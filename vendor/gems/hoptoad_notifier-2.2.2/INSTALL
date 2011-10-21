@@ -11,12 +11,12 @@ is *not* environment-specific. Hoptoad is smart enough to know what errors are
 caused by what environments, so your staging errors don't get mixed in with
 your production errors.)
 
-You can test that Hoptoad is working in your production environment by using 
+You can test that Hoptoad is working in your production environment by using
 this rake task (from RAILS_ROOT):
 
   rake hoptoad:test
 
-If everything is configured properly, that task will send a notice to Hoptoad 
+If everything is configured properly, that task will send a notice to Hoptoad
 which will be visible immediately.
 
 NOTE FOR RAILS 1.2.* USERS:

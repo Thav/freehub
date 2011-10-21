@@ -41,7 +41,7 @@ class PeopleController < ApplicationController
         @person.services << Service.new(:service_type_id => 'MEMBERSHIP', :paid => true) if params[:membership]
         @person.services << Service.new(:service_type_id => 'EAB', :paid => true) if params[:eab]
         @person.visits << Visit.new if params[:visiting]
-        
+
         flash[:notice] = 'Person was successfully created.'
         format.html do
           if params[:visiting]

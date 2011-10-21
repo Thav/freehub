@@ -4,6 +4,6 @@ Or check:
 
   http://googlecharts.rubyforge.org
 
-and/or 
+and/or
 
   http://github.com/mattetti/googlecharts

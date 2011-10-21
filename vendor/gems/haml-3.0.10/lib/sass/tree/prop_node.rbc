@@ -821,7 +821,7 @@ s
 s
 4
 
-If 
+If
 x
 11
 declaration
@@ -1129,7 +1129,7 @@ p
 14
 s
 2
-  
+
 x
 1
 -
@@ -1162,7 +1162,7 @@ s
 
 s
 1
- 
+
 x
 14
 resolved_value
@@ -2136,7 +2136,7 @@ empty?
 n
 s
 18
-Invalid property: 
+Invalid property:
 x
 11
 declaration
@@ -2647,7 +2647,7 @@ x
 to_s
 s
 2
-: 
+:
 x
 5
 class
@@ -2674,13 +2674,13 @@ s
 
 s
 2
-  
+
 x
 1
 *
 s
 1
- 
+
 x
 6
 rstrip

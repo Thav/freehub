@@ -3,7 +3,7 @@
   If this record is a mistake you can
   = link_to "remove #{@person.first_name}", person_path(:id => @person), :confirm => 'Are you sure?', :method => :delete
   from the system.
-  
+
 =error_messages_for :person
 -form_for @person, :url => person_path(:id => @person) do |f|
   = render :partial => 'people/form', :object => f, :locals => { :person => @person }

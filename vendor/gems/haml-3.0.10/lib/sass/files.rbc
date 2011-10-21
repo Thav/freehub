@@ -1383,18 +1383,18 @@ x
 Util
 s
 17
-WARNING: Neither 
+WARNING: Neither
 x
 4
 to_s
 s
 29
-.sass nor .scss found. Using 
+.sass nor .scss found. Using
 s
 102
 .css instead.
 This behavior is deprecated and will be removed in a future version.
-If you really need 
+If you really need
 s
 28
 .css, import it explicitly.
@@ -1407,7 +1407,7 @@ x
 +
 s
 40
-File to import not found or unreadable: 
+File to import not found or unreadable:
 s
 2
 .
@@ -1417,7 +1417,7 @@ x
 size
 s
 11
-Load path: 
+Load path:
 x
 5
 first
@@ -1427,11 +1427,11 @@ x
 s
 14
 Load paths:
-  
+
 s
 3
 
-  
+
 x
 4
 join
@@ -2056,13 +2056,13 @@ x
 Util
 s
 47
-Warning. Error encountered while reading cache 
+Warning. Error encountered while reading cache
 x
 4
 to_s
 s
 2
-: 
+:
 x
 9
 haml_warn

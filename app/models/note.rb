@@ -46,5 +46,5 @@ class Note < ActiveRecord::Base
     sql += " LIMIT #{options[:offset]},#{options[:limit]}" if options[:limit]
     sql
   end
-  
+
 end

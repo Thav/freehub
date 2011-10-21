@@ -9,7 +9,7 @@ Screw.Unit(function() {
         expect(BlueRidge.Browser.deriveSpecNameFromCurrentFile()).to(equal, "path/to/current_file_spec.js");
       });
     });
-    
+
     describe("urlCorrection", function(){
       it("returns an empty string if the given depth is zero", function(){
         expect(BlueRidge.Browser.urlCorrection(0)).to(equal, "");
@@ -23,7 +23,7 @@ Screw.Unit(function() {
         expect(BlueRidge.Browser.urlCorrection(7)).to(equal, "../../../../../../../");
       });
     });
-    
+
     describe("calculateDepth", function(){
       it("returns 1 if the current file is a direct child of the 'fixtures' directory", function(){
         stub(BlueRidge.Browser, 'currentFile').and_return("/some/prefix/fixtures/current_file.html");
@@ -50,7 +50,7 @@ Screw.Unit(function() {
             mock(BlueRidge.Browser).should_receive("createScriptTag").with_arguments("../some_file.js", null).at_least(1, "time");
             BlueRidge.Browser.require("some_file.js", {system: true});
           });
-          
+
           it("prepends two '../' if the current file is in a subdirectory directly beneath the 'fixtures' directory", function(){
             stub(BlueRidge.Browser, 'currentFile').and_return("/ignored/fixtures/foo/current_file.html");
             mock(BlueRidge.Browser).should_receive("createScriptTag").with_arguments("../../some_file.js", null).at_least(1, "time");
@@ -63,14 +63,14 @@ Screw.Unit(function() {
             BlueRidge.Browser.require("some_file.js", {system: true});
           });
         });
-        
+
         describe("when requiring a spec dependency", function(){
           it("prepends a single '../' if the current file is directly in the 'fixtures' directory", function(){
             stub(BlueRidge.Browser, 'currentFile').and_return("/ignored/fixtures/current_file.html");
             mock(BlueRidge.Browser).should_receive("createScriptTag").with_arguments("../some_file.js", null).at_least(1, "time");
             BlueRidge.Browser.require("some_file.js");
           });
-          
+
           it("pops off one '../' and then prepends two '../' if the current file is in a subdirectory directly beneath the 'fixtures' directory", function(){
             stub(BlueRidge.Browser, 'currentFile').and_return("/ignored/fixtures/foo/current_file.html");
             mock(BlueRidge.Browser).should_receive("createScriptTag").with_arguments("../../some_file.js", null).at_least(1, "time");
@@ -94,7 +94,7 @@ Screw.Unit(function() {
       //   mock(BlueRidge.Browser).should_receive("createScriptTag").with_arguments("some_url", callback).at_least(1, "time");
       //   BlueRidge.Browser.require("some_url", {onload: callback});
       // });
-      // 
+      //
       // it("creates a script tag with NO onload callback if passed NOT an 'onload' option", function(){
       //   var callback = function(){ alert("some callback!") };
       //   stub(BlueRidge.Browser, "calculateDepth").and_return(0);

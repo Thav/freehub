@@ -38,12 +38,12 @@ Screw.Matchers = (function($) {
         return 'expected ' + $.print(actual) + (not ? ' to not equal ' : ' to equal ') + $.print(expected);
       }
     },
-    
+
     be_gt: {
       match: function(expected, actual) {
         return actual > expected;
       },
-      
+
       failure_message: function(expected, actual, not) {
         return 'expected ' + $.print(actual) + (not ? ' to not ' : ' to ') + 'be greater than ' + $.print(expected);
       }
@@ -53,7 +53,7 @@ Screw.Matchers = (function($) {
       match: function(expected, actual) {
         return actual >= expected;
       },
-      
+
       failure_message: function(expected, actual, not) {
         return 'expected ' + $.print(actual) + (not ? ' to not ' : ' to ') + 'be greater than or equal to ' + $.print(expected);
       }
@@ -63,7 +63,7 @@ Screw.Matchers = (function($) {
       match: function(expected, actual) {
         return actual < expected;
       },
-      
+
       failure_message: function(expected, actual, not) {
         return 'expected ' + $.print(actual) + (not ? ' to not ' : ' to ') + 'be less than ' + $.print(expected);
       }
@@ -73,7 +73,7 @@ Screw.Matchers = (function($) {
       match: function(expected, actual) {
         return actual <= expected;
       },
-      
+
       failure_message: function(expected, actual, not) {
         return 'expected ' + $.print(actual) + (not ? ' to not ' : ' to ') + 'be less than or equal to ' + $.print(expected);
       }

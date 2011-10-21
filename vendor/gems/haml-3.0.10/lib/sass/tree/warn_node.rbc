@@ -415,7 +415,7 @@ p
 8
 s
 2
-  
+
 x
 1
 *
@@ -424,7 +424,7 @@ x
 to_s
 s
 6
-@warn 
+@warn
 x
 5
 @expr
@@ -662,7 +662,7 @@ x
 value
 s
 9
-WARNING: 
+WARNING:
 x
 4
 to_s
@@ -824,7 +824,7 @@ p
 16
 s
 8
-        
+
 x
 2
 ==
@@ -839,7 +839,7 @@ x
 to_s
 s
 6
- line 
+ line
 x
 4
 line
@@ -851,7 +851,7 @@ x
 <<
 s
 4
- of 
+ of
 x
 8
 filename

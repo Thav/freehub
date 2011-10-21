@@ -5173,7 +5173,7 @@ x
 allocate
 s
 9
-Expected 
+Expected
 x
 7
 inspect
@@ -5948,7 +5948,7 @@ x
 ===
 s
 8
-Invalid 
+Invalid
 x
 4
 name
@@ -5957,7 +5957,7 @@ x
 to_s
 s
 11
- character 
+ character
 x
 10
 error_char
@@ -7607,7 +7607,7 @@ x
 instance_eval
 s
 4
-def 
+def
 M
 1
 p
@@ -7679,14 +7679,14 @@ s
 (
 s
 2
-, 
+,
 x
 4
 join
 s
 4
 )
-  
+
 x
 3
 ERB

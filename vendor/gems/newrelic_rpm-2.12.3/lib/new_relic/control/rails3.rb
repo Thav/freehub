@@ -1,8 +1,8 @@
 # Control subclass instantiated when Rails is detected.  Contains
-# Rails specific configuration, instrumentation, environment values, 
+# Rails specific configuration, instrumentation, environment values,
 # etc.
 class NewRelic::Control::Rails3 < NewRelic::Control
-  
+
   def env
     @env ||= ::Rails.env.to_s
   end
@@ -14,7 +14,7 @@ class NewRelic::Control::Rails3 < NewRelic::Control
   def logger
     ::Rails.logger
   end
-  
+
   def base_log_file
     logger.instance_eval {
       @log.path
@@ -31,7 +31,7 @@ class NewRelic::Control::Rails3 < NewRelic::Control
   def vendor_root
     @vendor_root ||= File.join(root,'vendor','rails')
   end
-  
+
   def version
     @rails_version ||= NewRelic::VersionNumber.new(::Rails::VERSION::STRING)
   end
@@ -46,9 +46,9 @@ class NewRelic::Control::Rails3 < NewRelic::Control
       logger.info "Starting the New Relic Agent."
     end
   end
-  
-  protected 
-  
+
+  protected
+
   # Collect the Rails::Info into an associative array as well as the list of plugins
   def append_environment_info
     local_env.append_environment_value('Rails version'){ version }
@@ -62,14 +62,14 @@ class NewRelic::Control::Rails3 < NewRelic::Control
           (gem.specification.respond_to?(:version) && gem.specification.version)
         gem.name + (version ? "(#{version})" : "")
       end
-    end      
+    end
     local_env.append_plugin_list { ::Rails.configuration.plugins }
   end
-  
+
   def install_shim
     super
     require 'new_relic/agent/instrumentation/controller_instrumentation'
     ActionController::Base.send :include, NewRelic::Agent::Instrumentation::ControllerInstrumentation::Shim
   end
-  
+
 end

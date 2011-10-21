@@ -4,7 +4,7 @@ h2. &#x2192; 'Sexy Charts using Google API & Ruby'
 
 
 h2. What
-  
+
 A nice and simple wrapper for "Google Chart API":http://code.google.com/apis/chart/
 (Fully tested using RSpec, check the specs for more usage examples)
 
@@ -21,7 +21,7 @@ or <pre syntax="ruby">$ sudo gem install googlecharts</pre>
 h2. The basics
 
 This gem supports the following types of charts:
-   
+
 !http://chart.apis.google.com/chart?cht=lc&chs=200x125&chd=s:helloWorld&chxt=x,y&chxl=0:|Mar|Apr|May|June|July|1:||50+Kb(Line)! Gchart.line()
 
 !http://chart.apis.google.com/chart?cht=lxy&chs=200x125&chd=t:0,30,60,70,90,95,100|20,30,40,50,60,70,80|10,30,40,45,52|100,90,40,20,10|-1|5,33,50,55,7&chco=3072F3,ff0000,00aaaa&chls=2,4,1&chm=s,FF0000,0,-1,5|s,0000ff,1,-1,5|s,00aa00,2,-1,5(line_xy)! Gchart.line_xy()
@@ -37,7 +37,7 @@ This gem supports the following types of charts:
 !http://chart.apis.google.com/chart?cht=p3&chd=s:Uf9a&chs=200x100&chl=A|B|C|D(pie_3d)! Gchart.pie_3d()
 
 !http://chart.apis.google.com/chart?chs=100x20&cht=ls&chco=0077CC&chm=B,E6F2FA,0,0,0&chls=1,0,0&chd=t:27,25,25,25,25,27,100,31,25,36,25,25,39,25,31,25,25,25,26,26,25,25,28,25,25,100,28,27,31,25,27,27,29,25,27,26,26,25,26,26,35,33,34,25,26,25,36,25,26,37,33,33,37,37,39,25,25,25,25(sparkline)!Gchart.sparkline()
-              
+
 !http://chart.apis.google.com/chart?chs=225x125&cht=gom&chd=t:70&chl=Flavor(google-o-meter)! Gchart.meter()
 
 h2. Demonstration of usage
@@ -54,7 +54,7 @@ require:
 <pre syntax="ruby">require 'gchart'</pre>
 
 <pre syntax="ruby">
-Gchart.line(:size => '200x300', 
+Gchart.line(:size => '200x300',
             :title => "example title",
             :bg => 'efefef',
             :legend => ['first data set label', 'second data set label'],
@@ -140,7 +140,7 @@ Gchart.bar(:data => [[300, 100, 30, 200], [100, 200, 300, 10]], :bar_colors => [
 The problem now, is that we can't see the first value of the second dataset since it's lower than the first value of the first dataset. Let's unstack the bars:
 
 <pre syntax="ruby">
-Gchart.bar(:data => [[300, 100, 30, 200], [100, 200, 300, 10]], 
+Gchart.bar(:data => [[300, 100, 30, 200], [100, 200, 300, 10]],
            :bar_colors => 'FF0000,00FF00',
            :stacked => false )
 </pre>
@@ -159,7 +159,7 @@ Gchart.bar(:data => @data, :bar_width_and_spacing => '25,6,12') # width of 25, s
 Gchart.bar(:data => @data, :bar_width_and_spacing => [25,6]) # width of 25, spacing of 6
 Gchart.bar(:data => @data, :bar_width_and_spacing => 25) # width of 25
 </pre>
-  
+
 The hash lets you set these values directly, with the Google default values set for any options you don't include:
 
 <pre syntax="ruby">
@@ -227,8 +227,8 @@ Googlecharts comes with 4 themes: keynote, thirty7signals, pastel and greyscale.
 
 <pre syntax="ruby">
   Gchart.line(
-              :theme => :keynote, 
-              :data => [[0,40,10,70,20],[41,10,80,50,40],[20,60,30,60,80],[5,23,35,10,56],[80,90,5,30,60]], 
+              :theme => :keynote,
+              :data => [[0,40,10,70,20],[41,10,80,50,40],[20,60,30,60,80],[5,23,35,10,56],[80,90,5,30,60]],
               :title => 'keynote'
               )
 </pre>
@@ -294,7 +294,7 @@ Gchart.bar(:title => "Recent Chart Sexyness", :title_color => 'FF0000', :data =>
 *set the chart's size*
 
 <pre syntax="ruby">
-Gchart.bar(:title => "Recent Chart Sexyness", 
+Gchart.bar(:title => "Recent Chart Sexyness",
            :data => [15, 30, 10, 20, 100, 20, 40, 100],
            :size => '600x400')
 </pre>
@@ -304,7 +304,7 @@ Gchart.bar(:title => "Recent Chart Sexyness",
 *set the image background color*
 
 <pre syntax="ruby">
-Gchart.bar(:title => "Matt's Mojo", 
+Gchart.bar(:title => "Matt's Mojo",
            :data => [15, 30, 10, 20, 100, 20, 40, 100, 90, 100, 80],
            :background => 'FF9994')
 </pre>
@@ -314,7 +314,7 @@ Gchart.bar(:title => "Matt's Mojo",
 *set the chart background color*
 
 <pre syntax="ruby">
-Gchart.bar(:title => "Matt's Mojo", 
+Gchart.bar(:title => "Matt's Mojo",
            :data => [15, 30, 10, 20, 100, 20, 40, 100, 90, 100, 80],
            :background => 'FF9994', :chart_background => '000000')
 </pre>
@@ -324,7 +324,7 @@ Gchart.bar(:title => "Matt's Mojo",
 *Set bar/line colors*
 
 <pre syntax="ruby">
-Gchart.bar(:title => "Matt's Mojo", 
+Gchart.bar(:title => "Matt's Mojo",
            :data => [15, 30, 10, 20, 100, 20, 40, 100, 90, 100, 80],
            :bar_colors => '76A4FB',
            :background => 'EEEEEE', :chart_background => 'CCCCCC')
@@ -333,7 +333,7 @@ Gchart.bar(:title => "Matt's Mojo",
 !http://chart.apis.google.com/chart?chf=c,s,CCCCCC|bg,s,EEEEEE&cht=bvs&chs=300x200&chd=s:JSGM9MY929w&chco=76A4FB&chtt=Matt's+Mojo(bar colors)!
 
 <pre syntax="ruby">
-Gchart.line(:title => "Matt's Mojo", 
+Gchart.line(:title => "Matt's Mojo",
             :data => [15, 30, 10, 20, 100, 20, 40, 100, 90, 100, 80],
             :line_colors => '76A4FB')
 </pre>
@@ -344,7 +344,7 @@ Gchart.line(:title => "Matt's Mojo",
 
 <pre syntax="ruby">
 Gchart.bar(:title => "Matt vs Rob",
-           :data => [[300, 100, 30, 200], [100, 200, 300, 10]], 
+           :data => [[300, 100, 30, 200], [100, 200, 300, 10]],
            :bar_colors => 'FF0000,00FF00',
            :stacked => false, :size => '400x200',
            :legend => ["Matt's Mojo", "Rob's Mojo"] )
@@ -353,7 +353,7 @@ Gchart.bar(:title => "Matt vs Rob",
 
 <pre syntax="ruby">
 Gchart.line(:title => "Matt vs Rob",
-            :data => [[300, 100, 30, 200], [100, 200, 300, 10]], 
+            :data => [[300, 100, 30, 200], [100, 200, 300, 10]],
             :bar_colors => ['FF0000','00FF00'],
             :stacked => false, :size => '400x200',
             :legend => ["Matt's Mojo", "Rob's Mojo"] )
@@ -403,7 +403,7 @@ Gchart.line(:data => [300, 100, 30, 200, 100, 200, 300, 10], :axis_with_labels =
             :axis_labels => ['Jan|July|Jan|July|Jan', '2005|2006|2007'])
 </pre>
 
-or 
+or
 
 <pre syntax="ruby">
 Gchart.line(:data => [300, 100, 30, 200, 100, 200, 300, 10], :axis_with_labels => 'x,r',
@@ -434,7 +434,7 @@ You might prefer to save the chart instead of using the url, not a problem:
 Gchart.line(:data => [0, 26], :format => 'file')
 </pre>
 
-You might want to specify the path and/or the filename used to save your chart: 
+You might want to specify the path and/or the filename used to save your chart:
 
 <pre syntax="ruby">
 Gchart.line(:data => [0, 26], :format => 'file', :filename => 'custom_filename.png')
@@ -473,7 +473,7 @@ Google Chart API offers "3 types of data encoding":http://code.google.com/apis/c
   * simple
   * text
   * extended
-  
+
 By default this library uses the simple encoding, if you need a different type of encoding, you can change it really easily:
 
 default / simple: chd=s:9UGoUo9C
@@ -489,7 +489,7 @@ Gchart.line(:data => [300, 100, 30, 200, 100, 200, 300, 10], :encoding => 'exten
 text: chd=t:300,100,30,200,100,200,300,10
 <pre syntax="ruby">
 Gchart.line(:data => [300, 100, 30, 200, 100, 200, 300, 10], :encoding => 'text' )
-</pre> 
+</pre>
 
 (note that the text encoding doesn't use a max value and therefore should be under 100)
 
@@ -529,27 +529,27 @@ h2. People reported using this gem
     <img  src="http://img.skitch.com/20080627-r14subqdx2ye3w13qefbx974gc.png" alt="github"/><br/>
     <li><a href="http://github.com">http://github.com</a></li><br/>
   </div>
-  
+
   <div>
     <img  src="http://stafftool.com/images/masthead_screen.gif" alt="stafftool"/><br/>
     <li><a href="http://stafftool.com/">Takeo(contributor)</a></li><br/>
   </div>
-  
+
   <div>
     <img  src="http://img.skitch.com/20080627-g2pp89h7gdbh15m1rr8hx48jep.jpg" alt="graffletopia"/><br/>
     <li><a href="http://graffletopia.com"> http://graffletopia.com  Mokolabs(contributor)</a></li><br/>
   </div>
-  
+
   <div>
     <img  src="http://img.skitch.com/20080627-kc1weqsbkmxeqhwiyriq3n6g8k.jpg" alt="gumgum"/><br/>
     <li><a href="http://gumgum.com"> http://gumgum.com  Mattetti(contributor)</a></li><br/>
   </div>
-  
+
   <div>
     <img  src="http://img.skitch.com/20080627-n48j8pb2r7irsewfeh4yp3da12.jpg" alt="feedflix"/><br/>
     <li><a href="http://feedflix.com/"> http://feedflix.com/</a></li><br/>
   </div>
-  
+
   <div>
     <li><a href="http://www.csuchico.edu/"> California State University, Chico</a></li><br/>
   </div>
@@ -557,7 +557,7 @@ h2. People reported using this gem
 
 h2. License
 
-This code is free to use under the terms of the MIT license. 
+This code is free to use under the terms of the MIT license.
 
 h2. Contact
 

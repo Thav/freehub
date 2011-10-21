@@ -17,17 +17,17 @@ To install:
 
     ./script/plugin install git://github.com/relevance/blue-ridge.git
     ./script/generate blue_ridge
-  
+
 To run all of the specs:
 
     rake test:javascripts
-  
+
 (Hint: You can also use the `spec:javascripts` or `examples:javascripts` aliases.)
-  
+
 To run an individual spec file called "application_spec.js":
 
     rake test:javascripts TEST=application
-    
+
 To generate and run a spec for a JavaScript file called "public/javascripts/graphics.js" run:
 
     ./script/generate javascript_spec graphics
@@ -52,14 +52,14 @@ The layout of the JavaScript spec directories looks like this (assuming you crea
 * application_spec.js: file with Screw.Unit specs; intended for testing code in public/javascripts/application.js
 * graphics_spec.js: another spec file; intended for testing code in public/javascripts/graphics.js
 * spec_helper.js: a place a you to store your common configuration & convenience functions; auto-included by each spec
-    
+
 #### "javascripts/fixtures" directory
 * application.html: base DOM for application_spec.js; also runs specs in-browser
 * graphics.html: base DOM for graphics_spec.js; also runs specs in-browser
 * screw.css: stylesheet for Screw.Unit output when running specs in-browser
 
 ### Why We Need Fixtures
-Blue Ridge relies on the convention that each spec file will have a similarly named HTML file in the `fixtures` directory.  We create one fixture per spec file so that env.js has a base DOM to emulate when running specs from the command line and so that we have an HTML launch-pad to run our specs in-browser.  
+Blue Ridge relies on the convention that each spec file will have a similarly named HTML file in the `fixtures` directory.  We create one fixture per spec file so that env.js has a base DOM to emulate when running specs from the command line and so that we have an HTML launch-pad to run our specs in-browser.
 
 If you want to have specific HTML for a suite of specs, put it in the HTML fixture for that suite.  If you want to run a specific suite of tests in Firefox or Internet Explorer, open the HTML fixture file with the same name and Screw.Unit automatically runs the specs associated with the fixture.
 
@@ -91,7 +91,7 @@ Example Using Prototype
 It's very easy to add support for Prototype.  Here's an example spec:
 
     jQuery.noConflict();
-    
+
     require("spec_helper.js");
     require("../../public/javascripts/prototype.js", {onload: function() {
         require("../../public/javascripts/application.js");
@@ -167,7 +167,7 @@ Runs an IRB-like JavaScript shell for debugging your JavaScript code.  jQuery an
     Rhino 1.7 release 2 PRERELEASE 2008 07 28
     js> print("Hello World!")
     Hello World!
-    js> 
+    js>
 
 Note that if you have `rlwrap` installed and on the command line path (and you really, really should!), then command-line history and readline arrow-up and down will be properly supported automatically. (You can get `rlwrap` from your friendly neighborhood package manager.)
 
@@ -188,7 +188,7 @@ Run your specs directory from TextMate using the [Blue Ridge TextMate Bundle](ht
 
     cd ~/Library/Application Support/TextMate/Bundles/
     git clone git://github.com/karnowski/blue-ridge-tmbundle.git Blue\ Ridge.tmbundle
-    
+
 Then when editing a Screw.Unit spec file in TextMate you can:
 * press command-R to run the spec directly from TextMate
 * type snippets like "it", "des", "bef", "aft" and then press the tab key to expand into full it blocks, describe blocks, etc.

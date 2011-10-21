@@ -2,7 +2,7 @@ require File.expand_path(File.join(File.dirname(__FILE__),'..', '..','..','test_
 require 'new_relic/agent/samplers/cpu_sampler'
 
 class NewRelic::Agent::StatsEngine::SamplersTest < Test::Unit::TestCase
-  
+
   def setup
     @stats_engine = NewRelic::Agent::StatsEngine.new
     NewRelic::Agent.instance.stubs(:stats_engine).returns(@stats_engine)
@@ -68,5 +68,5 @@ class NewRelic::Agent::StatsEngine::SamplersTest < Test::Unit::TestCase
     NewRelic::Agent::Samplers::MemorySampler.stubs(:platform).returns 'windows'
     assert !NewRelic::Agent::Samplers::MemorySampler.supported_on_this_platform? || defined? JRuby
   end
-  
+
 end

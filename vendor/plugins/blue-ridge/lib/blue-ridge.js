@@ -18,15 +18,15 @@ BlueRidge.Browser = {
     //remove any extra "../" from the start of the URL
     var prefix = "^";
     for(var i=0; i < (depth-1); i++) { prefix += "\.\.\/" }
-    url = url.replace(new RegExp(prefix), ""); 
-    
+    url = url.replace(new RegExp(prefix), "");
+
     return this.urlCorrection(depth) + url;
   },
-  
+
   treatUrlAsRelativeToCurrentFile: function(url){
     return this.urlCorrection(this.calculateDepth()) + url;
   },
-  
+
   createScriptTag: function(url, onload){
     var head = document.getElementsByTagName("head")[0];
     var script = document.createElement("script");
@@ -36,13 +36,13 @@ BlueRidge.Browser = {
 
     head.appendChild(script);
   },
-  
+
   urlCorrection: function(depth){
     var correction = "";
     for(var i=0; i < depth; i++) { correction += "../" }
     return correction;
   },
-  
+
   debug: function(message){
     document.writeln(message + " <br/>");
   },
@@ -50,11 +50,11 @@ BlueRidge.Browser = {
   currentFile: function(){
     return window.location.toString();
   },
-  
+
   deriveSpecNameFromCurrentFile: function(){
     return this.currentFile().match(/^.*fixtures\/(.*?)\.html/)[1] + "_spec.js";
   },
-  
+
   calculateDepth: function(){
     var subDirs = this.currentFile().match(/^.*fixtures\/((.*?\/)*)(.*?)\.html/)[1];
     return subDirs.split("/").length;

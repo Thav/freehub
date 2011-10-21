@@ -29,7 +29,7 @@
     %li.expired Membership expired #{date_short @person.membership.end_date}
     %li= link_to 'Renew', new_service_path(:person_id => @person)
   %li= @person.email
- 
+
   %li= @person.postal_code
   %li= link_to "Edit #{@person.first_name}", edit_person_path(:id => @person)
   %li &nbsp;
@@ -64,7 +64,7 @@
         -for visit in visits
           %tr{:class => cycle('odd','even', :name => 'visits')}
             %td.what= visit.volunteer? ? 'Volunteered' : 'Visited'
-            %td.time #{visit.duration.nil? ? 0 : (visit.duration/3600).round(2)} hours 
+            %td.time #{visit.duration.nil? ? 0 : (visit.duration/3600).round(2)} hours
             %td.when{:title => datetime_long(visit.arrived_at)}= "#{time_ago_in_words(visit.arrived_at)} ago"
             %td.note= note_text(visit.note)
       %p

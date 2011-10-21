@@ -4,7 +4,7 @@ class ServiceType
   def initialize(id, name, description)
     @id, @name, @description = id, name, description
   end
-  
+
   TYPES = [
             ServiceType.new('MEMBERSHIP', "Membership", "Membership for this shop."),
             ServiceType.new('EAB', "Earn a Bike/Digging Rights", "One of everything you can find in the shop to build or fix one bike."),

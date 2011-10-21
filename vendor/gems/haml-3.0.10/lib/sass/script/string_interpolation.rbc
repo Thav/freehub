@@ -415,7 +415,7 @@ p
 8
 s
 22
-(string_interpolation 
+(string_interpolation
 x
 7
 @before
@@ -427,7 +427,7 @@ x
 to_s
 s
 1
- 
+
 x
 4
 @mid

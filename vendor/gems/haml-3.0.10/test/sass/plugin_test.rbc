@@ -2129,7 +2129,7 @@ s
 67
 /*
 Syntax error: Undefined variable: "$bork".
-        on line 2 of 
+        on line 2 of
 s
 5
 bork1
@@ -7287,14 +7287,14 @@ p
 7
 s
 10
-template: 
+template:
 x
 4
 to_s
 s
 11
 
-line:     
+line:
 x
 1
 +
@@ -7354,10 +7354,10 @@ x
 to_s
 s
 25
- Trailing lines found in 
+ Trailing lines found in
 s
 6
-.css: 
+.css:
 s
 2
 \n
@@ -8050,11 +8050,11 @@ x
 update_all_stylesheets!
 s
 9
-Expected 
+Expected
 s
 38
  callback to be run with arguments:
-  
+
 x
 7
 inspect
@@ -8321,7 +8321,7 @@ x
 ==
 s
 9
-Expected 
+Expected
 x
 4
 to_s
@@ -8331,7 +8331,7 @@ s
 s
 27
 ,
-  was run with arguments 
+  was run with arguments
 x
 7
 inspect
@@ -8340,7 +8340,7 @@ x
 <<
 s
 16
- with arguments 
+ with arguments
 x
 5
 flunk
@@ -9020,7 +9020,7 @@ x
 stylesheet_needs_update?
 s
 9
-Expected 
+Expected
 x
 4
 to_s
@@ -9162,7 +9162,7 @@ x
 stylesheet_needs_update?
 s
 9
-Expected 
+Expected
 x
 4
 to_s

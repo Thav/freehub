@@ -19,18 +19,18 @@
 #    config.gem 'newrelic_rpm'
 # to your initialization sequence.
 #
-# For merb, do 
+# For merb, do
 #    dependency 'newrelic_rpm'
 # in the Merb config/init.rb
 #
 # For Sinatra, just require the +newrelic_rpm+ gem and it will
 # automatically detect Sinatra and instrument all the handlers.
 #
-# For other frameworks, or to manage the agent manually, 
+# For other frameworks, or to manage the agent manually,
 # invoke NewRelic::Agent#manual_start directly.
 #
 # == Configuring the Agent
-# 
+#
 # All agent configuration is done in the <tt>newrelic.yml</tt> file.
 # This file is by default read from the +config+ directory of the
 # application root and is subsequently searched for in the application
@@ -38,20 +38,20 @@
 #
 # == Using with Rack/Metal
 #
-# To instrument middlewares, refer to the docs in 
+# To instrument middlewares, refer to the docs in
 # NewRelic::Agent::Instrumentation::Rack.
 #
 # == Agent API
 #
 # For details on the Agent API, refer to NewRelic::Agent.
-# 
+#
 #
 # :main: lib/new_relic/agent.rb
 module NewRelic
   # == Agent APIs
   # This module contains the public API methods for the Agent.
   #
-  # For adding custom instrumentation to method invocations, refer to 
+  # For adding custom instrumentation to method invocations, refer to
   # the docs in the class NewRelic::Agent::MethodTracer.
   #
   # For information on how to customize the controller
@@ -88,7 +88,7 @@ module NewRelic
     require 'new_relic/transaction_sample'
     require 'new_relic/noticed_error'
     require 'new_relic/histogram'
-    
+
     require 'new_relic/agent/chained_call'
     require 'new_relic/agent/agent'
     require 'new_relic/agent/shim_agent'
@@ -101,7 +101,7 @@ module NewRelic
     require 'new_relic/agent/sampler'
 
     require 'new_relic/agent/instrumentation/controller_instrumentation'
-    
+
     require 'new_relic/agent/samplers/cpu_sampler'
     require 'new_relic/agent/samplers/memory_sampler'
     require 'new_relic/agent/samplers/object_sampler'
@@ -110,29 +110,29 @@ module NewRelic
     require 'thread'
     require 'resolv'
     require 'timeout'
-    
+
     # An exception that is thrown by the server if the agent license is invalid.
     class LicenseException < StandardError; end
-    
+
     # An exception that forces an agent to stop reporting until its mongrel is restarted.
     class ForceDisconnectException < StandardError; end
-      
+
     # An exception that forces an agent to restart.
     class ForceRestartException < StandardError; end
-    
+
     # Used to blow out of a periodic task without logging a an error, such as for routine
     # failures.
     class ServerConnectionException < StandardError; end
-    
+
     # Used for when a transaction trace or error report has too much
     # data, so we reset the queue to clear the extra-large item
     class PostTooBigException < ServerConnectionException; end
-    
+
     # Reserved for future use.  Meant to represent a problem on the server side.
     class ServerError < StandardError; end
 
     class BackgroundLoadingError < StandardError; end
-    
+
     @agent = nil
 
     # The singleton Agent instance.  Used internally.
@@ -140,11 +140,11 @@ module NewRelic
       raise "Plugin not initialized!" if @agent.nil?
       @agent
     end
-    
+
     def agent= new_instance #:nodoc:
       @agent = new_instance
     end
-    
+
     alias instance agent #:nodoc:
 
     # Get or create a statistics gatherer that will aggregate numerical data
@@ -158,18 +158,18 @@ module NewRelic
     def get_stats(metric_name, use_scope=false)
       @agent.stats_engine.get_stats(metric_name, use_scope)
     end
-    
-    alias get_stats_no_scope get_stats 
-    
+
+    alias get_stats_no_scope get_stats
+
     # Get the logger for the agent.  Available after the agent has initialized.
     # This sends output to the agent log file.
     def logger
       NewRelic::Control.instance.log
     end
-    
+
     # Call this to manually start the Agent in situations where the Agent does
     # not auto-start.
-    # 
+    #
     # When the app environment loads, so does the Agent. However, the
     # Agent will only connect to RPM if a web front-end is found. If
     # you want to selectively monitor ruby processes that don't use
@@ -186,15 +186,15 @@ module NewRelic
       raise unless Hash === options
       NewRelic::Control.instance.init_plugin({ :agent_enabled => true, :sync_startup => true }.merge(options))
     end
-    
+
     # Register this method as a callback for processes that fork
-    # jobs.  
+    # jobs.
     #
     # If the master/parent connects to the agent prior to forking the
     # agent in the forked process will use that agent_run.  Otherwise
     # the forked process will establish a new connection with the
     # server.
-    # 
+    #
     # Use this especially when you fork the process to run background
     # jobs or other work.  If you are doing this with a web dispatcher
     # that forks worker processes then you will need to force the
@@ -202,17 +202,17 @@ module NewRelic
     # Unicorn are already handled, nothing special needed for them.
     #
     # Options:
-    # * <tt>:force_reconnect => true</tt> to force the spawned process to 
+    # * <tt>:force_reconnect => true</tt> to force the spawned process to
     #   establish a new connection, such as when forking a long running process.
     #   The default is false--it will only connect to the server if the parent
     #   had not connected.
-    # * <tt>:keep_retrying => false</tt> if we try to initiate a new 
+    # * <tt>:keep_retrying => false</tt> if we try to initiate a new
     #   connection, this tells me to only try it once so this method returns
     #   quickly if there is some kind of latency with the server.
     def after_fork(options={})
       agent.after_fork(options)
     end
-    
+
     # Clear out any unsent metric data.
     def reset_stats
       agent.reset_stats
@@ -222,7 +222,7 @@ module NewRelic
     # and kills the background thread.
     def shutdown
       agent.shutdown
-    end        
+    end
 
     # Add instrumentation files to the agent.  The argument should be
     # a glob matching ruby scripts which will be executed at the time
@@ -247,21 +247,21 @@ module NewRelic
     #    NewRelic::Agent.set_sql_obfuscator(:replace) do |sql|
     #       my_obfuscator(sql)
     #    end
-    # 
+    #
     def set_sql_obfuscator(type = :replace, &block)
       agent.set_sql_obfuscator type, &block
     end
-    
-    
+
+
     # This method sets the state of sql recording in the transaction
     # sampler feature. Within the given block, no sql will be recorded
     #
     # usage:
     #
     #   NewRelic::Agent.disable_sql_recording do
-    #     ...  
+    #     ...
     #   end
-    #     
+    #
     def disable_sql_recording
       state = agent.set_record_sql(false)
       begin
@@ -270,9 +270,9 @@ module NewRelic
         agent.set_record_sql(state)
       end
     end
-    
+
     # This method disables the recording of transaction traces in the given
-    # block.  See also #disable_all_tracing  
+    # block.  See also #disable_all_tracing
     def disable_transaction_tracing
       state = agent.set_record_tt(false)
       begin
@@ -281,7 +281,7 @@ module NewRelic
         agent.set_record_tt(state)
       end
     end
-    
+
     # Cancel the collection of the current transaction in progress, if
     # any.  Only affects the transaction started on this thread once
     # it has started and before it has completed.
@@ -291,7 +291,7 @@ module NewRelic
         NewRelic::Agent::Instrumentation::MetricFrame.abort_transaction!
       end
     end
-    
+
     # Yield to the block without collecting any metrics or traces in
     # any of the subsequent calls.  If executed recursively, will keep
     # track of the first entry point and turn on tracing again after
@@ -303,10 +303,10 @@ module NewRelic
     ensure
       agent.pop_trace_execution_flag
     end
-    
+
     # Check to see if we are capturing metrics currently on this thread.
     def is_execution_traced?
-      Thread.current[:newrelic_untraced].nil? || Thread.current[:newrelic_untraced].last != false      
+      Thread.current[:newrelic_untraced].nil? || Thread.current[:newrelic_untraced].last != false
     end
 
     # Set a filter to be applied to errors that RPM will track.  The
@@ -314,17 +314,17 @@ module NewRelic
     # different from the original exception) or nil to ignore this
     # exception.
     #
-    # The block is yielded to with the exception to filter. 
-    # 
+    # The block is yielded to with the exception to filter.
+    #
     # Return the new block or the existing filter Proc if no block is passed.
     #
     def ignore_error_filter(&block)
       agent.error_collector.ignore_error_filter(&block)
     end
-    
+
     # Record the given error in RPM.  It will be passed through the
     # #ignore_error_filter if there is one.
-    # 
+    #
     # * <tt>exception</tt> is the exception which will be recorded.  May also be
     #   an error message.
     # Options:
@@ -345,11 +345,11 @@ module NewRelic
     def add_custom_parameters(params)
       NewRelic::Agent::Instrumentation::MetricFrame.add_custom_parameters(params)
     end
-    
+
     # The #add_request_parameters method is aliased to #add_custom_parameters
     # and is now deprecated.
     alias add_request_parameters add_custom_parameters #:nodoc:
-    
+
     # Yield to a block that is run with a database metric name
     # context.  This means the Database instrumentation will use this
     # for the metric name if it does not otherwise know about a model.
@@ -365,5 +365,5 @@ module NewRelic
         yield
       end
     end
-  end 
-end  
+  end
+end

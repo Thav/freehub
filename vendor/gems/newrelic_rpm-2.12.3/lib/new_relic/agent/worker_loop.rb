@@ -1,20 +1,20 @@
 require 'thread'
 module NewRelic
   module Agent
-    
-    # A worker loop executes a set of registered tasks on a single thread.  
-    # A task is a proc or block with a specified call period in seconds.  
+
+    # A worker loop executes a set of registered tasks on a single thread.
+    # A task is a proc or block with a specified call period in seconds.
     class WorkerLoop
-      
+
       def initialize
         @log = log
         @should_run = true
       end
-      
+
       def lock
         @@lock ||= Mutex.new
       end
-      
+
       def log
         NewRelic::Control.instance.log
       end
@@ -36,18 +36,18 @@ module NewRelic
           run_task if keep_running
         end
       end
-      
+
       def keep_running
         @should_run
       end
-      
+
       def stop
         @should_run = false
       end
-      
+
       def run_task
         lock.synchronize do
-          @task.call 
+          @task.call
         end
       rescue ServerError => e
         log.debug "Server Error: #{e}"
@@ -67,13 +67,13 @@ module NewRelic
         end
       rescue Timeout::Error, NewRelic::Agent::ServerConnectionException
         # Want to ignore these because they are handled already
-      rescue ScriptError, StandardError => e 
-        log.error "Error running task in Agent Worker Loop '#{e}': #{e.backtrace.first}" 
+      rescue ScriptError, StandardError => e
+        log.error "Error running task in Agent Worker Loop '#{e}': #{e.backtrace.first}"
         log.debug e.backtrace.join("\n")
       ensure
         while @next_invocation_time < Time.now
           @next_invocation_time += @period
-        end        
+        end
       end
     end
   end

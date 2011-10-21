@@ -30,7 +30,7 @@ module Sass
               end
             end.join(", ") + ')'
           end
-              
+
         "#{'  ' * tabs}#{fmt == :sass ? '=' : '@mixin '}#{dasherize(@name, opts)}#{args}" +
           children_to_src(tabs, opts, fmt)
       end

@@ -675,7 +675,7 @@ x
 new_from_literal
 s
 2
-  
+
 x
 1
 *
@@ -684,7 +684,7 @@ x
 to_s
 s
 8
-@import 
+@import
 x
 18
 @imported_filename
@@ -792,7 +792,7 @@ x
 new_from_literal
 s
 2
-  
+
 x
 1
 *

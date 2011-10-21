@@ -1579,7 +1579,7 @@ x
 Error
 s
 15
-Invalid format 
+Invalid format
 x
 7
 inspect
@@ -3132,13 +3132,13 @@ x
 instance_eval
 s
 4
-def 
+def
 x
 4
 to_s
 s
 21
-(_haml_locals = {}); 
+(_haml_locals = {});
 x
 23
 precompiled_with_ambles

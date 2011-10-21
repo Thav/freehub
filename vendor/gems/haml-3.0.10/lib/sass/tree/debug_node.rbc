@@ -415,7 +415,7 @@ p
 8
 s
 2
-  
+
 x
 1
 *
@@ -424,7 +424,7 @@ x
 to_s
 s
 7
-@debug 
+@debug
 x
 5
 @expr
@@ -652,14 +652,14 @@ x
 line
 s
 8
- DEBUG: 
+ DEBUG:
 x
 4
 puts
 n
 s
 5
-Line 
+Line
 p
 15
 I

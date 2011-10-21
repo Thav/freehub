@@ -1,7 +1,7 @@
 class NotesController < ApplicationController
 
   permit "admin or (manager of :organization)"
-  
+
   # GET /notes
   # GET /notes.xml
   def index

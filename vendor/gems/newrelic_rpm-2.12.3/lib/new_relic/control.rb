@@ -6,24 +6,24 @@ require 'socket'
 require 'net/https'
 require 'logger'
 
-module NewRelic 
-  
+module NewRelic
+
   # The Control is a singleton responsible for the startup and
-  # initialization sequence.  The initializer uses a LocalEnvironment to 
+  # initialization sequence.  The initializer uses a LocalEnvironment to
   # detect the framework and instantiates the framework specific
   # subclass.
   #
   # The Control also implements some of the public API for the agent.
-  # 
+  #
   class Control
-    
+
     # A flag used in dev mode to indicate if profiling is available
     def profiling?
       @profiling
     end
-    
+
     def profiling_available?
-      @profiling_available ||= 
+      @profiling_available ||=
       begin
         require 'ruby-prof'
         true
@@ -34,26 +34,26 @@ module NewRelic
     def profiling=(val)
       @profiling = profiling_available? && val && defined?(RubyProf)
     end
-    
+
     attr_accessor :log_file
     # The env is the setting used to identify which section of the newrelic.yml
     # to load.  This defaults to a framework specific value, such as ENV['RAILS_ENV']
     # but can be overridden as long as you set it before calling #init_plugin
     attr_writer :env
     attr_reader :local_env
-    
+
     # Structs holding info for the remote server and proxy server
     class Server < Struct.new :name, :port, :ip #:nodoc:
       def to_s; "#{name}:#{port}"; end
     end
-    
+
     ProxyServer = Struct.new :name, :port, :user, :password #:nodoc:
-    
+
     # Access the Control singleton, lazy initialized
     def self.instance
       @instance ||= new_instance
     end
-    
+
     # Initialize the plugin/gem and start the agent.  This does the necessary configuration based on the
     # framework environment and determines whether or not to start the agent.  If the
     # agent is not going to be started then it loads the agent shim which has stubs
@@ -62,8 +62,8 @@ module NewRelic
     # This may be invoked multiple times, as long as you don't attempt to uninstall
     # the agent after it has been started.
     #
-    # If the plugin is initialized and it determines that the agent is not enabled, it 
-    # will skip starting it and install the shim.  But if you later call this with 
+    # If the plugin is initialized and it determines that the agent is not enabled, it
+    # will skip starting it and install the shim.  But if you later call this with
     # <tt>:agent_enabled => true</tt>, then it will install the real agent and start it.
     #
     # What determines whether the agent is launched is the result of calling agent_enabled?
@@ -75,17 +75,17 @@ module NewRelic
     #
     def init_plugin(options={})
       options['app_name'] = ENV['NEWRELIC_APP_NAME'] if ENV['NEWRELIC_APP_NAME']
- 
+
       require 'new_relic/agent'
-      
+
       # Load the DJ injection now.  If you do it sooner, DJ might not be loaded and
       # you'll miss it.
       require 'new_relic/delayed_job_injection'
-      
+
       # Merge the stringified options into the config as overrides:
       logger_override = options.delete(:log)
       environment_name = options.delete(:env) and self.env = environment_name
-      dispatcher = options.delete(:dispatcher) and @local_env.dispatcher = dispatcher 
+      dispatcher = options.delete(:dispatcher) and @local_env.dispatcher = dispatcher
       dispatcher_instance_id = options.delete(:dispatcher_instance_id) and @local_env.dispatcher_instance_id = dispatcher_instance_id
 
       # Clear out the settings, if they've already been loaded.  It may be that
@@ -116,16 +116,16 @@ module NewRelic
         install_shim
       end
     end
-    
+
     # Install the real agent into the Agent module, and issue the start command.
     def start_agent
       NewRelic::Agent.agent.start
     end
-    
+
     def [](key)
       fetch(key)
     end
-    
+
     def settings
       unless @settings
         @settings = (@yaml && merge_defaults(@yaml[env])) || {}
@@ -138,28 +138,28 @@ module NewRelic
             @local_env.dispatcher_instance_id = app_names.first
           end
         end
-        
+
       end
       @settings
     end
-    
+
     def []=(key, value)
       settings[key] = value
     end
-    
+
     def fetch(key, default=nil)
       settings.fetch(key, default)
     end
     # Add your own environment value to track for change detection.
-    # The name and value should be stable and not vary across app processes on 
+    # The name and value should be stable and not vary across app processes on
     # the same host.
     def append_environment_info(name, value)
       local_env.record_environment_info(name,value)
     end
-    
+
     ###################################
     # Agent config conveniences
-    
+
     def apdex_t
       # Always initialized with a default
       fetch('apdex_t').to_f
@@ -189,7 +189,7 @@ module NewRelic
     def post_size_limit
       fetch('post_size_limit', 2 * 1024 * 1024)
     end
-    
+
     def sync_startup
       fetch('sync_startup', false)
     end
@@ -200,19 +200,19 @@ module NewRelic
     def agent_enabled?
       return false if !developer_mode? && !monitor_mode?
       return self['agent_enabled'].to_s =~ /true|on|yes/i if !self['agent_enabled'].nil? && self['agent_enabled'] != 'auto'
-      return false if ENV['NEWRELIC_ENABLE'].to_s =~ /false|off|no/i 
+      return false if ENV['NEWRELIC_ENABLE'].to_s =~ /false|off|no/i
       return true if self['monitor_daemons'].to_s =~ /true|on|yes/i
       return true if ENV['NEWRELIC_ENABLE'].to_s =~ /true|on|yes/i
       # When in 'auto' mode the agent is enabled if there is a known
       # dispatcher running
       return true if @local_env.dispatcher != nil
     end
-    
+
     def app
       @local_env.framework
     end
     alias framework app
-    
+
     def dispatcher_instance_id
       self['dispatcher_instance_id'] || @local_env.dispatcher_instance_id
     end
@@ -223,46 +223,46 @@ module NewRelic
       self['app_name'] ? self['app_name'].split(';') : []
     end
     def validate_seed
-      self['validate_seed'] || ENV['NR_VALIDATE_SEED']   
+      self['validate_seed'] || ENV['NR_VALIDATE_SEED']
     end
     def validate_token
       self['validate_token'] || ENV['NR_VALIDATE_TOKEN']
     end
-    
+
     def use_ssl?
       @use_ssl ||= fetch('ssl', false)
     end
-    
+
     def verify_certificate?
       #this can only be on when SSL is enabled
       @verify_certificate ||= ( use_ssl? ? fetch('verify_certificate', false) : false)
     end
 
     def server
-      @remote_server ||= server_from_host(nil)  
+      @remote_server ||= server_from_host(nil)
     end
-    
+
     def api_server
-      api_host = self['api_host'] || 'rpm.newrelic.com' 
-      @api_server ||= 
+      api_host = self['api_host'] || 'rpm.newrelic.com'
+      @api_server ||=
       NewRelic::Control::Server.new \
-      api_host, 
-       (self['api_port'] || self['port'] || (use_ssl? ? 443 : 80)).to_i, 
+      api_host,
+       (self['api_port'] || self['port'] || (use_ssl? ? 443 : 80)).to_i,
       nil
     end
-    
+
     def proxy_server
       @proxy_server ||=
-      NewRelic::Control::ProxyServer.new self['proxy_host'], self['proxy_port'], self['proxy_user'], self['proxy_pass'] 
+      NewRelic::Control::ProxyServer.new self['proxy_host'], self['proxy_port'], self['proxy_user'], self['proxy_pass']
     end
-    
+
     def server_from_host(hostname=nil)
       host = hostname || self['host'] || 'collector.newrelic.com'
-      
+
       # if the host is not an IP address, turn it into one
-      NewRelic::Control::Server.new host, (self['port'] || (use_ssl? ? 443 : 80)).to_i, convert_to_ip_address(host) 
+      NewRelic::Control::Server.new host, (self['port'] || (use_ssl? ? 443 : 80)).to_i, convert_to_ip_address(host)
     end
-    
+
     # Return the Net::HTTP with proxy configuration given the NewRelic::Control::Server object.
     # Default is the collector but for api calls you need to pass api_server
     #
@@ -273,7 +273,7 @@ module NewRelic
     def http_connection(host = nil)
       host ||= server
       # Proxy returns regular HTTP if @proxy_host is nil (the default)
-      http_class = Net::HTTP::Proxy(proxy_server.name, proxy_server.port, 
+      http_class = Net::HTTP::Proxy(proxy_server.name, proxy_server.port,
                                     proxy_server.user, proxy_server.password)
       http = http_class.new(host.ip || host.name, host.port)
       log.debug("Http Connection opened to #{host.ip||host.name}:#{host.port}")
@@ -291,7 +291,7 @@ module NewRelic
     def to_s
       "Control[#{self.app}]"
     end
-    
+
     def log
       # If we try to get a log before one has been set up, return a stdout log
       unless @log
@@ -301,7 +301,7 @@ module NewRelic
       end
       @log
     end
-    
+
     # send the given message to STDOUT so that it shows
     # up in the console.  This should be used for important informational messages at boot.
     # The to_stdout may be implemented differently by different config subclasses.
@@ -311,7 +311,7 @@ module NewRelic
       to_stdout msg
       log.send level, msg if @log
     end
-    
+
     # Install stubs to the proper location so the app code will not fail
     # if the agent is not running.
     def install_shim
@@ -319,7 +319,7 @@ module NewRelic
       raise "Cannot install the Agent shim after instrumentation has already been installed!" if @instrumented
       NewRelic::Agent.agent = NewRelic::Agent::ShimAgent.instance
     end
-    
+
     # Add instrumentation.  Don't call this directly.  Use NewRelic::Agent#add_instrumentation.
     # This will load the file synchronously if we've already loaded the default
     # instrumentation.
@@ -333,9 +333,9 @@ module NewRelic
     end
     def install_instrumentation
       return if @instrumented
-      
+
       @instrumented = true
-      
+
       # Instrumentation for the key code points inside rails for monitoring by NewRelic.
       # note this file is loaded only if the newrelic agent is enabled (through config/newrelic.yml)
       instrumentation_path = File.join(File.dirname(__FILE__), 'agent','instrumentation')
@@ -345,7 +345,7 @@ module NewRelic
       @instrumentation_files.each { | pattern |  load_instrumentation_files pattern }
       log.debug "Finished instrumentation"
     end
-    
+
     def load_samplers
       agent = NewRelic::Agent.instance
       NewRelic::Agent::Sampler.sampler_classes.each do | subclass |
@@ -355,7 +355,7 @@ module NewRelic
           if subclass.use_harvest_sampler?
             agent.stats_engine.add_harvest_sampler sampler
             log.debug "Registered #{subclass.name} for harvest time sampling"
-          else            
+          else
             agent.stats_engine.add_sampler sampler
             log.debug "Registered #{subclass.name} for periodic sampling"
           end
@@ -366,14 +366,14 @@ module NewRelic
         end
       end
     end
-    
+
     protected
-    
+
     # Append framework specific environment information for uploading to
     # the server for change detection.  Override in subclasses
     def append_environment_info; end
-    
-    # Look up the ip address of the host using the pure ruby lookup 
+
+    # Look up the ip address of the host using the pure ruby lookup
     # to prevent blocking.  If that fails, fall back to the regular
     # IPSocket library.  Return nil if we can't find the host ip
     # address and don't have a good default.
@@ -394,7 +394,7 @@ module NewRelic
       end
       ip_address
     end
-    
+
     def merge_defaults(settings_hash)
       s = {
         'host' => 'collector.newrelic.com',
@@ -407,18 +407,18 @@ module NewRelic
       s['agent_enabled'] = s.delete('monitor_daemons') if s['agent_enabled'].nil? && s.include?('monitor_daemons')
       s
     end
-    
+
     # Control subclasses may override this, but it can be called multiple times.
     def setup_log
       @log_file = "#{log_path}/#{log_file_name}"
       @log = Logger.new @log_file
-      
+
       # change the format just for our logger
-      
+
       def @log.format_message(severity, timestamp, progname, msg)
-        "[#{timestamp.strftime("%m/%d/%y %H:%M:%S %z")} #{Socket.gethostname} (#{$$})] #{severity} : #{msg}\n" 
+        "[#{timestamp.strftime("%m/%d/%y %H:%M:%S %z")} #{Socket.gethostname} (#{$$})] #{severity} : #{msg}\n"
       end
-      
+
       # set the log level as specified in the config file
       case fetch("log_level","info").downcase
       when "debug" then @log.level = Logger::DEBUG
@@ -430,15 +430,15 @@ module NewRelic
       end
       @log
     end
-    
+
     def to_stdout(msg)
-      STDOUT.puts "** [NewRelic] " + msg 
+      STDOUT.puts "** [NewRelic] " + msg
     end
-    
+
     def config_file
       File.expand_path(File.join(root,"config","newrelic.yml"))
     end
-    
+
     def log_path
       @log_path ||= begin
                       path = self['log_file_path'] || File.join(root,'log')
@@ -452,7 +452,7 @@ module NewRelic
     def log_file_name
       @log_file_name ||= fetch('log_file_name', 'newrelic_agent.log')
     end
-    
+
     # Create the concrete class for environment specific behavior:
     def self.new_instance
       @local_env = NewRelic::LocalEnvironment.new
@@ -467,7 +467,7 @@ module NewRelic
         NewRelic::Control.const_get(@local_env.framework.to_s.capitalize).new @local_env
       end
     end
-    
+
     def initialize local_env
       @local_env = local_env
       @instrumentation_files = []
@@ -487,7 +487,7 @@ module NewRelic
       puts e.backtrace.join("\n")
       raise "Error reading newrelic.yml file: #{e}"
     end
-    
+
     # The root directory for the plugin or gem
     def self.newrelic_root
       File.expand_path(File.join(File.dirname(__FILE__),"..",".."))
@@ -495,23 +495,23 @@ module NewRelic
     def newrelic_root
       self.class.newrelic_root
     end
-    
+
     # Merge the given options into the config options.
     # They might be a nested hash
     def merge_options(options, hash=self)
       options.each do |key, val |
         case
-        when key == :config then next 
+        when key == :config then next
         when val.is_a?(Hash)
           merge_options(val, hash[key.to_s] ||= {})
         when val.nil?
           hash.delete(key.to_s)
-        else 
+        else
           hash[key.to_s] = val
         end
       end
     end
-    
+
     def load_instrumentation_files pattern
       Dir.glob(pattern) do |file|
         begin
@@ -523,6 +523,6 @@ module NewRelic
         end
       end
     end
-    
+
   end
 end

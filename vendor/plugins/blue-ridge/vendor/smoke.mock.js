@@ -30,14 +30,14 @@ Smoke.Mock = function(originalObj) {
 	obj.stub = function(attr){
 		return new Smoke.Stub(this, attr);
 	};
-	
+
 	obj.should_receive = function(attr){
 		var expectation = new Smoke.Mock.Expectation(this, attr);
 		this._expectations[attr] = (this._expectations[attr] || []).concat([expectation]);
 		this._valuesBeforeMocking[attr] = this[attr];
 		if(this._expectations[attr].length == 1) {
   		this[attr] = Smoke.Mock.Expectation.stub(this, attr);
-		} 
+		}
 		return expectation;
 	};
 
@@ -47,12 +47,12 @@ Smoke.Mock = function(originalObj) {
 			for(var i=0; i < expectations.length; i++) expectations[i].check();
 		};
 	};
-	
+
 	obj._resetMocks = function(){
 		for(var attr in this._valuesBeforeMocking) {
 			this[attr] = this._valuesBeforeMocking[attr];
 		}
-		
+
 		delete this._valuesBeforeMocking;
 		delete this._expectations;
 		delete this._resetMocks;
@@ -60,7 +60,7 @@ Smoke.Mock = function(originalObj) {
 		delete this.stub;
 		delete this.should_receive;
 	};
-	
+
 	Smoke.mocks.push(obj);
 	return obj;
 };
@@ -100,10 +100,10 @@ Smoke.Mock.Expectation.stub = function(mock, attr) {
       if (!matched) {
         this[0].argumentMismatchError(args)
       }
-      return return_value;        
+      return return_value;
     }.apply(mock._expectations[attr], arguments);
   }
-} 
+}
 
 
 Smoke.Mock.Expectation.prototype = {
@@ -160,7 +160,7 @@ Smoke.Mock.Expectation.prototype = {
 	},
 	parseCount: function(c){
 		switch(c){
-			case 'once': 
+			case 'once':
 				return 1;
 			case 'twice':
 				return 2;

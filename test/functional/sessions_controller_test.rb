@@ -31,7 +31,7 @@ class SessionsControllerTest < ActionController::TestCase
     post :create, :login => 'greeter', :password => 'test', :remember_me => "0"
     assert_nil @response.cookies["auth_token"]
   end
-  
+
   def test_should_delete_token_on_logout
     login_as :greeter
     get :destroy
@@ -64,7 +64,7 @@ class SessionsControllerTest < ActionController::TestCase
     def auth_token(token)
       CGI::Cookie.new('name' => 'auth_token', 'value' => token)
     end
-    
+
     def cookie_for(user)
       auth_token users(user).remember_token
     end

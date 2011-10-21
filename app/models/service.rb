@@ -16,13 +16,13 @@
 #
 
 class Service < ActiveRecord::Base
-  
+
   belongs_to :person
   has_one :note, :as => :notable, :dependent => :destroy
   has_userstamps
 
   validates_presence_of :person_id, :service_type_id
-  
+
   acts_as_paginated
   chains_finders
 
@@ -66,7 +66,7 @@ class Service < ActiveRecord::Base
   def self.csv_header
     CSV.generate_line(CSV_FIELDS[:person] + CSV_FIELDS[:self])
   end
-  
+
   def to_csv
     values = person.attributes.values_at(*CSV_FIELDS[:person])
     values << service_type_id

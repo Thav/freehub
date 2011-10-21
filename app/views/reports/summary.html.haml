@@ -14,7 +14,7 @@
             =calendar_date_select_tag "criteria[to]", @report.criteria[:to], :year_range => 3.years.ago..1.years.from_now
             %label{:for => 'criteria[to]'} Date To
           %p.instruct Leave one or both blank to search without date constraints.
-      %li 
+      %li
         =submit_tag "Update"
 
 -if @report.days.empty?
@@ -33,17 +33,17 @@
         %th Total
       -for week in @report.weeks
         %tr{:class => cycle('odd','even')}
-          %td 
+          %td
             = date_short(week.start)
-          %td 
+          %td
             = week.total_day.staff
-          %td 
+          %td
             = week.total_day.volunteer
-          %td 
+          %td
             = week.total_day.member
-          %td 
+          %td
             = week.total_day.patron
-          %td 
+          %td
             = week.total_day.total
   %div.section
     %h2 Visits by Day
@@ -59,15 +59,15 @@
         -if day.total == 0
           -next
         %tr{:class => cycle('odd','even')}
-          %td 
+          %td
             =link_to date_long(day.date), day_visits_path(day.date)
-          %td 
+          %td
             = day.staff
-          %td 
+          %td
             = day.volunteer
-          %td 
+          %td
             = day.member
-          %td 
+          %td
             = day.patron
-          %td 
+          %td
             = day.total

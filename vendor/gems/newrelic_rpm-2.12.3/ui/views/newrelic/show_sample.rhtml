@@ -25,7 +25,7 @@
     <th>CPU Burn:</th>
     <td><%= to_ms(@sample.params[:cpu_time]) if @sample.params[:cpu_time] %> ms</td>
   </tr>
-  
+
   <% unless @custom_params.empty? %>
     <tr>
       <th valign="top">Custom Params:</th>
@@ -38,7 +38,7 @@
       </td>
     </tr>
   <% end %>
-  
+
   <% unless @request_params.empty? %>
     <tr>
       <th valign="top">HTTP Params:</th>
@@ -55,14 +55,14 @@
       </td>
     </tr>
   <% end %>
-  
+
 </table>
 </div>
 
 <br/>
 <div id="view_sample">
 	<% if @sample.profile %>
-	  <%= profile_table(@sample.profile) %> 
+	  <%= profile_table(@sample.profile) %>
 	<% else %>
 	<div align=center width="100%">
 		<%= show_view_link 'Summary', 'show_sample_summary' %>

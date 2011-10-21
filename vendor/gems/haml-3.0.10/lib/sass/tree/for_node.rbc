@@ -489,7 +489,7 @@ s
 through
 s
 2
-  
+
 x
 1
 *
@@ -507,7 +507,7 @@ x
 dasherize
 s
 6
- from 
+ from
 x
 5
 @from
@@ -516,7 +516,7 @@ x
 to_sass
 s
 1
- 
+
 x
 3
 @to

@@ -6,7 +6,7 @@ class ServicesControllerTest < ActionController::TestCase
     super
     login_as 'greeter'
   end
-  
+
   def test_should_get_index_for_person
     get :index, :organization_key => 'sfbk', :person_id => people(:mary)
     assert_response :success

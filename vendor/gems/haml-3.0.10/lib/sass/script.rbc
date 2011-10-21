@@ -602,7 +602,7 @@ x
 ==
 s
 2
-: 
+:
 x
 7
 inspect
@@ -777,13 +777,13 @@ Util
 s
 29
 DEPRECATION WARNING:
-On line 
+On line
 x
 4
 to_s
 s
 12
-, character 
+, character
 s
 5
  of '
@@ -988,13 +988,13 @@ Util
 s
 29
 DEPRECATION WARNING:
-On line 
+On line
 x
 4
 to_s
 s
 12
-, character 
+, character
 s
 5
  of '
@@ -1004,10 +1004,10 @@ s
 s
 9
 
-Setting 
+Setting
 s
 6
- with 
+ with
 s
 2
 ||
@@ -1017,7 +1017,7 @@ s
 Use "
 s
 2
-: 
+:
 s
 9
  !default

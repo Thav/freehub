@@ -5632,7 +5632,7 @@ x
 rgb
 s
 2
-, 
+,
 x
 4
 join
@@ -6355,10 +6355,10 @@ x
 n
 s
 30
-Alpha channels must be equal: 
+Alpha channels must be equal:
 s
 1
- 
+
 x
 4
 Hash

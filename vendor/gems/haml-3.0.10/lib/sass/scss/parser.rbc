@@ -3467,7 +3467,7 @@ s
 [^\s]
 s
 1
- 
+
 x
 4
 gsub
@@ -4000,7 +4000,7 @@ x
 to_s
 s
 1
- 
+
 x
 5
 strip
@@ -6294,13 +6294,13 @@ x
 allocate
 s
 8
-@import 
+@import
 x
 4
 to_s
 s
 1
- 
+
 x
 10
 initialize
@@ -6573,7 +6573,7 @@ x
 allocate
 s
 7
-@media 
+@media
 x
 4
 to_s
@@ -17558,7 +17558,7 @@ x
 to_s
 s
 12
-": expected 
+": expected
 s
 7
 , was "

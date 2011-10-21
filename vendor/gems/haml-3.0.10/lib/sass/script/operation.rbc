@@ -574,7 +574,7 @@ x
 to_s
 s
 1
- 
+
 x
 9
 @operand1
@@ -794,13 +794,13 @@ x
 ===
 s
 2
-, 
+,
 x
 6
 concat
 s
 1
- 
+
 x
 5
 Lexer
@@ -1371,7 +1371,7 @@ s
 Undefined operation: "
 s
 1
- 
+
 s
 2
 ".

@@ -37,7 +37,7 @@
                 {
                     return;
                 }
-                
+
                 var tag = $(this).val();
                 if (this.selectedIndex == $('option', this).size() - 1)
                 {

@@ -1,7 +1,7 @@
 %h1
   =link_to 'Reports', reports_path
   = ' : Services'
-  
+
 %div.column
   -form_tag report_path(:action => 'services'), :method => :get do
     %ul
@@ -19,7 +19,7 @@
             =calendar_date_select_tag "report[end_before]", @report[:end_before], :year_range => 3.years.ago..1.years.from_now
             %label{:for => 'report[end_before]'} Ending Before
           %p.instruct Leave one or both blank to search without date constraints.
-      %li 
+      %li
         =submit_tag "Update"
 
 %div.section
@@ -42,13 +42,13 @@
             =link_to(service.person.full_name, person_path(:id => service.person))
           %td{:style => 'width:100px;'}
             = service.service_type.name
-          %td 
+          %td
             = date_short(service.start_date)
-          %td 
+          %td
             = date_short(service.end_date)
-          %td 
+          %td
             = service.paid
-          %td 
+          %td
             = service.volunteered
           %td.note{:style => 'width:360px;'}
             =note_text(service.note)

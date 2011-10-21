@@ -26,7 +26,7 @@ module Rack
       data = request['value'].to_f
       stats = NewRelic::Agent.get_stats(metric, false)
       stats.record_data_point data
-      response = ::Rack::Response.new "#{metric}=#{data}" 
+      response = ::Rack::Response.new "#{metric}=#{data}"
       response.finish
     end
   end

@@ -25,7 +25,7 @@
 #
 
 class Person < ActiveRecord::Base
-  
+
   belongs_to :organization
   has_many :visits, :include => :note, :dependent => :destroy, :order => "arrived_at DESC"
   has_many :services, :include => :note, :dependent => :destroy,  :order => "end_date DESC" do
@@ -44,7 +44,7 @@ class Person < ActiveRecord::Base
   has_many :notes, :as => :notable, :dependent => :destroy
 
   has_userstamps
-  
+
   validates_presence_of :first_name, :organization_id
   validates_uniqueness_of :email, :scope => :organization_id, :case_sensitive => false, :allow_nil => true, :allow_blank => true
   validates_length_of :first_name, :last_name, :street1, :street2, :city, :state, :postal_code, :country, :within => 1..40, :allow_blank => true
@@ -75,7 +75,7 @@ class Person < ActiveRecord::Base
   named_scope :matching_name, lambda { |name| {
       :conditions => [ "LOWER(full_name) LIKE :name", { :name => "%#{name.downcase}%"} ]
   } }
-  
+
 
   def initialize(params={})
     super
@@ -85,7 +85,7 @@ class Person < ActiveRecord::Base
   def membership
     @membership ||= services.last(:membership)
   end
-  
+
   def member?
     !membership.nil? && membership.current?
   end
@@ -107,7 +107,7 @@ class Person < ActiveRecord::Base
       'Patron'
     end
   end
-  
+
   def volunteer_hours(from=Date.today - 365,to=Date.tomorrow)
     hours = 0
     if not self.visits.nil?
@@ -115,7 +115,7 @@ class Person < ActiveRecord::Base
         if visit.duration
           hours += visit.duration
         end
-      end 
+      end
     end
     if hours > 0
       hours /= 3600
@@ -132,7 +132,7 @@ class Person < ActiveRecord::Base
 
   CSV_FIELDS = { :self => %w{first_name last_name staff email email_opt_out phone postal_code street1 street2 city state postal_code country yob created_at membership_expires_on} }
   CSV_FIELDS_HOURS = { :self => %w{first_name last_name staff hours email yob created_at membership_expires_on} }
-  
+
   def self.csv_header
     CSV.generate_line(CSV_FIELDS[:self])
   end
@@ -140,7 +140,7 @@ class Person < ActiveRecord::Base
   def self.csv_header_hours
     CSV.generate_line(CSV_FIELDS_HOURS[:self])
   end
-  
+
   def to_csv
     values = self.attributes.values_at(*CSV_FIELDS[:self])
     values[values.size - 2] = created_at.nil? ? nil : created_at.to_s(:db)
@@ -149,7 +149,7 @@ class Person < ActiveRecord::Base
   end
 
   def to_csv_hours
-  
+
   end
 
   private

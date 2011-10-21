@@ -3814,8 +3814,8 @@ x
 rstrip
 s
 11
- 
-	
+
+
  %p foo
 s
 9
@@ -7816,7 +7816,7 @@ s
 
 s
 10
-%textarea 
+%textarea
 s
 48
 <p>
@@ -17260,7 +17260,7 @@ x
 message
 s
 6
-Line: 
+Line:
 x
 4
 to_s
@@ -18225,7 +18225,7 @@ s
 69
 <script type='text/javascript'>
   //<![CDATA[
-    
+
   //]]>
 </script>
 
@@ -21427,7 +21427,7 @@ s
 
 s
 3
-%p 
+%p
 s
 12
 %p= 's' * 75

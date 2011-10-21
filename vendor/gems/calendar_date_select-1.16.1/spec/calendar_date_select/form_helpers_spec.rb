@@ -156,7 +156,7 @@ describe CalendarDateSelect::FormHelpers do
     before(:each) do
       @time = Time.parse("January 2, 2007 12:01:23 AM")
     end
-    
+
     it "should use the string verbatim when provided" do
       output = calendar_date_select_tag(:name, "Some String")
 
@@ -180,7 +180,7 @@ describe CalendarDateSelect::FormHelpers do
       output = calendar_date_select_tag(:name, @time, :time => 'mixed')
       output.should include(CalendarDateSelect.format_date(@time))
     end
-    
+
     it "not include the image option in the result input tag" do
       output = calendar_date_select_tag(:name, @time, :time => 'mixed')
       output.should_not include("image=")

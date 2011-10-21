@@ -1,12 +1,12 @@
 # == New Relic Initialization
-# 
+#
 # When installed as a gem, you can activate the New Relic agent one of the following ways:
 #
 # For Rails, add:
 #    config.gem 'newrelic_rpm'
 # to your initialization sequence.
 #
-# For merb, do 
+# For merb, do
 #    dependency 'newrelic_rpm'
 # in the Merb config/init.rb
 #
@@ -20,7 +20,7 @@
 require 'new_relic/control'
 
 # After verison 2.0 of Rails we can access the configuration directly.
-# We need it to add dev mode routes after initialization finished. 
+# We need it to add dev mode routes after initialization finished.
 if defined? Rails.configuration
   Rails.configuration.after_initialize do
     NewRelic::Control.instance.init_plugin :config => Rails.configuration

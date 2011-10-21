@@ -9,10 +9,10 @@ def install_newrelic_config_file(license_key="PASTE_YOUR_LICENSE_KEY_HERE")
     dest_dir = File.join(ENV["HOME"],".newrelic") rescue nil
     FileUtils.mkdir(dest_dir) if dest_dir
   end
-  
+
   src_config_file = File.join(File.dirname(__FILE__),"newrelic.yml")
   dest_config_file = File.join(dest_dir, "newrelic.yml") if dest_dir
-  
+
   if !dest_dir
     STDERR.puts "Could not find a config or ~/.newrelic directory to locate the default newrelic.yml file"
   elsif File::exists? dest_config_file
@@ -23,7 +23,7 @@ def install_newrelic_config_file(license_key="PASTE_YOUR_LICENSE_KEY_HERE")
     File.open( dest_config_file, 'w' ) do |out|
       out.puts yaml
     end
-    
+
     puts <<-EOF
 
 Installed a default configuration file in #{dest_dir}.
@@ -38,7 +38,7 @@ E-mail support@newrelic.com with any problems or questions.
 
     EOF
 
-  end  
+  end
 end
 
 if __FILE__ == $0 || $0 =~ /script\/plugin/

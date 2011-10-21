@@ -47,7 +47,7 @@ class HoptoadGenerator < Rails::Generator::Base
   def capistrano_hook
     IO.read(source_path('capistrano_hook.rb'))
   end
-  
+
   def plugin_is_present?
     File.exists?('vendor/plugins/hoptoad_notifier')
   end

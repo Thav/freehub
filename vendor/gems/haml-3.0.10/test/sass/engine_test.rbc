@@ -3429,7 +3429,7 @@ x
 new_from_literal
 s
 8
-$a: 1 + 
+$a: 1 +
 s
 69
 Invalid CSS after "1 +": expected expression (e.g. 1px, bold), was ""
@@ -3651,7 +3651,7 @@ s
 64
 File to import not found or unreadable: foo.sass.
 Load paths:
-  
+
 x
 4
 File
@@ -3687,7 +3687,7 @@ Import directives may only be used at the root of a document.
 s
 14
 foo
-  @import 
+  @import
 n
 s
 16
@@ -3753,9 +3753,9 @@ s
 Indenting at the beginning of the document is illegal.
 s
 18
- 
-   
-	
+
+
+
   a
   b: c
 s
@@ -3903,7 +3903,7 @@ Invalid else directive '@else foo': expected 'if <expr>'.
 s
 19
 @if false
-@else if 
+@else if
 s
 56
 Invalid else directive '@else if': expected 'if <expr>'.
@@ -5209,7 +5209,7 @@ x
 message
 s
 6
-Line: 
+Line:
 x
 4
 to_s
@@ -9838,10 +9838,10 @@ Syntax error: 12em*px isn't a valid CSS value.
 
 1: =error-mixin($a)
 2:   color: $a * 1em * 1px
-3: 
+3:
 4: =outer-mixin($a)
 5:   +error-mixin($a)
-6: 
+6:
 7: .error
 
 n
@@ -10114,9 +10114,9 @@ Syntax error: Properties aren't allowed at the root of a document.
 
 1: .filler
 2:   stuff: "stuff!"
-3: 
+3:
 4: a: b
-5: 
+5:
 6: .more.filler
 7:   a: b
 
@@ -12863,7 +12863,7 @@ s
 s
 27
 @a
-  #foo, 
+  #foo,
   #bar
     :b c
 s
@@ -21430,7 +21430,7 @@ p
 s
 47
 WARNING: In the main file
-        on line 1 of 
+        on line 1 of
 x
 4
 File
@@ -21449,24 +21449,24 @@ s
 /templates/warn.sass
 
 WARNING: Imported
-        on line 1 of 
+        on line 1 of
 n
 s
 53
 /templates/warn_imported.sass
-        from line 2 of 
+        from line 2 of
 n
 s
 73
 /templates/warn.sass
 
 WARNING: In an imported mixin
-        on line 4 of 
+        on line 4 of
 n
 s
 75
 /templates/warn_imported.sass, in `emits-a-warning'
-        from line 3 of 
+        from line 3 of
 n
 s
 21

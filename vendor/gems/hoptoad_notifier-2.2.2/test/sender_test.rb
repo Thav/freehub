@@ -50,7 +50,7 @@ class SenderTest < Test::Unit::TestCase
                    :proxy_port => proxy_port,
                    :proxy_user => proxy_user,
                    :proxy_pass => proxy_pass)
-    assert_received(http, :post) do |expect| 
+    assert_received(http, :post) do |expect|
       expect.with(uri.path, anything, HoptoadNotifier::HEADERS)
     end
     assert_received(Net::HTTP, :Proxy) do |expect|

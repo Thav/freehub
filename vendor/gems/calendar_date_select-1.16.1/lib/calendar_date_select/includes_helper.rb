@@ -18,11 +18,11 @@ module CalendarDateSelect::IncludesHelper
   def calendar_date_select_includes(*args)
     return "" if @cds_already_included
     @cds_already_included=true
-    
+
     options = (Hash === args.last) ? args.pop : {}
     options.assert_valid_keys(:style, :locale)
     options[:style] ||= args.shift
-    
+
     javascript_include_tag(*calendar_date_select_javascripts(:locale => options[:locale])) + "\n" +
     stylesheet_link_tag(*calendar_date_select_stylesheets(:style => options[:style])) + "\n"
   end

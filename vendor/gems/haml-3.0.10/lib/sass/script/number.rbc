@@ -1854,7 +1854,7 @@ x
 allocate
 s
 38
-Cannot modulo by a number with units: 
+Cannot modulo by a number with units:
 x
 7
 inspect

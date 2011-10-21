@@ -1,6 +1,6 @@
 require File.expand_path(File.dirname(__FILE__) + '/../lib/blue_ridge')
 
-def error_message_for_missing_spec_dir 
+def error_message_for_missing_spec_dir
   %Q{Could not find JavaScript test directory.
 None of the following directories existed: #{BlueRidge::JavaScriptSpecDirs.join(", ")}.
 Maybe you need to call './script/generate blue_ridge'?
@@ -14,7 +14,7 @@ namespace :test do
     js_spec_dir = BlueRidge.find_javascript_spec_dir || (raise error_message_for_missing_spec_dir)
     raise "JavaScript test failures" unless BlueRidge.run_specs_in_dir(js_spec_dir, ENV["TEST"])
   end
-  
+
   task :javascript => :javascripts
 end
 
@@ -36,7 +36,7 @@ namespace :js do
   task :fixtures do
     js_spec_dir = BlueRidge.find_javascript_spec_dir || (raise error_message_for_missing_spec_dir)
     fixture_dir = "#{js_spec_dir}/fixtures"
-    
+
     if PLATFORM[/darwin/]
       system("open #{fixture_dir}")
     elsif PLATFORM[/linux/]
@@ -45,7 +45,7 @@ namespace :js do
       puts "You can run your in-browser fixtures from #{fixture_dir}."
     end
   end
-  
+
   desc "Runs the Rhino JavaScript shell."
   task :shell do
     rlwrap = `which rlwrap`.chomp

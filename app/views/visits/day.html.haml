@@ -22,15 +22,15 @@
           %th.time In
           %th.time Out
           %th.note{:style => 'width:350px;'} Note
-          %th{:style => 'width:30px;'} 
-          %th 
+          %th{:style => 'width:30px;'}
+          %th
 
         -for visit in @groups[group[:key]]
           %tr{:class => cycle('odd','even')}
             %td.name
               =link_to(visit.person.full_name, person_path(:id => visit.person))
             %td
-              = visit.person.person_type 
+              = visit.person.person_type
             %td.time
               = time_short(visit.arrived_at)
             %td.time
@@ -47,12 +47,12 @@
               = note_text(visit.note)
             %td{:style => 'width:30px;'}
               =link_to 'Edit', edit_visit_path(:person_id => visit.person, :id => visit, :destination => day_visits_path)
-            %td 
+            %td
               =link_to 'Remove', visit_path(:person_id => visit.person, :id => visit, :destination => day_visits_path), :method => :delete
 
 %div.section
   %p
     See #{link_to "previous", day_visits_path(@day.yesterday)}
-    -unless @day == Date.today 
+    -unless @day == Date.today
       or #{link_to "next", day_visits_path(@day.tomorrow)}
     day.

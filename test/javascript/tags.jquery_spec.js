@@ -32,7 +32,7 @@ Screw.Unit(function()
             {
                 $(".tags_control .view").hide();
                 $(".tags_control .edit").show();
-                
+
                 $('a.show_view').trigger('click');
                 expect($(".tags_control .view").is(":visible")).to(be_true);
                 expect($(".tags_control .edit").is(":visible")).to(be_false);
@@ -53,7 +53,7 @@ Screw.Unit(function()
 
            after(function()
            {
-              event_data = null; 
+              event_data = null;
            });
 
            it("should dispatch delete event", function()

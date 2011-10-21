@@ -1,7 +1,7 @@
 require 'test_helper'
 
 class OrganizationsControllerTest < ActionController::TestCase
-      
+
   def test_should_get_index
     get :index
     assert_response :success

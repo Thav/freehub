@@ -1435,7 +1435,7 @@ s
 
 s
 2
-  
+
 x
 12
 @output_tabs
@@ -2171,7 +2171,7 @@ x
 allocate
 s
 10
-Can't run 
+Can't run
 x
 4
 to_s
@@ -2193,7 +2193,7 @@ raise
 n
 s
 18
- filter; required 
+ filter; required
 M
 1
 p
@@ -2262,7 +2262,7 @@ x
 map
 s
 4
- or 
+ or
 x
 4
 join
@@ -3237,7 +3237,7 @@ s
 20
 >
   //<![CDATA[
-    
+
 x
 6
 rstrip
@@ -3248,7 +3248,7 @@ s
 s
 5
 
-    
+
 x
 4
 gsub
@@ -3459,7 +3459,7 @@ s
 22
 >
   /*<![CDATA[*/
-    
+
 x
 6
 rstrip
@@ -3470,7 +3470,7 @@ s
 s
 5
 
-    
+
 x
 4
 gsub
@@ -3659,7 +3659,7 @@ rstrip
 s
 5
 
-    
+
 x
 4
 gsub

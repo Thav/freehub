@@ -2,7 +2,7 @@ Contributors
 ------------
 * Justin Gehtland (jgehtland)
   - Original idea.
-  
+
 * Geof Dagley (gdagley)
   - Put into a Rails plugin.
 
@@ -21,14 +21,14 @@ Contributors
 
 * Matt Wilson (hypomodern)
   - Although we didn't use his patch directly, his ideas were a *great* help in
-    the "deeply-nested test directories" feature.  Thanks! 
+    the "deeply-nested test directories" feature.  Thanks!
 
 * Nick Stenning (nickstenning)
   - For reminding us to add descriptions to our Rake tasks!
-  
+
 * Tristan Dunn (tristandunn)
   - For fixing the nested-describe command-line output.
-  
+
 * Chris Redinger (redinger)
   - For pairing & refactoring on the nested-describe command-line fix.
 

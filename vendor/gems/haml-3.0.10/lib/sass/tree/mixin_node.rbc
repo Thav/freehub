@@ -863,7 +863,7 @@ x
 map
 s
 2
-, 
+,
 x
 4
 join
@@ -875,7 +875,7 @@ s
 )
 s
 2
-  
+
 x
 1
 *
@@ -893,7 +893,7 @@ s
 +
 s
 9
-@include 
+@include
 x
 5
 @name
@@ -1921,10 +1921,10 @@ x
 n
 s
 6
-Mixin 
+Mixin
 s
 7
- takes 
+ takes
 s
 9
  argument
@@ -1937,10 +1937,10 @@ s
 s
 6
 
- but 
+ but
 s
 1
- 
+
 s
 3
 was
@@ -2272,7 +2272,7 @@ x
 SyntaxError
 s
 6
-Mixin 
+Mixin
 x
 5
 @name
@@ -2281,7 +2281,7 @@ x
 to_s
 s
 22
- is missing parameter 
+ is missing parameter
 x
 7
 inspect

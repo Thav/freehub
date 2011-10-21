@@ -5,7 +5,7 @@ Smoke.Stub = function(obj,attr) {
 };
 
 Smoke.Stub.prototype = {
-	defaultReturn: null, 
+	defaultReturn: null,
 	property: function(p){
 		this.property = p;
 		this.and_set_to(this.defaultReturn);

@@ -7,26 +7,26 @@ describe BlueRidge do
       File.stubs(:exist?).with("examples").returns(true)
       BlueRidge.find_base_spec_dir.should == "examples"
     end
-    
+
     it "returns RSpec's 'spec' directory if it exists and no Micronaut directory exists" do
       File.stubs(:exist?).with("examples").returns(false)
       File.stubs(:exist?).with("spec").returns(true)
       BlueRidge.find_base_spec_dir.should == "spec"
     end
-    
+
     it "returns the 'test' directory if no Micronaut or RSpec directories exist" do
       File.stubs(:exist?).with("examples").returns(false)
       File.stubs(:exist?).with("spec").returns(false)
       BlueRidge.find_base_spec_dir.should == "test"
     end
   end
-  
+
   describe "returning the directory name to contain the project's JavaScript tests" do
     it "returns 'examples/javascripts' if the base spec dir is 'examples'" do
       BlueRidge.stubs(:find_base_spec_dir).returns("examples")
       BlueRidge.javascript_spec_dir.should == "examples/javascripts"
     end
-    
+
     it "returns 'spec/javascripts' if the base spec dir is 'spec'" do
       BlueRidge.stubs(:find_base_spec_dir).returns("spec")
       BlueRidge.javascript_spec_dir.should == "spec/javascripts"
@@ -37,26 +37,26 @@ describe BlueRidge do
       BlueRidge.javascript_spec_dir.should == "test/javascript"
     end
   end
-  
+
   describe "finding the directory containing the project's JavaScript tests" do
     it "returns 'examples/javascripts' if it exists" do
       File.stubs(:exist?).with("examples/javascripts").returns(true)
       BlueRidge.find_javascript_spec_dir.should == "examples/javascripts"
     end
-    
+
     it "returns 'spec/javascripts' if it exists and 'examples/javascripts' does not" do
       File.stubs(:exist?).with("examples/javascripts").returns(false)
       File.stubs(:exist?).with("spec/javascripts").returns(true)
       BlueRidge.find_javascript_spec_dir.should == "spec/javascripts"
     end
-    
+
     it "returns 'test/javascript' if it exists and 'examples/javascripts' and 'spec/javascripts' do not" do
       File.stubs(:exist?).with("examples/javascripts").returns(false)
       File.stubs(:exist?).with("spec/javascripts").returns(false)
       File.stubs(:exist?).with("test/javascript").returns(true)
       BlueRidge.find_javascript_spec_dir.should == "test/javascript"
     end
-    
+
     it "returns null if none of the JavaScript spec directories exist" do
       File.stubs(:exist?).with("examples/javascripts").returns(false)
       File.stubs(:exist?).with("spec/javascripts").returns(false)
@@ -98,7 +98,7 @@ describe BlueRidge do
       BlueRidge.run_specs_in_dir("some_directory").should == :some_value
     end
   end
-  
+
   describe "running specs under the current directory" do
     describe "when the given spec filename is nil" do
       it "calls run_spec for each '*_spec.js' file under the current directory" do
@@ -107,28 +107,28 @@ describe BlueRidge do
         BlueRidge.expects(:run_spec).with("second_js_spec.js")
         BlueRidge.run_specs
       end
-  
+
       it "calls run_spec for each of the spec files, even if an early one reports a failure" do
         BlueRidge.stubs(:find_specs_under_current_dir).returns(["first_js_spec.js", "second_js_spec.js"])
         BlueRidge.expects(:run_spec).with("first_js_spec.js").returns(false)
         BlueRidge.expects(:run_spec).with("second_js_spec.js")
         BlueRidge.run_specs
       end
-  
+
       it "returns false if ANY of the specs reports a failure" do
         BlueRidge.stubs(:find_specs_under_current_dir).returns(["first_js_spec.js", "second_js_spec.js"])
         BlueRidge.stubs(:run_spec).with("first_js_spec.js").returns(false)
         BlueRidge.stubs(:run_spec).with("second_js_spec.js").returns(true)
         BlueRidge.run_specs.should == false
       end
-  
+
       it "returns true if ALL of the specs reports success" do
         BlueRidge.stubs(:find_specs_under_current_dir).returns(["first_js_spec.js", "second_js_spec.js"])
         BlueRidge.stubs(:run_spec).returns(true)
         BlueRidge.run_specs.should == true
       end
     end
-  
+
     describe "when given a spec name" do
       it "runs only the single spec and does not look for other specs" do
         BlueRidge.expects(:find_specs_under_current_dir).never
@@ -145,7 +145,7 @@ describe BlueRidge do
         BlueRidge.stubs(:run_spec).returns(true)
         BlueRidge.run_specs("some_filename").should == true
       end
-    
+
       it "returns false if the spec reports a failure" do
         BlueRidge.stubs(:run_spec).returns(false)
         BlueRidge.run_specs("some_filename").should == false

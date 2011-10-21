@@ -845,7 +845,7 @@ x
 allocate
 s
 42
-The #options attribute is not set on this 
+The #options attribute is not set on this
 x
 5
 class
@@ -1508,7 +1508,7 @@ x
 to_s
 s
 1
- 
+
 x
 10
 initialize
@@ -1639,7 +1639,7 @@ x
 to_s
 s
 2
-, 
+,
 x
 10
 initialize

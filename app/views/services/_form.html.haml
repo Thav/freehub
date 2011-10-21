@@ -18,5 +18,5 @@
     =labeled_input 'Note', :for => :visit_note do
       -capture do
         =note.text_area :text, :rows => 6
-  %li 
+  %li
     =form.submit @service.new_record? ? "Create" : "Update"

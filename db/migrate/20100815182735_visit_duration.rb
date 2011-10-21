@@ -4,6 +4,6 @@ class VisitDuration < ActiveRecord::Migration
   end
 
   def self.down
-    remove_column :visits, :duration  
+    remove_column :visits, :duration
   end
 end

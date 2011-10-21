@@ -2947,7 +2947,7 @@ x
 each_with_index
 s
 23
-[BUG] Unknown operator 
+[BUG] Unknown operator
 x
 4
 to_s
@@ -3065,14 +3065,14 @@ p
 12
 s
 16
-            def 
+            def
 x
 4
 to_s
 s
 33
 
-              return unless e = 
+              return unless e =
 s
 35
 
@@ -3135,7 +3135,7 @@ x
 map
 s
 2
-, 
+,
 x
 4
 join
@@ -3282,7 +3282,7 @@ to_s
 s
 22
 
-              return 
+              return
 s
 17
  unless try_tok(:
@@ -4817,7 +4817,7 @@ SyntaxError
 n
 s
 18
-Required argument 
+Required argument
 x
 7
 inspect
@@ -6811,7 +6811,7 @@ x
 map
 s
 4
- or 
+ or
 x
 4
 join

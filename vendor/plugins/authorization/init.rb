@@ -16,14 +16,14 @@ end
 case AUTHORIZATION_MIXIN
   when "hardwired"
     require File.dirname(__FILE__) + '/lib/publishare/hardwired_roles'
-    ActiveRecord::Base.send( :include, 
-      Authorization::HardwiredRoles::UserExtensions, 
-      Authorization::HardwiredRoles::ModelExtensions 
+    ActiveRecord::Base.send( :include,
+      Authorization::HardwiredRoles::UserExtensions,
+      Authorization::HardwiredRoles::ModelExtensions
     )
   when "object roles"
     require File.dirname(__FILE__) + '/lib/publishare/object_roles_table'
-    ActiveRecord::Base.send( :include, 
-      Authorization::ObjectRolesTable::UserExtensions, 
+    ActiveRecord::Base.send( :include,
+      Authorization::ObjectRolesTable::UserExtensions,
       Authorization::ObjectRolesTable::ModelExtensions
     )
 end

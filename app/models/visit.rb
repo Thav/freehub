@@ -18,13 +18,13 @@
 #
 
 class Visit < ActiveRecord::Base
-  
+
   belongs_to :person
   has_one :note, :as => :notable, :dependent => :destroy
   has_userstamps
 
   validates_presence_of :person_id, :arrived_at
-  
+
   acts_as_paginated
   chains_finders
 
@@ -43,7 +43,7 @@ class Visit < ActiveRecord::Base
   named_scope :before, lambda { |date| {
       :conditions => [ "convert_tz(visits.arrived_at,'+00:00','#{Time.zone.formatted_offset}') < ?", date.to_date.to_time.utc ]
   } }
-  
+
   named_scope :volunteer, lambda{ |bool| {
     :conditions => {:volunteer => bool}
   } }
@@ -54,7 +54,7 @@ class Visit < ActiveRecord::Base
     self.volunteer ||= false
     self.note ||= Note.new
   end
-  
+
  # def volunteer_hours
  #   hours = 0
  #   self.each |visit|

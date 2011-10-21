@@ -76,7 +76,7 @@ class VisitsController < ApplicationController
       end
     end
   end
-  
+
   # PUT /visits/1/sign_in
   # PUT /visits/1/sign_in.xml
   def sign_in
@@ -108,7 +108,7 @@ class VisitsController < ApplicationController
     else
       @visit.end_at = Time.now;
     end
-    
+
     respond_to do |format|
       if @visit.update_attributes(params[:visit])
         flash[:notice] = "#{@visit.person.full_name} was successfully signed out."

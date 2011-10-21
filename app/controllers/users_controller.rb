@@ -5,14 +5,14 @@ class UsersController < ApplicationController
 
   permit "admin", :only => [:index]
   permit "admin or (owner of :user)", :only => [:edit, :update, :destroy]
-  
+
   # render new.rhtml
   def new
   end
 
   def create
     cookies.delete :auth_token
-    # protects against session fixation attacks, wreaks havoc with 
+    # protects against session fixation attacks, wreaks havoc with
     # request forgery protection.
     # uncomment at your own risk
     # reset_session

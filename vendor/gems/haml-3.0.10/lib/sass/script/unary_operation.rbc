@@ -395,7 +395,7 @@ x
 to_s
 s
 1
- 
+
 x
 8
 @operand
@@ -661,7 +661,7 @@ x
 new
 s
 1
- 
+
 s
 0
 
@@ -1014,7 +1014,7 @@ s
 Undefined unary operation: "
 s
 1
- 
+
 s
 2
 ".

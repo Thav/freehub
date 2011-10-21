@@ -17,7 +17,7 @@
             =calendar_date_select_tag "report[before]", @report[:before], :year_range => 3.years.ago..1.years.from_now
             %label{:for => 'report[before]'} Created Before
           %p.instruct Leave one or both blank to search without date constraints.
-      %li 
+      %li
         =submit_tag "Update"
 
 %div.section
@@ -43,15 +43,15 @@
             = person.staff
           %td{:style => 'width:200px;'}
             = person.email
-          %td 
+          %td
             = person.phone
-          %td 
+          %td
             = person.city
-          %td 
+          %td
             = person.state
-          %td 
+          %td
             = person.postal_code
-          %td 
+          %td
             = datetime_short(person.created_at)
       %tr.list_controls
         %td{:colspan => 8}

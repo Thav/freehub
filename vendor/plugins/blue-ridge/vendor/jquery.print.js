@@ -60,7 +60,7 @@
       '\\': '\\\\'
     };
     var r = /["\\\x00-\x1f\x7f-\x9f]/g;
-    
+
     var str = r.test(value)
       ? '"' + value.replace(r, function (a) {
           var c = character_substitutions[a];

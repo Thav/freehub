@@ -35,11 +35,11 @@
   :background_color: *white
 :greyscale:
   :bar_colors: [
-            282828,  
-            383838,  
-            686868,  
-            989898,  
-            c8c8c8,  
+            282828,
+            383838,
+            686868,
+            989898,
+            c8c8c8,
             e8e8e8
             ]
   :background_color: *white

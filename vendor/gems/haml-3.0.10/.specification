@@ -1,42 +1,42 @@
---- !ruby/object:Gem::Specification 
+--- !ruby/object:Gem::Specification
 name: haml
-version: !ruby/object:Gem::Version 
+version: !ruby/object:Gem::Version
   version: 3.0.10
 platform: ruby
-authors: 
+authors:
 - Nathan Weizenbaum
 - Chris Eppstein
 - Hampton Catlin
-autorequire: 
+autorequire:
 bindir: bin
 cert_chain: []
 
 date: 2010-06-07 00:00:00 -07:00
-default_executable: 
-dependencies: 
-- !ruby/object:Gem::Dependency 
+default_executable:
+dependencies:
+- !ruby/object:Gem::Dependency
   name: yard
   type: :development
-  version_requirement: 
-  version_requirements: !ruby/object:Gem::Requirement 
-    requirements: 
+  version_requirement:
+  version_requirements: !ruby/object:Gem::Requirement
+    requirements:
     - - ">="
-      - !ruby/object:Gem::Version 
+      - !ruby/object:Gem::Version
         version: 0.5.3
-    version: 
-- !ruby/object:Gem::Dependency 
+    version:
+- !ruby/object:Gem::Dependency
   name: maruku
   type: :development
-  version_requirement: 
-  version_requirements: !ruby/object:Gem::Requirement 
-    requirements: 
+  version_requirement:
+  version_requirements: !ruby/object:Gem::Requirement
+    requirements:
     - - ">="
-      - !ruby/object:Gem::Version 
+      - !ruby/object:Gem::Version
         version: 0.5.9
-    version: 
+    version:
 description: "      Haml (HTML Abstraction Markup Language) is a layer on top of XHTML or XML\n      that's designed to express the structure of XHTML or XML documents\n      in a non-repetitive, elegant, easy way,\n      using indentation rather than closing tags\n      and allowing Ruby to be embedded with ease.\n      It was originally envisioned as a plugin for Ruby on Rails,\n      but it can function as a stand-alone templating engine.\n"
 email: haml@googlegroups.com
-executables: 
+executables:
 - haml
 - html2haml
 - sass
@@ -44,14 +44,14 @@ executables:
 - sass-convert
 extensions: []
 
-extra_rdoc_files: 
+extra_rdoc_files:
 - VERSION_NAME
 - CONTRIBUTING
 - README.md
 - MIT-LICENSE
 - VERSION
 - REVISION
-files: 
+files:
 - rails/init.rb
 - lib/haml.rbc
 - lib/sass.rb
@@ -415,8 +415,8 @@ has_rdoc: true
 homepage: http://haml-lang.com/
 licenses: []
 
-post_install_message: 
-rdoc_options: 
+post_install_message:
+rdoc_options:
 - --title
 - Haml
 - --main
@@ -425,28 +425,28 @@ rdoc_options:
 - lib/haml/buffer.rb
 - --line-numbers
 - --inline-source
-require_paths: 
+require_paths:
 - lib
-required_ruby_version: !ruby/object:Gem::Requirement 
-  requirements: 
+required_ruby_version: !ruby/object:Gem::Requirement
+  requirements:
   - - ">="
-    - !ruby/object:Gem::Version 
+    - !ruby/object:Gem::Version
       version: "0"
-  version: 
-required_rubygems_version: !ruby/object:Gem::Requirement 
-  requirements: 
+  version:
+required_rubygems_version: !ruby/object:Gem::Requirement
+  requirements:
   - - ">="
-    - !ruby/object:Gem::Version 
+    - !ruby/object:Gem::Version
       version: "0"
-  version: 
+  version:
 requirements: []
 
 rubyforge_project: haml
 rubygems_version: 1.3.5
-signing_key: 
+signing_key:
 specification_version: 3
 summary: An elegant, structured XHTML/XML templating engine. Comes with Sass, a similar CSS templating engine.
-test_files: 
+test_files:
 - test/sass/script_test.rb
 - test/sass/less_conversion_test.rb
 - test/sass/css2sass_test.rb

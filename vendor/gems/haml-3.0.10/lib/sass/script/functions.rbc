@@ -1144,7 +1144,7 @@ x
 to_s
 s
 10
- is not a 
+ is not a
 x
 8
 downcase
@@ -1696,7 +1696,7 @@ x
 allocate
 s
 12
-Color value 
+Color value
 x
 4
 to_s
@@ -2024,7 +2024,7 @@ x
 allocate
 s
 12
-Color value 
+Color value
 x
 4
 to_s
@@ -2444,7 +2444,7 @@ x
 allocate
 s
 14
-Alpha channel 
+Alpha channel
 x
 4
 to_s
@@ -3128,7 +3128,7 @@ x
 allocate
 s
 14
-Alpha channel 
+Alpha channel
 x
 4
 to_s
@@ -3200,14 +3200,14 @@ map
 n
 s
 11
-Saturation 
+Saturation
 s
 28
  must be between 0% and 100%
 n
 s
 10
-Lightness 
+Lightness
 x
 5
 Color
@@ -4438,7 +4438,7 @@ x
 map
 s
 2
-, 
+,
 x
 4
 join
@@ -5707,7 +5707,7 @@ ArgumentError
 n
 s
 7
-Weight 
+Weight
 x
 4
 to_s
@@ -8012,19 +8012,19 @@ x
 allocate
 s
 7
-Amount 
+Amount
 x
 4
 to_s
 s
 17
- must be between 
+ must be between
 x
 5
 first
 s
 5
- and 
+ and
 x
 4
 last

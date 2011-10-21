@@ -1,13 +1,13 @@
---- !ruby/object:Gem::Specification 
+--- !ruby/object:Gem::Specification
 name: annotate
-version: !ruby/object:Gem::Version 
+version: !ruby/object:Gem::Version
   version: 2.4.0
 platform: ruby
-authors: 
+authors:
 - Cuong Tran
 - Alex Chaffee
 - Marcos Piccinini
-autorequire: 
+autorequire:
 bindir: bin
 cert_chain: []
 
@@ -16,17 +16,17 @@ default_executable: annotate
 dependencies: []
 
 description: Annotates Rails Models, routes, fixtures, and others based on the database schema.
-email: 
+email:
 - alex@stinky.com
 - ctran@pragmaquest.com
 - x@nofxx.com
-executables: 
+executables:
 - annotate
 extensions: []
 
-extra_rdoc_files: 
+extra_rdoc_files:
 - README.rdoc
-files: 
+files:
 - History.txt
 - README.rdoc
 - VERSION.yml
@@ -46,31 +46,31 @@ has_rdoc: true
 homepage: http://github.com/ctran/annotate
 licenses: []
 
-post_install_message: 
-rdoc_options: 
+post_install_message:
+rdoc_options:
 - --charset=UTF-8
-require_paths: 
+require_paths:
 - lib
-required_ruby_version: !ruby/object:Gem::Requirement 
-  requirements: 
+required_ruby_version: !ruby/object:Gem::Requirement
+  requirements:
   - - ">="
-    - !ruby/object:Gem::Version 
+    - !ruby/object:Gem::Version
       version: "0"
-  version: 
-required_rubygems_version: !ruby/object:Gem::Requirement 
-  requirements: 
+  version:
+required_rubygems_version: !ruby/object:Gem::Requirement
+  requirements:
   - - ">="
-    - !ruby/object:Gem::Version 
+    - !ruby/object:Gem::Version
       version: "0"
-  version: 
+  version:
 requirements: []
 
 rubyforge_project: annotate
 rubygems_version: 1.3.5
-signing_key: 
+signing_key:
 specification_version: 3
 summary: Annotates Rails Models, routes, fixtures, and others based on the database schema.
-test_files: 
+test_files:
 - spec/annotate/annotate_models_spec.rb
 - spec/annotate/annotate_routes_spec.rb
 - spec/annotate_spec.rb

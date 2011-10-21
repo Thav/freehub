@@ -10,7 +10,7 @@ describe <%= model_controller_class_name %>Controller do
   it 'allows signup' do
     lambda do
       create_<%= file_name %>
-      response.should be_redirect      
+      response.should be_redirect
     end.should change(<%= class_name %>, :count).by(1)
   end
 
@@ -33,7 +33,7 @@ describe <%= model_controller_class_name %>Controller do
       response.should be_success
     end.should_not change(<%= class_name %>, :count)
   end
-  
+
   it 'requires password on signup' do
     lambda do
       create_<%= file_name %>(:password => nil)
@@ -41,7 +41,7 @@ describe <%= model_controller_class_name %>Controller do
       response.should be_success
     end.should_not change(<%= class_name %>, :count)
   end
-  
+
   it 'requires password confirmation on signup' do
     lambda do
       create_<%= file_name %>(:password_confirmation => nil)
@@ -57,7 +57,7 @@ describe <%= model_controller_class_name %>Controller do
       response.should be_success
     end.should_not change(<%= class_name %>, :count)
   end
-  
+
   <% if options[:include_activation] %>
   it 'activates user' do
     <%= class_name %>.authenticate('aaron', 'test').should be_nil
@@ -66,17 +66,17 @@ describe <%= model_controller_class_name %>Controller do
     flash[:notice].should_not be_nil
     <%= class_name %>.authenticate('aaron', 'test').should == <%= table_name %>(:aaron)
   end
-  
+
   it 'does not activate user without key' do
     get :activate
     flash[:notice].should be_nil
   end
-  
+
   it 'does not activate user with blank key' do
     get :activate, :activation_code => ''
     flash[:notice].should be_nil
   end<% end %>
-  
+
   def create_<%= file_name %>(options = {})
     post :create, :<%= file_name %> => { :login => 'quire', :email => 'quire@example.com',
       :password => 'quire', :password_confirmation => 'quire' }.merge(options)

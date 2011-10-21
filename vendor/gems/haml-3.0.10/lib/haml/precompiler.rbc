@@ -1636,7 +1636,7 @@ s
 84
 begin
 extend Haml::Helpers
-_hamlout = @haml_buffer = Haml::Buffer.new(@haml_buffer, 
+_hamlout = @haml_buffer = Haml::Buffer.new(@haml_buffer,
 x
 18
 options_for_buffer
@@ -1968,13 +1968,13 @@ s
 ]
 s
 3
- = 
+ =
 s
 8
-.nil? ? 
+.nil? ?
 s
 3
- : 
+ :
 p
 9
 I
@@ -2683,7 +2683,7 @@ x
 n
 s
 26
-Inconsistent indentation: 
+Inconsistent indentation:
 x
 4
 Haml
@@ -2697,7 +2697,7 @@ human_indentation
 s
 71
  used for indentation,
-but the rest of the document was indented using 
+but the rest of the document was indented using
 n
 s
 2
@@ -2712,7 +2712,7 @@ s
 
 s
 1
- 
+
 x
 4
 gsub
@@ -3323,7 +3323,7 @@ x
 n
 s
 22
-The line was indented 
+The line was indented
 x
 4
 to_s
@@ -5664,7 +5664,7 @@ x
 []
 s
 2
-  
+
 x
 12
 @output_tabs
@@ -6303,7 +6303,7 @@ x
 to_s
 s
 3
-); 
+);
 s
 2
 #{
@@ -6443,10 +6443,10 @@ s
 _hamlout.push_text("
 s
 3
-", 
+",
 s
 2
-, 
+,
 x
 22
 @dont_tab_up_next_text
@@ -7695,7 +7695,7 @@ x
 flush_merged_text
 s
 12
-haml_temp = 
+haml_temp =
 x
 11
 push_silent
@@ -7707,7 +7707,7 @@ x
 loud
 s
 19
-_hamlout.buffer << 
+_hamlout.buffer <<
 s
 15
 haml_temp.to_s;
@@ -9284,7 +9284,7 @@ x
 []
 s
 1
- 
+
 x
 1
 +
@@ -10362,7 +10362,7 @@ x
 ==
 s
 1
- 
+
 x
 15
 filter_and_join
@@ -12451,7 +12451,7 @@ x
 allocate
 s
 24
-Invalid attribute list: 
+Invalid attribute list:
 x
 7
 inspect
@@ -12489,7 +12489,7 @@ x
 eos?
 s
 1
- 
+
 x
 2
 <<
@@ -12703,7 +12703,7 @@ x
 <<
 s
 4
- => 
+ =>
 s
 1
 ,
@@ -15622,7 +15622,7 @@ empty?
 n
 s
 25
-There's no Ruby code for 
+There's no Ruby code for
 x
 4
 to_s
@@ -15741,7 +15741,7 @@ x
 size
 s
 2
-, 
+,
 x
 5
 first
@@ -16695,7 +16695,7 @@ x
 to_s
 s
 1
- 
+
 s
 12
 <![endif]-->
@@ -17360,7 +17360,7 @@ s
  encoding=
 s
 1
- 
+
 x
 5
 split
@@ -19308,7 +19308,7 @@ x
 newline
 s
 1
- 
+
 x
 2
 <<

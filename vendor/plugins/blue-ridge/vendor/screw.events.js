@@ -1,6 +1,6 @@
 (function($) {
   $(Screw)
-    .bind('loaded', function() {    
+    .bind('loaded', function() {
       $('.describe, .it')
         .click(function() {
           document.location = location.href.split('?')[0] + '?' + $(this).fn('selector');
@@ -29,7 +29,7 @@
             .append($('<p class="error"></p>').text(reason.toString()));
 
           var file = reason.fileName || reason.sourceURL;
-          var line = reason.lineNumber || reason.line;          
+          var line = reason.lineNumber || reason.line;
           if (file || line) {
             $(this).append($('<p class="error"></p>').text('line ' + line + ', ' + file));
           }

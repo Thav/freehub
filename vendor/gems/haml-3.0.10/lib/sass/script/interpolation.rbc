@@ -425,7 +425,7 @@ p
 8
 s
 15
-(interpolation 
+(interpolation
 x
 7
 @before
@@ -437,7 +437,7 @@ x
 to_s
 s
 1
- 
+
 x
 4
 @mid
@@ -643,7 +643,7 @@ x
 @whitespace_before
 s
 1
- 
+
 s
 2
 #{
@@ -983,7 +983,7 @@ x
 @whitespace_before
 s
 1
- 
+
 x
 4
 @mid

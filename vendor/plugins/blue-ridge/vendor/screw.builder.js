@@ -65,7 +65,7 @@ var Screw = (function($) {
   };
 
   $(screw).queue(function() { $(screw).trigger('loading') });
-  
+
   $(window).load(function(){
     $('<div class="describe"></div>')
       .append('<h3 class="status"></h3>')
@@ -73,10 +73,10 @@ var Screw = (function($) {
       .append('<ul class="describes"></ul>')
       .append('<ol class="afters"></ol>')
       .appendTo('body');
-  
+
     $(screw).dequeue();
     $(screw).trigger('loaded');
   });
-  
+
   return screw;
 })(jQuery);

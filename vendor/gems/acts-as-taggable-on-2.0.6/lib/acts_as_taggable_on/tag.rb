@@ -1,7 +1,7 @@
 module ActsAsTaggableOn
   class Tag < ::ActiveRecord::Base
     include ActsAsTaggableOn::ActiveRecord::Backports if ::ActiveRecord::VERSION::MAJOR < 3
-  
+
     attr_accessible :name
 
     ### ASSOCIATIONS:
@@ -18,11 +18,11 @@ module ActsAsTaggableOn
     def self.named(name)
       where(["name #{like_operator} ?", name])
     end
-  
+
     def self.named_any(list)
       where(list.map { |tag| sanitize_sql(["name #{like_operator} ?", tag.to_s]) }.join(" OR "))
     end
-  
+
     def self.named_like(name)
       where(["name #{like_operator} ?", "%#{name}%"])
     end

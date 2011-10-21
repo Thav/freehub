@@ -36,7 +36,7 @@ class TaggingsControllerTest < ActionController::TestCase
       setup do
         xhr :delete, :destroy, :organization_key => 'sfbk', :person_id => people(:mary), :id => 'mechanic'
       end
-      
+
       should_render_without_layout
       should_render_template 'taggings/_index.html.haml'
     end
@@ -69,6 +69,6 @@ class TaggingsControllerTest < ActionController::TestCase
         assert_equal ['mechanic', 'mom', 'three'], people(:mary).tag_list
       end
     end
-    
+
   end
 end

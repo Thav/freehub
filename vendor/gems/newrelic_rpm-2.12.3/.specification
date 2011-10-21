@@ -1,27 +1,27 @@
---- !ruby/object:Gem::Specification 
+--- !ruby/object:Gem::Specification
 name: newrelic_rpm
-version: !ruby/object:Gem::Version 
+version: !ruby/object:Gem::Version
   version: 2.12.3
 platform: ruby
-authors: 
+authors:
 - Bill Kayser
-autorequire: 
+autorequire:
 bindir: bin
 cert_chain: []
 
 date: 2010-06-10 00:00:00 -07:00
-default_executable: 
-dependencies: 
-- !ruby/object:Gem::Dependency 
+default_executable:
+dependencies:
+- !ruby/object:Gem::Dependency
   name: jeweler
   type: :development
-  version_requirement: 
-  version_requirements: !ruby/object:Gem::Requirement 
-    requirements: 
+  version_requirement:
+  version_requirements: !ruby/object:Gem::Requirement
+    requirements:
     - - ">="
-      - !ruby/object:Gem::Version 
+      - !ruby/object:Gem::Version
         version: "0"
-    version: 
+    version:
 description: |
   New Relic RPM is a Ruby performance management system, developed by
   New Relic, Inc (http://www.newrelic.com).  RPM provides you with deep
@@ -31,15 +31,15 @@ description: |
   http://github.com/newrelic/rpm/tree/master.
 
 email: support@newrelic.com
-executables: 
+executables:
 - mongrel_rpm
 - newrelic_cmd
 extensions: []
 
-extra_rdoc_files: 
+extra_rdoc_files:
 - CHANGELOG
 - LICENSE
-files: 
+files:
 - CHANGELOG
 - LICENSE
 - README.md
@@ -209,38 +209,38 @@ homepage: http://www.github.com/newrelic/rpm
 licenses: []
 
 post_install_message: |+
-  
+
   Please see http://support.newrelic.com/faqs/docs/ruby-agent-release-notes
   for a complete description of the features and enhancements available
   in version 2.12 of the Ruby Agent.
-  
+
   For details on this specific release, refer to the CHANGELOG file.
-  
-rdoc_options: 
+
+rdoc_options:
 - --charset=UTF-8
 - --line-numbers
 - --inline-source
 - --title
 - New Relic RPM
-require_paths: 
+require_paths:
 - lib
-required_ruby_version: !ruby/object:Gem::Requirement 
-  requirements: 
+required_ruby_version: !ruby/object:Gem::Requirement
+  requirements:
   - - ">="
-    - !ruby/object:Gem::Version 
+    - !ruby/object:Gem::Version
       version: "0"
-  version: 
-required_rubygems_version: !ruby/object:Gem::Requirement 
-  requirements: 
+  version:
+required_rubygems_version: !ruby/object:Gem::Requirement
+  requirements:
   - - ">="
-    - !ruby/object:Gem::Version 
+    - !ruby/object:Gem::Version
       version: "0"
-  version: 
+  version:
 requirements: []
 
-rubyforge_project: 
+rubyforge_project:
 rubygems_version: 1.3.5
-signing_key: 
+signing_key:
 specification_version: 3
 summary: New Relic Ruby Performance Monitoring Agent
 test_files: []

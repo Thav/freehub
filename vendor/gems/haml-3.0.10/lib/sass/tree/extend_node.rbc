@@ -597,7 +597,7 @@ x
 allocate
 s
 13
-Can't extend 
+Can't extend
 x
 4
 to_a
@@ -987,7 +987,7 @@ p
 9
 s
 2
-  
+
 x
 1
 *
@@ -996,7 +996,7 @@ x
 to_s
 s
 8
-@extend 
+@extend
 x
 9
 @selector

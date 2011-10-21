@@ -72,7 +72,7 @@ at_exit { File.delete(scope('REVISION')) rescue nil }
 
 desc "Install Haml as a gem. Use SUDO=1 to install with sudo."
 task :install => [:package] do
-  gem  = RUBY_PLATFORM =~ /java/  ? 'jgem' : 'gem' 
+  gem  = RUBY_PLATFORM =~ /java/  ? 'jgem' : 'gem'
   sh %{#{'sudo ' if ENV["SUDO"]}#{gem} install --no-ri pkg/haml-#{File.read(scope('VERSION')).strip}}
 end
 
@@ -194,7 +194,7 @@ task :release_edge do
     pr = version[3]
     version = version.map {|n| n.to_i}
     unless pr || (version[1] % 2 == 1 && version[2] == 0)
-      raise "#{version.join('.')} is not a development version" 
+      raise "#{version.join('.')} is not a development version"
     end
 
     # Bump the edge gem version
@@ -367,7 +367,7 @@ END
       result = RubyProf.profile { times.times { obj.render } }
     end
 
-    RubyProf.const_get("#{(ENV['OUTPUT'] || 'Flat').capitalize}Printer").new(result).print 
+    RubyProf.const_get("#{(ENV['OUTPUT'] || 'Flat').capitalize}Printer").new(result).print
   end
 rescue LoadError; end
 

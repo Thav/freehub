@@ -14,7 +14,7 @@
             =calendar_date_select_tag "report[before]", @report[:before], :year_range => 3.years.ago..1.years.from_now
             %label{:for => 'report[before]'} Date To
           %p.instruct Leave one or both blank to search without date constraints.
-      %li 
+      %li
         =submit_tag "Update"
 %div.section
   -if @visits.empty?
@@ -34,9 +34,9 @@
         %tr{:class => cycle('odd','even')}
           %td{:style => 'width:150px;'}
             =link_to(visit.person.full_name, person_path(:id => visit.person))
-          %td 
+          %td
             = visit.person.staff? ? 'Staff' : 'Patron'
-          %td 
+          %td
             = visit.volunteer? ? 'Yes' : 'No'
           %td
             = datetime_long(visit.arrived_at)

@@ -39,7 +39,7 @@ module NewRelic
       #
       # == Overriding the metric name
       #
-      # By default the middleware is identified only by its class, but if you want to 
+      # By default the middleware is identified only by its class, but if you want to
       # be more specific and pass in name, then omit including the Rack instrumentation
       # and instead follow this example:
       #
@@ -55,7 +55,7 @@ module NewRelic
       #
       # == Cascading or chained calls
       #
-      # Calls which return a 404 will not have transactions recorded, but 
+      # Calls which return a 404 will not have transactions recorded, but
       # any calls to instrumented frameworks like ActiveRecord will still be
       # captured even if the result is a 404.  To avoid this you need to
       # instrument only when you are the endpoint.
@@ -77,7 +77,7 @@ module NewRelic
       #       end
       #     end
       #   end
-      #      
+      #
       module Rack
         def newrelic_request_headers
           @newrelic_request.env

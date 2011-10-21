@@ -3837,7 +3837,7 @@ x
 ==
 s
 26
-Inconsistent indentation: 
+Inconsistent indentation:
 x
 4
 Haml
@@ -3854,7 +3854,7 @@ to_s
 s
 71
  used for indentation,
-but the rest of the document was indented using 
+but the rest of the document was indented using
 n
 s
 2
@@ -3862,7 +3862,7 @@ s
 
 s
 1
- 
+
 x
 4
 gsub
@@ -4466,7 +4466,7 @@ allocate
 s
 56
 Inconsistent indentation:
-previous line was indented by 
+previous line was indented by
 x
 4
 Haml
@@ -4480,7 +4480,7 @@ human_indentation
 s
 32
 ,
-but this line was indented by 
+but this line was indented by
 n
 n
 n
@@ -4503,7 +4503,7 @@ s
 
 s
 1
- 
+
 x
 4
 gsub
@@ -4937,7 +4937,7 @@ x
 allocate
 s
 22
-The line was indented 
+The line was indented
 x
 1
 -
@@ -6559,7 +6559,7 @@ x
 Util
 s
 16
-WARNING on line 
+WARNING on line
 x
 4
 line
@@ -6571,7 +6571,7 @@ x
 filename
 s
 4
- of 
+ of
 s
 70
 :
@@ -10931,7 +10931,7 @@ x
 DirectiveNode
 s
 8
-@import 
+@import
 x
 4
 to_s
@@ -12022,13 +12022,13 @@ x
 allocate
 s
 28
-Invalid for directive '@for 
+Invalid for directive '@for
 x
 4
 to_s
 s
 12
-': expected 
+': expected
 s
 1
 .
@@ -12545,7 +12545,7 @@ x
 n
 s
 30
-Invalid else directive '@else 
+Invalid else directive '@else
 x
 4
 to_s
@@ -13995,7 +13995,7 @@ Regexp
 n
 s
 4
-^\* 
+^\*
 x
 3
 new
@@ -14080,7 +14080,7 @@ s
 
 s
 1
- 
+
 x
 1
 +
@@ -14110,7 +14110,7 @@ Regexp
 n
 s
 2
-^ 
+^
 x
 3
 new

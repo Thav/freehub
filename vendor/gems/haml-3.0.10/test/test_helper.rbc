@@ -1054,7 +1054,7 @@ Regexp
 n
 s
 19
-^(block|rescue) in 
+^(block|rescue) in
 x
 3
 new

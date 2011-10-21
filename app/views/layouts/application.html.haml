@@ -28,7 +28,7 @@
             %span.log_out
               = link_to 'Log Out', session_path, :method => :delete
           -else
-            %span.log_in 
+            %span.log_in
               =link_to 'Log In', new_session_path
         -if flash[:notice]
           %span#notice= flash[:notice]
@@ -56,14 +56,14 @@
         = "Times shown are #{Time.zone.name} timezone."
     %div#footer
       %div.body
-        %div#logo 
+        %div#logo
           = link_to 'Freehub', root_path
         %ul
           %li Get #{link_to "help or send feedback", "http://wiki.github.com/asalant/freehub/freehub-support"}
           %li Check the #{link_to 'project documentation', 'http://wiki.github.com/asalant/freehub/'}
         %ul
           %li Thanks to #{link_to 'EngineYard', 'http://www.engineyard.com'} for hosting
-        %div.credit 
+        %div.credit
           =image_tag("ey-logo.gif")
     :javascript
       var _gaq = _gaq || [];

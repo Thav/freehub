@@ -1,4 +1,4 @@
-require File.expand_path(File.join(File.dirname(__FILE__),'..','..','test_helper')) 
+require File.expand_path(File.join(File.dirname(__FILE__),'..','..','test_helper'))
 class NewRelic::Agent::BusyCalculatorTest < Test::Unit::TestCase
   attr_reader :now
   def setup
@@ -7,7 +7,7 @@ class NewRelic::Agent::BusyCalculatorTest < Test::Unit::TestCase
     @instance_busy = NewRelic::MethodTraceStats.new
     NewRelic::Agent::BusyCalculator.stubs(:instance_busy_stats).returns(@instance_busy)
   end
-  
+
   def test_normal
     # start the timewindow 10 seconds ago
     # start a request at 10 seconds, 5 seconds long
@@ -16,7 +16,7 @@ class NewRelic::Agent::BusyCalculatorTest < Test::Unit::TestCase
     NewRelic::Agent::BusyCalculator.dispatcher_finish(now - 5.0)
     assert_equal 5, NewRelic::Agent::BusyCalculator.accumulator
     NewRelic::Agent::BusyCalculator.harvest_busy
-    
+
     assert_equal 1, @instance_busy.call_count
     assert_in_delta 0.50, @instance_busy.total_call_time, 0.05
   end
@@ -26,7 +26,7 @@ class NewRelic::Agent::BusyCalculatorTest < Test::Unit::TestCase
     NewRelic::Agent::BusyCalculator.stubs(:harvest_start).returns(now - 10.0)
     NewRelic::Agent::BusyCalculator.dispatcher_start(now - 5.0)
     NewRelic::Agent::BusyCalculator.harvest_busy
-    
+
     assert_equal 1, @instance_busy.call_count, @instance_busy
     assert_in_delta 0.50, @instance_busy.total_call_time, 0.05
   end
@@ -43,7 +43,7 @@ class NewRelic::Agent::BusyCalculatorTest < Test::Unit::TestCase
     NewRelic::Agent::BusyCalculator.dispatcher_start(now - 2.0)
     NewRelic::Agent::BusyCalculator.dispatcher_finish(now - 1.0)
     NewRelic::Agent::BusyCalculator.harvest_busy
-    
+
     assert_equal 1, @instance_busy.call_count
     assert_in_delta 0.50, @instance_busy.total_call_time, 0.05
   end
@@ -63,7 +63,7 @@ class NewRelic::Agent::BusyCalculatorTest < Test::Unit::TestCase
     NewRelic::Agent::BusyCalculator.dispatcher_finish(now - 2.0)
     worker.join
     NewRelic::Agent::BusyCalculator.harvest_busy
-    
+
     assert_equal 1, @instance_busy.call_count
     # 3 + 6 = 9, or 90%
     assert_in_delta 0.90, @instance_busy.total_call_time, 0.025
@@ -74,6 +74,6 @@ class NewRelic::Agent::BusyCalculatorTest < Test::Unit::TestCase
     NewRelic::Agent::BusyCalculator.harvest_busy
     NewRelic::Agent::BusyCalculator.harvest_busy
     NewRelic::Agent::BusyCalculator.harvest_busy
-    assert_equal 3, @instance_busy.call_count  
+    assert_equal 3, @instance_busy.call_count
   end
 end

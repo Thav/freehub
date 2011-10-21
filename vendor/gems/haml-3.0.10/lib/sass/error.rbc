@@ -1535,7 +1535,7 @@ s
 an unknown file
 s
 14
-Syntax error: 
+Syntax error:
 x
 7
 message
@@ -1684,7 +1684,7 @@ p
 s
 9
 
-        
+
 x
 2
 ==
@@ -1699,7 +1699,7 @@ x
 to_s
 s
 6
- line 
+ line
 x
 4
 line
@@ -1708,7 +1708,7 @@ x
 []
 s
 4
- of 
+ of
 x
 8
 filename
@@ -2021,7 +2021,7 @@ x
 gsub
 s
 3
-\A 
+\A
 s
 5
 "; }
@@ -2286,7 +2286,7 @@ x
 to_s
 s
 2
-: 
+:
 x
 7
 message
@@ -2420,7 +2420,7 @@ x
 to_s
 s
 2
-: 
+:
 p
 5
 I

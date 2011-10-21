@@ -6,6 +6,6 @@ class VisitsStartEndAt < ActiveRecord::Migration
 
   def self.down
     remove_column :visits, :start_at
-    remove_column :visits, :end_at    
+    remove_column :visits, :end_at
   end
 end

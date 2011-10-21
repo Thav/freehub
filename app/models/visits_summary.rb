@@ -66,10 +66,10 @@ class VisitsSummary
       end
       week.add_day(day)
     end
-    
+
     weeks
   end
-  
+
 end
 
 class VisitsDay
@@ -125,5 +125,5 @@ class VisitsWeek
 
   def contains?(date)
     date >= @start && date < @start.advance(:days => 7)
-  end 
+  end
 end

@@ -1,11 +1,11 @@
 class OrganizationsController < ApplicationController
 
   skip_before_filter :login_required, :only => [:index, :show, :new, :create]
-  before_filter :assign_id_param, :resolve_organization_by_id, :except => [ :index, :new, :create ] 
+  before_filter :assign_id_param, :resolve_organization_by_id, :except => [ :index, :new, :create ]
 
   permit "admin", :only => [ :destroy ]
-  permit "admin or (manager of :organization)", :only => [ :show, :edit, :update ] 
-    
+  permit "admin or (manager of :organization)", :only => [ :show, :edit, :update ]
+
   # GET /organizations
   # GET /organizations.xml
   def index

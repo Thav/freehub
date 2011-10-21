@@ -12,7 +12,7 @@ class NewRelic::Control::Test < NewRelic::Control::Rails #:nodoc:
   end
   def initialize local_env
     super local_env
-    setup_log 
+    setup_log
   end
   # when running tests, don't write out stderr
   def log!(msg, level=:info)
@@ -27,7 +27,7 @@ class NewRelic::Control::Test < NewRelic::Control::Rails #:nodoc:
       def draw_with_test_route
         draw_without_test_route do | map |
           map.connect ':controller/:action/:id'
-          yield map        
+          yield map
         end
       end
       alias_method_chain :draw, :test_route

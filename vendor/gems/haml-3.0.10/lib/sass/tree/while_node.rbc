@@ -387,7 +387,7 @@ p
 8
 s
 2
-  
+
 x
 1
 *
@@ -396,7 +396,7 @@ x
 to_s
 s
 7
-@while 
+@while
 x
 5
 @expr
