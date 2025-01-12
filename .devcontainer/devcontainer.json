@@ -1,6 +1,6 @@
 {
   "name": "Ruby on Rails Dev Container",
-  "dockerFile": "Dockerfile",
+  "dockerFile": "../Dockerfile",
   "customizations": {
     "vscode": {
       "extensions": [
