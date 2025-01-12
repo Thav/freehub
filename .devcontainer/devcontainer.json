@@ -4,10 +4,11 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "rebornix.Ruby",
+        "shopify.ruby-lsp",
         "castwide.solargraph",
         "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode"
+        "esbenp.prettier-vscode",
+        "oderwat.indent-rainbow"
       ]
     }
   },
