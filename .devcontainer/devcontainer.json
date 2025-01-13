@@ -1,6 +1,8 @@
 {
-  "name": "Ruby on Rails Dev Container",
-  "dockerFile": "../Dockerfile",
+  "name": "Freehub Dev Container Environment",
+  "dockerComposeFile": ["../docker-compose.yml"],
+  "service": "app",
+  "workspaceFolder": "/workspace",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -12,8 +14,16 @@
       ]
     }
   },
-  "postCreateCommand": "bundle install && yarn install",
-  "forwardPorts": [3000],
+  "remoteEnv": {
+    "SSH_AUTH_SOCK": "/ssh-agent",
+    "RAILS_ENV": "development"
+  },
+  // Bind the SSH agent socket to enable SSH key authentication within the container
+  "mounts": [
+    "source=${localEnv:SSH_AUTH_SOCK},target=/ssh-agent,type=bind,consistency=cached"
+  ],
+  "postCreateCommand": "bundle install && yarn install && rbenv install -s && rbenv rehash && rails db:create && rails db:migrate && npm --prefix assets install",
+  "forwardPorts": [3000, 3306],
   "portsAttributes": {
     "3000": {
       "label": "Rails Server",
