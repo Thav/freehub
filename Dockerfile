@@ -1,9 +1,5 @@
 FROM mcr.microsoft.com/vscode/devcontainers/ruby:0-3.2
 
-# Install Node.js
-RUN curl -sL https://deb.nodesource.com/setup_20.x | bash - \
-  && apt-get install -y nodejs
-
 # Install Bundler
 RUN gem install bundler:2.4.2
 

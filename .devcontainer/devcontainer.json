@@ -18,11 +18,12 @@
     "SSH_AUTH_SOCK": "/ssh-agent",
     "RAILS_ENV": "development"
   },
-  // Bind the SSH agent socket to enable SSH key authentication within the container
   "mounts": [
     "source=${localEnv:SSH_AUTH_SOCK},target=/ssh-agent,type=bind,consistency=cached"
   ],
-  "postCreateCommand": "bundle install && yarn install && rbenv install -s && rbenv rehash && rails db:create && rails db:migrate && npm --prefix assets install",
+  "initializeCommand": "docker network prune -f",
+  "updateContentCommand": "bundle install",
+  "postCreateCommand": "yarn install && rbenv install -s && rbenv rehash && rails db:create && rails db:migrate && npm --prefix assets install",
   "forwardPorts": [3000, 3306],
   "portsAttributes": {
     "3000": {
