@@ -45,5 +45,9 @@
 /app/assets/builds/*
 !/app/assets/builds/.keep
 
+# Ignore node_modules
 /assets/node_modules
 /node_modules
+
+# Ignore mysql container volume mount
+/db_data

@@ -11,3 +11,7 @@ The easiest way to start developing Freehub is to use the dev container. This se
 * Ruby version
     * During inital setup, the files in this repository called for ruby version 3.2.0, but Microsoft's dev container (`cr.microsoft.com/vscode/devcontainers/ruby:0-3.2`) provided 3.2.2
     * This repository was updated to match the target container, and that target container may update in the future
+* Environment variables
+    * something with .env.example
+* Node not installed
+    * wtf, of course it won't run

@@ -1,2 +1,2 @@
-web: rails s -p 3000
-js: npm --prefix=assets run watch
+web: rails s -p 3000 --verbose
+js: yarn --prefix=assets run watch

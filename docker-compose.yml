@@ -2,7 +2,7 @@ services:
   db:
     image: mysql:5.7
     environment:
-      MYSQL_ROOT_PASSWORD: ''
+      MYSQL_ROOT_PASSWORD: mugwort
       MYSQL_DATABASE: freehub_development
     ports:
       - "3306:3306"
@@ -24,10 +24,9 @@ services:
     environment:
       DATABASE_HOST: db
       DATABASE_USERNAME: root
-      DATABASE_PASSWORD: ''
+      DATABASE_PASSWORD: horcrux
       RAILS_ENV: development
       SSH_AUTH_SOCK: /ssh-agent
-      MYSQL_ALLOW_EMPTY_PASSWORD: true
     ports:
       - "3000:3000"
     depends_on:

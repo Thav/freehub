@@ -81,7 +81,7 @@ class DatabaseTasks
           adapter: 'mysql2',
           database: @database_name,
           username: ENV['DB_USER'] || 'root',
-          password: ENV['DB_PASS'] ||'',
+          password: ENV['DB_PASS'] || 'horcrux',
           host: 'localhost',
         }
       }
