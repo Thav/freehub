@@ -3,6 +3,16 @@
   "dockerComposeFile": ["../docker-compose.yml"],
   "service": "app",
   "workspaceFolder": "/workspace",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    }
+  },
+  "initializeCommand": [
+    "bash",
+    "-c",
+    "docker compose down --remove-orphans && docker network prune -f"
+  ],
   "customizations": {
     "vscode": {
       "extensions": [
@@ -21,9 +31,8 @@
   "mounts": [
     "source=${localEnv:SSH_AUTH_SOCK},target=/ssh-agent,type=bind,consistency=cached"
   ],
-  "initializeCommand": "docker network prune -f",
   "updateContentCommand": "bundle install",
-  "postCreateCommand": "yarn install && rbenv install -s && rbenv rehash && rails db:create && rails db:migrate && npm --prefix assets install",
+  "postCreateCommand": "yarn install && rbenv install -s && rbenv rehash && rails db:create && rails db:migrate && yarn --cwd ./assets install",
   "forwardPorts": [3000, 3306],
   "portsAttributes": {
     "3000": {

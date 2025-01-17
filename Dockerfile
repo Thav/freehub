@@ -1,10 +1,5 @@
 FROM mcr.microsoft.com/vscode/devcontainers/ruby:0-3.2
 
-# Accept the Node.js version argument
-ARG NODE_VERSION=20
-ENV NODE_VERSION=${NODE_VERSION}
-# This tells the base image's scripts to install Node.js
-
 # Install Bundler
 RUN gem install bundler
 

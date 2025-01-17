@@ -8,10 +8,10 @@ services:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 20s
-      retries: 10
+  # healthcheck:
+  #   test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p", "mugwort"]
+  #   timeout: 20s
+  #   retries: 10
     networks:
       - freehub_network
 
@@ -19,8 +19,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        NODE_VERSION: 20
     environment:
       DATABASE_HOST: db
       DATABASE_USERNAME: root
@@ -29,9 +27,9 @@ services:
       SSH_AUTH_SOCK: /ssh-agent
     ports:
       - "3000:3000"
-    depends_on:
-      db:
-        condition: service_healthy
+    # depends_on:
+    #   db:
+    #     condition: service_healthy
     volumes:
       - .:/workspace
     command: sleep infinity  # This will keep the container running
