@@ -11,7 +11,7 @@
 # It's strongly recommended that you check this file into your version control system.
 
 ActiveRecord::Schema[7.0].define(version: 2023_01_08_181157) do
-  create_table "notes", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "notes", charset: "utf8mb4", force: :cascade do |t|
     t.text "body"
     t.bigint "created_by_user_id", null: false
     t.bigint "updated_by_user_id", null: false
@@ -21,7 +21,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_01_08_181157) do
     t.index ["updated_by_user_id"], name: "index_notes_on_updated_by_user_id"
   end
 
-  create_table "organizations", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "organizations", charset: "utf8mb4", force: :cascade do |t|
     t.string "name", null: false
     t.string "slug", null: false
     t.string "location", null: false
@@ -29,17 +29,16 @@ ActiveRecord::Schema[7.0].define(version: 2023_01_08_181157) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["slug"], name: "index_organizations_on_slug", unique: true
-    t.check_constraint "`slug` regexp '^[a-z0-9_-]{3,5}$'", name: "valid_slug"
   end
 
-  create_table "people", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "people", charset: "utf8mb4", force: :cascade do |t|
     t.text "first_name", null: false
     t.text "last_name", null: false
     t.integer "birth_year"
     t.text "country", null: false
-    t.text "address", size: :long, default: "{}", null: false, collation: "utf8mb4_bin"
-    t.text "email"
-    t.text "phone"
+    t.json "address", null: false
+    t.string "email"
+    t.string "phone"
     t.boolean "email_opt_out", default: false, null: false
     t.boolean "staff", default: false, null: false
     t.bigint "organization_id", null: false
@@ -48,23 +47,20 @@ ActiveRecord::Schema[7.0].define(version: 2023_01_08_181157) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["created_by_user_id"], name: "index_people_on_created_by_user_id"
-    t.index ["email", "organization_id"], name: "index_people_on_email_and_organization_id", unique: true, using: :hash
+    t.index ["email", "organization_id"], name: "index_people_on_email_and_organization_id", unique: true
     t.index ["organization_id"], name: "index_people_on_organization_id"
-    t.index ["phone", "organization_id"], name: "index_people_on_phone_and_organization_id", unique: true, using: :hash
+    t.index ["phone", "organization_id"], name: "index_people_on_phone_and_organization_id", unique: true
     t.index ["updated_by_user_id"], name: "index_people_on_updated_by_user_id"
-    t.check_constraint "`birth_year` >= 1920", name: "valid_birth_year"
-    t.check_constraint "`country` regexp '^[A-Z]{2}$'", name: "valid_country"
-    t.check_constraint "json_valid(`address`)", name: "address"
   end
 
-  create_table "people_notes", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "people_notes", charset: "utf8mb4", force: :cascade do |t|
     t.bigint "person_id", null: false
     t.bigint "note_id", null: false
     t.index ["note_id"], name: "index_people_notes_on_note_id"
     t.index ["person_id"], name: "index_people_notes_on_person_id"
   end
 
-  create_table "services", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "services", charset: "utf8mb4", force: :cascade do |t|
     t.datetime "start_date"
     t.datetime "end_date"
     t.boolean "paid", default: false, null: false
@@ -84,10 +80,10 @@ ActiveRecord::Schema[7.0].define(version: 2023_01_08_181157) do
     t.index ["updated_by_user_id"], name: "index_services_on_updated_by_user_id"
   end
 
-  create_table "user_organization_roles", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "user_organization_roles", charset: "utf8mb4", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "organization_id", null: false
-    t.text "role", default: "member", null: false
+    t.text "role", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["organization_id"], name: "index_user_organization_roles_on_organization_id"
@@ -95,7 +91,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_01_08_181157) do
     t.index ["user_id"], name: "index_user_organization_roles_on_user_id"
   end
 
-  create_table "users", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "users", charset: "utf8mb4", force: :cascade do |t|
     t.text "first_name", null: false
     t.text "last_name", null: false
     t.boolean "admin", default: false
@@ -120,7 +116,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_01_08_181157) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
-  create_table "visits", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "visits", charset: "utf8mb4", force: :cascade do |t|
     t.boolean "volunteer", default: false, null: false
     t.datetime "arrived_at"
     t.datetime "start_at"

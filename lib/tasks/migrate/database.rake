@@ -2,6 +2,15 @@ class DatabaseTasks
   include Rake::DSL
   attr_reader :database_name
 
+  def database_exists?
+    ActiveRecord::Base.connection
+  rescue ActiveRecord::NoDatabaseError
+    false
+  else
+    true
+  end
+  
+
   def initialize
     namespace :migrate do
       desc 'Migrate database from the old structure to new structure'
@@ -43,18 +52,29 @@ class DatabaseTasks
     file_path = ENV['DB_DUMP']
     raise "DB_DUMP environment variable must be set" unless file_path
     raise "Sql dump '#{file_path}' does not exist, define it with DB_DUMP" unless File.exist?(file_path)
+    
+    # Verify we can connect to MySQL before proceeding
+    verify_mysql_connection!(database_name)
 
-    # Check if the mysql database exists
-    # If it doesn't, create it
-    # Load the sql dump into the database
-    # Connect to the database
+    # Use ActiveRecord to manage database operations
+    establish_old_db_connection(database_name)
 
-    puts "Dropping database '#{database_name}'"
-    `mysql -u root -e "DROP DATABASE IF EXISTS #{database_name}"`
+    if database_exists?
+      puts "Dropping database '#{database_name}'"
+      ActiveRecord::Base.connection.drop_database(database_name)
+    else
+      puts "Database '#{database_name}' does not exist, skipping drop"
+    end
+    
     puts "Creating database '#{database_name}'"
-    `mysql -u root -e "CREATE DATABASE IF NOT EXISTS #{database_name}"`
+    ActiveRecord::Base.connection.create_database(database_name)
+
+    
     puts "Loading database dump '#{file_path}' into database '#{database_name}'"
-    `mysql -u root #{database_name} < #{file_path}`
+    # Read the SQL file and execute it through ActiveRecord
+    sql_content = File.read(file_path)
+    establish_old_db_connection(database_name)
+    ActiveRecord::Base.connection.execute(sql_content)
 
     @database_name = database_name
   end
@@ -64,13 +84,51 @@ class DatabaseTasks
     database_name = ENV['DB_NAME']
     raise "DB_NAME environment variable must be set" unless database_name
 
-    # Check if the mysql database exists
-    # If it doesn't, raise an error
-
-    results = `mysql -u root -e "SHOW DATABASES LIKE '#{database_name}'"`
-    raise "Database '#{database_name}' does not exist, please make sure DB_NAME is set to an existing database" unless results.include?(database_name)
+    # Verify we can connect to MySQL before proceeding
+    verify_mysql_connection!
+    
+    # Check if database exists using ActiveRecord
+    existing_databases = ActiveRecord::Base.connection.execute("SHOW DATABASES LIKE '#{database_name}'")
+    raise "Database '#{database_name}' does not exist, please make sure DB_NAME is set to an existing database" if existing_databases.count.zero?
 
     @database_name = database_name
+  end
+
+  private
+
+  def verify_mysql_connection!(database_name)
+    begin
+      # Try to connect without specifying a database
+      establish_old_db_connection
+      puts "Successfully connected to MySQL server"
+      
+      # If we have a database name, just log whether it exists
+      if database_name
+        databases = ActiveRecord::Base.connection.execute("SHOW DATABASES").to_a.flatten
+        if databases.include?(database_name)
+          puts "Database '#{database_name}' already exists (will be dropped and recreated)"
+        else
+          puts "Database '#{database_name}' does not exist yet (will be created)"
+        end
+      end
+    rescue ActiveRecord::ConnectionNotEstablished => e
+      raise "Could not connect to MySQL server. Please check your connection settings: #{e.message}"
+    rescue Mysql2::Error::ConnectionError => e
+      raise "Could not connect to MySQL server. Please verify the server is running and accessible: #{e.message}"
+    end
+  end
+
+  def establish_old_db_connection(db_name = nil)
+    config = {
+      adapter: 'mysql2',
+      host: ENV['DATABASE_HOST'] || 'db',     # Match Docker Compose service name
+      username: ENV['DATABASE_USERNAME'] || 'root',
+      password: ENV['DATABASE_PASSWORD'] || 'horcrux',
+      port: ENV['DATABASE_PORT'] || 3306
+    }
+    config[:database] = db_name if db_name
+
+    ActiveRecord::Base.establish_connection(config)
   end
 
   def initialize_database_connection()
@@ -80,9 +138,10 @@ class DatabaseTasks
         old: {
           adapter: 'mysql2',
           database: @database_name,
-          username: ENV['DB_USER'] || 'root',
-          password: ENV['DB_PASS'] || 'horcrux',
-          host: 'localhost',
+          username: ENV['DATABASE_USERNAME'] || 'root',
+          password: ENV['DATABASE_PASSWORD'] || 'horcrux',
+          host: ENV['DATABASE_HOST'] || 'db',
+          port: ENV['DATABASE_PORT'] || 3306
         }
       }
     }
@@ -90,9 +149,10 @@ class DatabaseTasks
     ActiveRecord::Base.configurations = conf
     ActiveRecord::Base.establish_connection(Rails.env.to_sym)
 
-    require 'old_freehub_data' # Load in the old database models, sort of hacky
+    require 'old_freehub_data' # Load in the old database models
   end
 
+DatabaseTasks.new
   def migrate_organizations()
     Organization.transaction do
       puts "Migrating #{OldFreehubData::Organization.count} organizations..."

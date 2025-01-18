@@ -34,7 +34,6 @@
   ],
   "updateContentCommand": "bundle install",
   "postCreateCommand": "yarn install && rbenv install -s && rbenv rehash && rails db:create && rails db:migrate && yarn --cwd ./assets install",
-  "forwardPorts": [3000, 3306],
   "portsAttributes": {
     "3000": {
       "label": "Rails Server",
