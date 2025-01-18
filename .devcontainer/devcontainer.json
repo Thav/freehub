@@ -20,7 +20,8 @@
         "castwide.solargraph",
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
-        "oderwat.indent-rainbow"
+        "oderwat.indent-rainbow",
+        "ms-azuretools.vscode-docker"
       ]
     }
   },

@@ -14,4 +14,4 @@ The easiest way to start developing Freehub is to use the dev container. This se
 * Environment variables
     * something with .env.example
 * Node not installed
-    * wtf, of course it won't run
+    * it was dev containers features
