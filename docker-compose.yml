@@ -1,6 +1,6 @@
 services:
   db:
-    image: mysql:5.7
+    image: mariadb:10.4
     environment:
       MYSQL_ROOT_PASSWORD: horcrux
       MYSQL_DATABASE: freehub_development
@@ -8,10 +8,6 @@ services:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "--password", "horcrux"]
-      timeout: 20s
-      retries: 10
     networks:
       - freehub_network
 
