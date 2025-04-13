@@ -16,4 +16,6 @@ The easiest way to start developing Freehub is to use the dev container. This se
 * Node not installed
     * it was dev containers features
 * Migration script
-    * why be messing with freehub_old
+    * 2025-04-12 - Added lib/tasks/db_import.rake which imports SQL dumps into development
+        * Run with `rake db:import_dump[/workspace/db/freehub_for_all_development_Clean2_reduced.sql]`
+        * The schema is way different from the rewrite, don't have a path to migrate yet
