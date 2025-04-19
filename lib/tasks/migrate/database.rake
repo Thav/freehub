@@ -1,16 +1,7 @@
 class DatabaseTasks
   include Rake::DSL
   attr_reader :database_name
-
-  def database_exists?
-    ActiveRecord::Base.connection
-  rescue ActiveRecord::NoDatabaseError
-    false
-  else
-    true
-  end
   
-
   def initialize
     namespace :migrate do
       desc 'Migrate database from the old structure to new structure'
@@ -51,15 +42,17 @@ class DatabaseTasks
     database_name = ENV['DB_NAME'] || 'freehub_old'
     file_path = ENV['DB_DUMP']
     raise "DB_DUMP environment variable must be set" unless file_path
-    raise "Sql dump '#{file_path}' does not exist, define it with DB_DUMP" unless File.exist?(file_path)
+    raise "SQL dump '#{file_path}' does not exist, define it with DB_DUMP" unless File.exist?(file_path)
     
     # Verify we can connect to MySQL before proceeding
-    verify_mysql_connection!(database_name)
+    # ActiveRecord is connected to the SQL server, but not
+    # the database after this call
+    database_exists = verify_mysql_connection!(database_name)
 
-    # Use ActiveRecord to manage database operations
-    establish_old_db_connection(database_name)
+    # # Use ActiveRecord to manage database operations
+    # establish_old_db_connection(database_name)
 
-    if database_exists?
+    if database_exists
       puts "Dropping database '#{database_name}'"
       ActiveRecord::Base.connection.drop_database(database_name)
     else
@@ -71,11 +64,39 @@ class DatabaseTasks
 
     
     puts "Loading database dump '#{file_path}' into database '#{database_name}'"
-    # Read the SQL file and execute it through ActiveRecord
-    sql_content = File.read(file_path)
-    establish_old_db_connection(database_name)
-    ActiveRecord::Base.connection.execute(sql_content)
+    # Read the SQL file and execute it through Mysql2
+    # since ActiveRecord failed to read the SQL dump
 
+    # Get ActiveRecord connection config
+    config = ActiveRecord::Base.configurations.configs_for(env_name: 'development').first.configuration_hash
+    db_host = config[:host]
+    db_user = config[:username]
+    db_pass = config[:password]
+    db_name = config[:database]
+
+    # Connect to the new DB
+    client = Mysql2::Client.new(
+      host: db_host,
+      username: db_user,
+      password: db_pass,
+      database: database_name,
+      flags: Mysql2::Client::MULTI_STATEMENTS
+    )
+
+    puts "Importing SQL from #{file_path}..."
+    sql = File.read(file_path)
+    begin
+      client.query(sql)
+    rescue Mysql2::Error => e
+      puts "❌ Import failed: #{e.message}"
+      exit 1
+    end
+
+    # Connect ActiveRecord to the old database for the
+    # rest of the migration
+    establish_old_db_connection(database_name)
+
+    puts "✅ Database import complete!"
     @database_name = database_name
   end
 
@@ -107,8 +128,10 @@ class DatabaseTasks
         databases = ActiveRecord::Base.connection.execute("SHOW DATABASES").to_a.flatten
         if databases.include?(database_name)
           puts "Database '#{database_name}' already exists (will be dropped and recreated)"
+          return true
         else
           puts "Database '#{database_name}' does not exist yet (will be created)"
+          return false
         end
       end
     rescue ActiveRecord::ConnectionNotEstablished => e
