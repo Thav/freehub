@@ -15,9 +15,7 @@ services:
       - freehub_network
 
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/rails/devcontainer/images/ruby:3.2.2
     environment:
       DATABASE_HOST: db
       DATABASE_USERNAME: freehub

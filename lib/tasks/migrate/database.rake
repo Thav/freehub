@@ -44,14 +44,11 @@ class DatabaseTasks
     file_path = ENV['DB_DUMP']
     raise "DB_DUMP environment variable must be set" unless file_path
     raise "SQL dump '#{file_path}' does not exist, define it with DB_DUMP" unless File.exist?(file_path)
-    
+    puts "🚛 Starting to intialize from dump"
     # Verify we can connect to MySQL before proceeding
     # ActiveRecord is connected to the SQL server, but not
     # the database after this call
     database_exists = verify_mysql_connection!(database_name)
-
-    # # Use ActiveRecord to manage database operations
-    # establish_old_db_connection(database_name)
 
     if database_exists
       puts "Dropping database '#{database_name}'"
@@ -63,27 +60,15 @@ class DatabaseTasks
     puts "Creating database '#{database_name}'"
     ActiveRecord::Base.connection.create_database(database_name)
 
-    
     puts "Loading database dump '#{file_path}' into database '#{database_name}'"
-    # Read the SQL file and execute it through Mysql2
-    # since ActiveRecord failed to read the SQL dump
+    # Read the SQL file and execute it through mysql client
+    # since ActiveRecord and mysql2 failed to parse the SQL dump
 
     # Get ActiveRecord connection config
     config = ActiveRecord::Base.configurations.configs_for(env_name: 'development').first.configuration_hash
     db_host = config[:host]
     db_user = config[:username]
     db_pass = config[:password]
-    db_name = config[:database]
-
-    # Connect to the new DB
-    client = Mysql2::Client.new(
-      host: db_host,
-      username: db_user,
-      password: db_pass,
-      database: database_name,
-      flags: Mysql2::Client::MULTI_STATEMENTS
-    )
-
 
     puts "Importing SQL from #{file_path}..."
 
@@ -185,7 +170,6 @@ class DatabaseTasks
     require 'old_freehub_data' # Load in the old database models
   end
 
-DatabaseTasks.new
   def migrate_organizations()
     Organization.transaction do
       puts "Migrating #{OldFreehubData::Organization.count} organizations..."
@@ -229,7 +213,7 @@ DatabaseTasks.new
         org = Organization.find(old_role.authorizable_id)
         old_role.users.each do |old_user|
           user = User.find_by_email(old_user.email)
-          role = UserOrganizationRole.create!(
+          UserOrganizationRole.create!(
             user: user,
             organization: org,
             role: old_role.name
