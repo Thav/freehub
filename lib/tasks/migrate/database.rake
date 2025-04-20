@@ -83,14 +83,23 @@ class DatabaseTasks
       flags: Mysql2::Client::MULTI_STATEMENTS
     )
 
+
     puts "Importing SQL from #{file_path}..."
-    sql = File.read(file_path)
-    begin
-      client.query(sql)
-    rescue Mysql2::Error => e
-      puts "❌ Import failed: #{e.message}"
-      exit 1
-    end
+
+    # Using mysql command here instead of mariadb
+    # because I could only find a convenient `mysql`
+    # devcontainer feature
+    mysql_cmd = [
+      "mysql",
+      "-u", db_user,
+      "-p#{db_pass}",
+      "-h", db_host,
+      "freehub_old",
+      "<",
+      file_path
+    ].join(" ")
+  
+    system(mysql_cmd) || abort("❌ SQL import failed.")
 
     # Connect ActiveRecord to the old database for the
     # rest of the migration
