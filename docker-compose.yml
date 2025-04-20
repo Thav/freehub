@@ -2,8 +2,10 @@ services:
   db:
     image: mariadb:10.4
     environment:
-      MYSQL_ROOT_PASSWORD: horcrux
+      MYSQL_ROOT_PASSWORD: muggle
       MYSQL_DATABASE: freehub_development
+      MYSQL_USER: freehub
+      MYSQL_PASSWORD: horcrux
     ports:
       - "3306:3306"
     volumes:
@@ -17,7 +19,7 @@ services:
       dockerfile: Dockerfile
     environment:
       DATABASE_HOST: db
-      DATABASE_USERNAME: root
+      DATABASE_USERNAME: freehub
       DATABASE_PASSWORD: horcrux
       RAILS_ENV: development
       SSH_AUTH_SOCK: /ssh-agent
