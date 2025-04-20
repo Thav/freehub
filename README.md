@@ -17,7 +17,7 @@ The easiest way to start developing Freehub is to use the dev container. This se
     * it was dev containers features
 * Migration script
     * 2025-04-12 - Added lib/tasks/db_import.rake which imports SQL dumps into development
-        * Run with `rake db:import_dump[/workspace/db/freehub_for_all_development_Clean2_reduced.sql]`
-        * The schema is way different from the rewrite, don't have a path to migrate yet
     * 2025-04-19 - Mysql2 gem import fails because SQL dump breaks statements across multiple lines, going to use `mysql` call to CLI for import
     * 2025-04-20 - Would like to remove `root` user access to database before I continue
+        * Latest migration from dump file should be like `rake migrate:database:from_dump[/workspace/db/freehub_for_all_development_Clean2.sql]`
+        * Something about `LoadError: cannot load such file -- /usr/local/rvm/gems/default/gems/mail-2.8.0/lib/mail/indifferent_hash.rb (LoadError)` in the users migration

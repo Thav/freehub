@@ -33,8 +33,13 @@
   "mounts": [
     "source=${localEnv:SSH_AUTH_SOCK},target=/ssh-agent,type=bind,consistency=cached"
   ],
-  "updateContentCommand": "bundle install",
-  "postCreateCommand": "yarn install && rbenv install -s && rbenv rehash && rails db:create && rails db:migrate && yarn --cwd ./assets install",
+  "postCreateCommand": [
+    "bundle install",
+    "yarn install",
+    "rails db:create",
+    "rails db:migrate",
+    "yarn --cwd ./assets install"
+  ],
   "portsAttributes": {
     "3000": {
       "label": "Rails Server",

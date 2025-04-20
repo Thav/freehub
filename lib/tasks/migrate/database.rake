@@ -15,7 +15,8 @@ class DatabaseTasks
           puts 'Migration complete'
         end
         desc 'Use a mysql dump file to migrate the data'
-        task from_dump: :environment do
+        task :from_dump, [:dump_file] => :environment do |t, args|
+          ENV['DB_DUMP'] = args[:dump_file] if args[:dump_file]
           # Reset the database
           Rake::Task['db:reset'].invoke
           initialize_from_dump()
@@ -153,10 +154,10 @@ class DatabaseTasks
   def establish_old_db_connection(db_name = nil)
     config = {
       adapter: 'mysql2',
-      host: ENV['DATABASE_HOST'] || 'db',     # Match Docker Compose service name
-      username: ENV['DATABASE_USERNAME'] || 'root',
-      password: ENV['DATABASE_PASSWORD'] || 'horcrux',
-      port: ENV['DATABASE_PORT'] || 3306
+      host: ENV['DATABASE_HOST'],
+      username: ENV['DATABASE_USERNAME'],
+      password: ENV['DATABASE_PASSWORD'],
+      port: ENV['DATABASE_PORT']
     }
     config[:database] = db_name if db_name
 

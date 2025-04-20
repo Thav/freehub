@@ -10,13 +10,13 @@ RUN gem install rails
 WORKDIR /workspace
 
 # Copy Gemfile and Gemfile.lock
-COPY Gemfile Gemfile.lock ./
+# COPY Gemfile Gemfile.lock ./
 
 # Install gems
-RUN bundle install --with development
+# RUN bundle install --with development
 
 # Copy the rest of the application code
-COPY . .
+# COPY . .
 
 # Expose port 3000
 EXPOSE 3000
