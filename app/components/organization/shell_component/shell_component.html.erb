@@ -1,0 +1,21 @@
+<div class="container mx-auto pt-10 font-mono">
+  <div class="flex justify-end pb-2">
+    <p class="text-sm text-stone-600">
+      Hello, <b><%=current_user.full_name%></b> | <%= link_to "Log out", destroy_user_session_path, method: :delete, class: "text-stone-800 hover:underline hover:text-cyan-600" %>
+    </p>
+  </div>
+  <div class="drop-shadow-md">
+    <div class="bg-stone-500 flex justify-between items-center px-4">
+      <%= link_to(organization_path(@org)) do %>
+        <span class="text-white text-2xl font-semibold"><%=@org.name%></span>
+      <%end%>
+      <div class="pt-4">
+        <%= render Organization::Shell::Nav::LinksComponent.new(links: @links) %>
+      </div>
+    </div>
+    <main class="bg-white p-2">
+      <%= content %>
+    </main>
+  </div>
+  <p class="pt-4 pl-4 text-stone-600 text-xs"><i>Times shown are <%=@org.timezone%> timezone.</i></p>
+</div>

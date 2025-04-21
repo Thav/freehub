@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= @org.name %> | <%= @page_title %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= vite_javascript_tag 'index' %>
+  </head>
+
+  <body class="bg-stone-50">
+    <%= render Organization::ShellComponent.new(org: @org, title: @page_title, links: organization_navigation(@org)) do %>
+      <%= yield %>
+    <% end %>
+  </body>
+</html>

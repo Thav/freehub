@@ -1,0 +1,7 @@
+<%= render Organizations::Reports::TableComponent.new(columns: person_columns, collection: @people) do |component| %>
+  <% component.with_filter_text(label: 'Matching name', query: 'name', help_text: 'Match 3 or more letters in a person\'s first and last name.') %>
+  <% component.with_filter_choice(label: 'Type', query: 'service_type', options: [['All', 'all'], ['Staff', 'staff'], ['Patrons', 'patrons']]) %>
+  <% component.with_filter_date_range(label: 'Date Range', start_query: 'created_at_gte', end_query: 'created_at_lte', help_text: 'Leave one or both blank to search without date constraints.') %>
+  <% component.with_pagination(pagination_attributes: @pagination, table_params: params.permit(:name, :service_type, :created_at_gte, :created_at_lte)) %>
+  <% component.with_export(path: export_organization_reports_people_path(@org, **params.permit(:name, :service_type, :created_at_gte, :create_at_lte), format: :csv)) %>
+<% end %>

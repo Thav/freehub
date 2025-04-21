@@ -1,0 +1,45 @@
+{
+  "name": "Freehub Dev Container Environment",
+  "dockerComposeFile": ["../docker-compose.yml"],
+  "service": "app",
+  "workspaceFolder": "/workspace",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    },
+    "ghcr.io/rails/devcontainer/features/mysql-client": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "shopify.ruby-lsp",
+        "castwide.solargraph",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "oderwat.indent-rainbow",
+        "ms-azuretools.vscode-docker"
+      ]
+    }
+  },
+  "remoteEnv": {
+    "SSH_AUTH_SOCK": "/ssh-agent",
+    "RAILS_ENV": "development"
+  },
+  "mounts": [
+    "source=${localEnv:SSH_AUTH_SOCK},target=/ssh-agent,type=bind,consistency=cached"
+  ],
+  // "postCreateCommand": [
+  //   "bundle install",
+  //   "yarn install",
+  //   "rails db:create",
+  //   "rails db:migrate",
+  //   "yarn --cwd ./assets install"
+  // ],
+  "portsAttributes": {
+    "3000": {
+      "label": "Rails Server",
+      "onAutoForward": "notify"
+    }
+  },
+  "remoteUser": "vscode"
+}

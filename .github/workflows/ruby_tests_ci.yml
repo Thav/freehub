@@ -1,0 +1,34 @@
+# This is a basic workflow to help you get started with Actions
+
+# use .ruby-version file instead of env
+name: Github actions for DBC Freehub testing
+
+# Controls when the action will run.
+on:
+  # Triggers the workflow on a push/pull to the master branch
+  push:
+    branches: [ master, rails-latest ]
+  pull_request:
+    branches: [ master, rails-latest ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "run_tests"
+  run_tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: "Set up Ruby and dependencies"
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - name: "Load MySQL server"
+        run: echo Need to add MySQL server install commands
+
+      - name: "Run tests"
+        run: |
+          echo Uncomment below after MySQL server is installed
+          # bundle exec rake

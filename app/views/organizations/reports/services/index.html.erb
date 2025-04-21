@@ -1,0 +1,6 @@
+<%= render Organizations::Reports::TableComponent.new(columns: service_columns, collection: @services) do |component| %>
+  <% component.with_filter_choice(label: 'Type', query: 'service_type', options: [['All', 'all'], ['Staff', 'staff'], ['Patrons', 'patrons']]) %>
+  <% component.with_filter_date_range(label: 'Date Range', start_query: 'end_date', end_query: 'start_date', help_text: 'Leave one or both blank to search without date constraints.') %>
+  <% component.with_pagination(pagination_attributes: @pagination, table_params: params.permit(:service_type, :start_date, :end_date)) %>
+  <% component.with_export(path: export_organization_reports_services_path(@org, **params.permit(:service_type, :start_date, :end_date), format: :csv)) %>
+<% end %>

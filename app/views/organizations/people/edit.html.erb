@@ -1,0 +1,10 @@
+<h1>Editing person</h1>
+
+<%= render "form", person: @person %>
+
+<br>
+
+<div>
+  <%= link_to "Show this person", organization_person_path(@org, @person) %> |
+  <%= link_to "Back to people", organization_people_path(@org) %>
+</div>

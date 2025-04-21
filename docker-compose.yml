@@ -1,0 +1,41 @@
+services:
+  db:
+    image: mariadb:10.4
+    environment:
+      MYSQL_ROOT_PASSWORD: muggle
+      MYSQL_DATABASE: freehub_development
+      MYSQL_USER: freehub
+      MYSQL_PASSWORD: horcrux
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./db/init:/docker-entrypoint-initdb.d
+    networks:
+      - freehub_network
+
+  app:
+    image: ghcr.io/rails/devcontainer/images/ruby:3.2.2
+    environment:
+      DATABASE_HOST: db
+      DATABASE_USERNAME: freehub
+      DATABASE_PASSWORD: horcrux
+      RAILS_ENV: development
+      SSH_AUTH_SOCK: /ssh-agent
+    ports:
+      - "3000:3000"
+    # depends_on:
+    #   db:
+    #     condition: service_healthy
+    volumes:
+      - .:/workspace
+    command: sleep infinity  # This will keep the container running
+    networks:
+      - freehub_network
+
+networks:
+  freehub_network:
+    name: freehub_network
+
+volumes:
+  db_data:

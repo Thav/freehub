@@ -1,0 +1,5 @@
+<%= render Organizations::Reports::TableComponent.new(columns: visit_columns, collection: @visits) do |component| %>
+  <% component.with_filter_date_range(label: 'Date Range', start_query: 'start_date', end_query: 'end_date', help_text: 'Leave one or both blank to search without date constraints.') %>
+  <% component.with_pagination(pagination_attributes: @pagination, table_params: params.permit(:start_date, :end_date)) %>
+  <% component.with_export(path: export_organization_reports_visits_path(@org, **params.permit(:start_date, :end_date), format: :csv)) %>
+<% end %>

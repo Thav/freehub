@@ -1,68 +1,31 @@
-ActionController::Routing::Routes.draw do |map|
+Rails.application.routes.draw do
+  devise_for :users
 
-  map.resources :organizations
-
-  # Authentication
-  map.resources :users
-  map.resource :session
-  map.activate '/activate/:activation_code',  :controller => 'users', :action => 'activate'
-  map.forgot   '/forgot',            :controller => 'users',     :action => 'forgot'
-  map.reset    '/reset/:reset_code', :controller => 'users',     :action => 'reset',
-                                     :requirements => { :reset_code => /\w+/ }
-
-  # Organization mappings go last so they don't take precedence
-  map.resources :tags, :path_prefix => '/:organization_key', :only => :show
-  map.resources :people, :path_prefix => '/:organization_key', :collection => { :auto_complete_for_person_full_name => :get }
-  map.resources :visits, :path_prefix => '/:organization_key/people/:person_id', :member => {:sign_in => :put, :sign_out => :put}
-  map.resources :services, :path_prefix => '/:organization_key/people/:person_id'
-  map.resources :notes, :path_prefix => '/:organization_key/people/:person_id'
-  map.resources :taggings, :path_prefix => '/:organization_key/people/:person_id', :only => [:index, :create, :destroy]
-
-  map.day_visits ':organization_key/visits/:year/:month/:day',
-          :controller => 'visits', :action => 'day',
-          :requirements => {:year => /\d{4}/, :day => /\d{1,2}/, :month => /\d{1,2}/}
-
-  map.reports ':organization_key/reports', :controller => 'reports', :action => 'index'
-  map.report ':organization_key/reports/:action', :controller => 'reports'
-
-  map.with_options :controller => 'organizations' do |organization|
-    organization.connect ':organization_key', :action => 'update', :conditions => { :method => :put }
-    organization.connect ':organization_key', :action => 'destroy', :conditions => { :method => :delete }
-    organization.organization_key ':organization_key', :action => 'show'
-    organization.edit_organization_key ':organization_key/edit', :action => 'edit'
+  concern :exportable do
+    get :export, on: :collection
   end
 
-  # The priority is based upon order of creation: first created -> highest priority.
+  resources :organizations, except: %i[show destroy update edit]
+  # :organization_id/:controller routes
+  # org ids are slugs and must be 3-5 numerical, lowercase, underscore, or dash characters
+  resources :organizations, only: %i[show destroy update edit], path: '', id: /[a-z0-9_-]{3,5}/ do
+    scope module: :organizations, id: /\d+/ do
+      resources :visits
+      resources :people
+      get 'reports', to: 'reports#index'
+      namespace :reports do
+        resources :visits, concerns: :exportable, only: %i[index]
+        resources :people, concerns: :exportable, only: %i[index]
+        resources :services, concerns: :exportable, only: %i[index]
+        get 'summary', to: 'summary#index'
+      end
+    end
+  end
 
-  # Sample of regular route:
-  #   map.connect 'products/:id', :controller => 'catalog', :action => 'view'
-  # Keep in mind you can assign values other than :controller and :action
+  root to: 'home#index'
 
-  # Sample of named route:
-  #   map.purchase 'products/:id/purchase', :controller => 'catalog', :action => 'purchase'
-  # This route can be invoked with purchase_url(:id => product.id)
+  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
-  # Sample resource route (maps HTTP verbs to controller actions automatically):
-  #   map.resources :products
-
-  # Sample resource route with options:
-  #   map.resources :products, :member => { :short => :get, :toggle => :post }, :collection => { :sold => :get }
-
-  # Sample resource route with sub-resources:
-  #   map.resources :products, :has_many => [ :comments, :sales ], :has_one => :seller
-
-  # Sample resource route within a namespace:
-  #   map.namespace :admin do |admin|
-  #     # Directs /admin/products/* to Admin::ProductsController (app/controllers/admin/products_controller.rb)
-  #     admin.resources :products
-  #   end
-
-  # You can have the root of your site routed with map.root -- just remember to delete public/index.html.
-  map.root :controller => "organizations"
-
-  # See how all your routes lay out with "rake routes"
-
-  # Install the default routes as the lowest priority.
-  map.connect ':controller/:action/:id'
-  map.connect ':controller/:action/:id.:format'
+  # Defines the root path route ("/")
+  # root "articles#index"
 end

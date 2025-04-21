@@ -1,0 +1,8 @@
+<div class="flex flex-col gap-2 text-stone-600">
+  <label class="block text-lg font-medium">Sign a Person In</label>
+  <div class="bg-cyan-50 border-cyan-500 border p-4">
+    <label class="block text-sm font-medium text-stone-700 pb-1">Name</label>
+    <person-check-in people-path="<%=organization_people_path(@org, format: :json)%>"></person-check-in>
+  </div>
+  <label class="text-xs">Start typing to find a person or <%=link_to('add a new person', new_organization_person_path(@org), class: 'text-cyan-600 hover:underline')%></label>
+</div>

@@ -1,0 +1,10 @@
+<nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+  <!-- Current: "z-10 bg-indigo-50 border-indigo-500 text-indigo-600", Default: "bg-white border-gray-300 text-gray-500 hover:bg-gray-50" -->
+  <% page_options.each do |page_option| %>
+    <% if page_option.present? %>
+      <%= link_to(page_option, @table_params.merge(page: page_option), class: page_option_class(page_option)) %>
+    <% else %>
+      <span class="relative inline-flex items-center border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700">...</span>
+    <% end %>
+  <% end %>
+</nav>

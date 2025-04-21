@@ -1,0 +1,5 @@
+@import "firacode";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

@@ -1,32 +1,13 @@
-# == Schema Information
-#
-# Table name: organizations
-#
-#  id                :integer(4)      not null, primary key
-#  name              :string(255)
-#  key               :string(255)
-#  timezone          :string(255)
-#  created_at        :datetime
-#  updated_at        :datetime
-#  location          :string(255)
-#  display_start_end :boolean(1)
-#
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-sfbk:
-  name: San Francisco Bike Kitchen
-  key: sfbk
-  timezone: Pacific Time (US & Canada)
-  location: San Francisco, CA
+one:
+  name: MyString
+  slug: MyString
+  timezone: MyString
+  location: MyString
 
-scbc:
-  name: Santa Cruz Bike Church
-  key: scbc
-  timezone: Pacific Time (US & Canada)
-  location: Santa Cruz, CA
-
-cbi:
-  name: Campus Bike Initiative
-  key: cbi
-  timezone: Eastern Time (US & Canada)
-  location: Calgary, Alberta, Canada
-
+two:
+  name: MyString
+  slug: MyString
+  timezone: MyString
+  location: MyString

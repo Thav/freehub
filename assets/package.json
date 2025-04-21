@@ -1,0 +1,23 @@
+{
+  "name": "app",
+  "private": "true",
+  "dependencies": {
+    "@hotwired/stimulus": "^3.2.1",
+    "@hotwired/turbo-rails": "^7.2.4",
+    "@rails/ujs": "^7.0.4-2",
+    "firacode": "^6.2.0",
+    "lit": "^2.6.1"
+  },
+  "scripts": {
+    "watch": "vite -c vite.config.js --mode development build -w",
+    "build": "vite -c vite.config.js --mode production build"
+  },
+  "xscripts": {
+    "prewatch": "find ../public/assets -type f -regex '.*\\(css\\|js\\)' -delete"
+  },
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.5.3",
+    "tailwindcss": "^3.2.4",
+    "vite": "^4.0.4"
+  }
+}

@@ -1,156 +1,19 @@
-# == Schema Information
-#
-# Table name: people
-#
-#  id              :integer(4)      not null, primary key
-#  first_name      :string(255)
-#  last_name       :string(255)
-#  full_name       :string(255)
-#  street1         :string(255)
-#  street2         :string(255)
-#  city            :string(255)
-#  state           :string(255)
-#  postal_code     :string(255)
-#  country         :string(255)
-#  email           :string(255)
-#  email_opt_out   :boolean(1)      default(FALSE)
-#  phone           :string(255)
-#  staff           :boolean(1)      default(FALSE)
-#  created_at      :datetime
-#  updated_at      :datetime
-#  created_by_id   :integer(4)
-#  updated_by_id   :integer(4)
-#  organization_id :integer(4)
-#  yob             :integer(4)
-#
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-mary:
-  first_name: Mary
-  last_name: Member
-  full_name: Mary Member
-  street1: 123 Street St
-  street2:
-  city: San Francisco
-  state: CA
-  postal_code: 95105
-  country: USA
-  email: mary@example.com
-  phone: 415 123-1234
-  staff: false
-  yob: 1972
-  created_at: 2008-01-02
-  organization: sfbk
+one:
+  full_name: MyText
+  country: MyText
+  address: 
+  email: MyString
+  email_opt_out: false
+  phone: MyText
+  organization: one
 
-marty:
-  first_name: Marty
-  last_name: Mechanic
-  full_name: Marty Mechanic
-  street1:
-  street2:
-  city:
-  state:
-  postal_code:
-  country:
-  email: marty@example.com
-  phone:
-  staff: true
-  created_at: 2008-01-03
-  organization: sfbk
-
-erik:
-  first_name: Erik
-  last_name: Dölerud
-  full_name: Erik Dölerud
-  street1:
-  street2:
-  city:
-  state:
-  postal_code:
-  country:
-  email: erik@example.com
-  phone:
-  staff: true
-  created_at: 2008-01-04
-  organization: sfbk
-
-
-daryl:
-  first_name: Daryl
-  last_name: Dayuse
-  full_name: Daryl Dayuse
-  street1:
-  street2:
-  city:
-  state:
-  postal_code:
-  country:
-  email:
-  phone:
-  staff: false
-  created_at: 2008-01-04
-  organization: sfbk
-
-victor:
-  first_name: Victor
-  last_name: Volunteer
-  full_name: Victor Volunteer
-  street1:
-  street2:
-  city:
-  state:
-  postal_code:
-  country:
-  email:
-  phone:
-  staff: false
-  created_at: 2008-01-05
-  organization: sfbk
-
-carrie:
-  first_name: Carrie
-  last_name: Classlover
-  full_name: Carrie Classlover
-  street1:
-  street2:
-  city:
-  state:
-  postal_code:
-  country:
-  email:
-  phone:
-  staff: false
-  created_at: 2008-01-06
-  organization: sfbk
-
-mary_scbc:
-  first_name: Mary
-  last_name: SCBC
-  full_name: Mary SCBC
-  street1:
-  street2:
-  city:
-  state:
-  postal_code:
-  country:
-  email:
-  phone:
-  staff: false
-  created_at: 2008-01-07
-  organization: scbc
-
-penny:
-  first_name: Penny
-  last_name: CBI
-  full_name: Penny CBI
-  street1:
-  street2:
-  city:
-  state:
-  postal_code:
-  country:
-  email:
-  phone:
-  staff: false
-  created_at: 2008-03-07
-  organization: cbi
-
+two:
+  full_name: MyText
+  country: MyText
+  address: 
+  email: MyString
+  email_opt_out: false
+  phone: MyText
+  organization: two

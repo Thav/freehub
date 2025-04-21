@@ -1,0 +1,8 @@
+<div data-controller="table" data-table-query-value="<%=@query%>">
+  <label class="block"><%=@label%></label>
+  <select data-action="table#setChoice">
+    <% @options.each do |option| %>
+      <option value="<%=option[1]%>"><%=option[0]%></option>
+    <% end %>
+  </select>
+</div>

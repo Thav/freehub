@@ -1,0 +1,36 @@
+<% filters.each do |filter| %>
+  <%= filter %>
+<% end %>
+
+<turbo-frame id="table" data-turbo-action="advance">
+  <table class="table-auto divide-stone-300 divide-y text-sm">
+    <thead>
+      <tr>
+        <% @columns.each do |column| %>
+          <th><%= column[:name] %></th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody>
+      <% @collection.each do |item| %>
+        <tr>
+          <% @columns.each do |column| %>
+            <td class="p-2"><%= column[:value].call(item) %></td>
+          <% end %>
+        </tr>
+      <% end %>
+      <tr>
+        <td colspan="<%=@columns.length%>">
+          <div class="flex justify-between">
+            <div>
+              <%= pagination %>
+            </div>
+            <div>
+              <%= export %>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</turbo-frame>

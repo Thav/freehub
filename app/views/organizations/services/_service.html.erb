@@ -1,0 +1,39 @@
+<div id="<%= dom_id service %>">
+  <p>
+    <strong>Start date:</strong>
+    <%= service.start_date %>
+  </p>
+
+  <p>
+    <strong>End date:</strong>
+    <%= service.end_date %>
+  </p>
+
+  <p>
+    <strong>Paid:</strong>
+    <%= service.paid %>
+  </p>
+
+  <p>
+    <strong>Volunteered:</strong>
+    <%= service.volunteered %>
+  </p>
+
+  <p>
+    <strong>Service type:</strong>
+    <%= service.service_type %>
+  </p>
+
+  <p>
+    <strong>Note:</strong>
+    <% if service.note.present? %>
+      <%= service.note.body %>
+    <% end %>
+  </p>
+
+  <p>
+    <strong>Person:</strong>
+    <%= service.person_id %>
+  </p>
+
+</div>

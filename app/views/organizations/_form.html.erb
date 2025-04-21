@@ -1,0 +1,39 @@
+<%= form_with(model: organization) do |form| %>
+  <% if organization.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(organization.errors.count, "error") %> prohibited this organization from being saved:</h2>
+
+      <ul>
+        <% organization.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="flex flex-col gap-4 pb-4">
+    <div>
+      <%= form.label :name, 'Organization Name', class: 'block text-sm font-medium text-stone-700 pb-1' %>
+      <%= form.text_field :name, class: 'block w-full border-stone-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm' %>
+    </div>
+
+    <div>
+      <%= form.label :slug, 'Key', class: 'block text-sm font-medium text-stone-700 pb-1' %>
+      <%= form.text_field :slug, class: 'block w-full border-stone-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm' %>
+    </div>
+
+    <div>
+      <%= form.label :location, class: 'block text-sm font-medium text-stone-700 pb-1' %>
+      <%= form.text_field :location, class: 'block w-full border-stone-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm' %>
+    </div>
+
+    <div>
+      <%= form.label :timezone, class: 'block text-sm font-medium text-stone-700 pb-1' %>
+      <%= form.time_zone_select :timezone, nil, {}, { class: 'mt-1 block w-full border-stone-300 py-2 pl-3 pr-10 text-base focus:border-cyan-500 focus:outline-none focus:ring-cyan-500 sm:text-sm' } %>
+    </div>
+  </div>
+
+  <div>
+    <%= form.submit class: 'flex w-full justify-center border border-transparent bg-cyan-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2' %>
+  </div>
+<% end %>

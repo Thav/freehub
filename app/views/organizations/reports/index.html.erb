@@ -1,0 +1,9 @@
+<div class="p-4 text-stone-700">
+  <div class="pb-2 text-xl">Listing Reports</div>
+  <div class="grid grid-cols-2 gap-4 pl-2">
+    <%= render Organizations::Reports::LinkComponent.new(name: 'People', path: organization_reports_people_path(@org), description: 'lists all people, members and non members') %>
+    <%= render Organizations::Reports::LinkComponent.new(name: 'Visits', path: organization_reports_visits_path(@org), description: 'lists all visits in a date range') %>
+    <%= render Organizations::Reports::LinkComponent.new(name: 'Services', path: organization_reports_services_path(@org), description: 'lists services by type (Membership, Class, Digging Rights) in a date range') %>
+    <%= render Organizations::Reports::LinkComponent.new(name: 'Summary', path: organization_reports_summary_path(@org), description: 'provides a high level view of who is visiting the shop when', exportable: false) %>
+  </div>
+</div>

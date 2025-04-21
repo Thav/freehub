@@ -1,0 +1,10 @@
+<h1>Editing visit</h1>
+
+<%= render "form", visit: @visit %>
+
+<br>
+
+<div>
+  <%= link_to 'Show this visit', organization_visit_path(@org, @visit) %> |
+  <%= link_to 'Back to visits', organization_visits_path(@org) %>
+</div>
