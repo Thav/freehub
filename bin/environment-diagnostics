@@ -1,0 +1,43 @@
+#!/usr/bin/env sh
+set -u
+
+failed=0
+
+report_command() {
+  label="$1"
+  command_name="$2"
+  shift 2
+  if command -v "$command_name" >/dev/null 2>&1; then
+    version_output=$("$@" 2>&1 | head -n 1)
+    printf '%-18s %s\n' "$label" "$version_output"
+  else
+    printf '%-18s %s\n' "$label" 'not installed (optional unless noted)'
+  fi
+}
+
+printf '%-18s %s\n' 'repository' "$(git rev-parse --show-toplevel 2>/dev/null || printf 'not in a Git worktree')"
+report_command 'git' git git --version
+report_command 'node (tracker)' node node --version
+report_command 'ruby (optional)' ruby ruby --version
+report_command 'psql (optional)' psql psql --version
+report_command 'mysql (optional)' mysql mysql --version
+
+if ! command -v docker >/dev/null 2>&1; then
+  printf '%-18s %s\n' 'docker (required)' 'not installed'
+  failed=1
+elif docker info >/dev/null 2>&1; then
+  printf '%-18s %s\n' 'docker daemon' 'available'
+else
+  printf '%-18s %s\n' 'docker daemon' 'unavailable'
+  docker info 2>&1 | head -n 3
+  failed=1
+fi
+
+if docker compose version >/dev/null 2>&1; then
+  printf '%-18s %s\n' 'docker compose' "$(docker compose version 2>&1)"
+else
+  printf '%-18s %s\n' 'docker compose' 'unavailable'
+  failed=1
+fi
+
+exit "$failed"

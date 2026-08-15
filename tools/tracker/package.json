@@ -1,0 +1,1 @@
+{"name":"freehub-modernization-tracker","private":true,"type":"module","scripts":{"test":"node cli.test.mjs","validate":"node cli.mjs validate"},"engines":{"node":">=20"}}

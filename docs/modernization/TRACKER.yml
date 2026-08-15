@@ -1,0 +1,311 @@
+{
+  "version": 1,
+  "active_ticket": null,
+  "tickets": [
+    {
+      "id": "FH-001",
+      "title": "Bootstrap the persistent sbx development sandbox",
+      "status": "blocked",
+      "path": "docs/modernization/tickets/FH-001-sbx-bootstrap.md",
+      "depends_on": [],
+      "claimed_at": "2026-08-15T19:42:36.111Z",
+      "updated_at": "2026-08-15T19:42:36.140Z",
+      "blocked_reason": "The sbx CLI is a host-side facility and is not available inside this workspace; the installed Docker client cannot access a daemon.",
+      "unblock_condition": "On the host, create or reconnect to sbx named freehub, then run bin/environment-diagnostics and verify image-cache persistence across reconnects.",
+      "evidence": [],
+      "implementation_commits": []
+    },
+    {
+      "id": "FH-002",
+      "title": "Run the legacy Rails application in containers",
+      "status": "pending",
+      "path": "docs/modernization/tickets/FH-002-legacy-container.md",
+      "depends_on": [
+        "FH-001"
+      ],
+      "claimed_at": null,
+      "updated_at": null,
+      "blocked_reason": null,
+      "unblock_condition": null,
+      "evidence": [],
+      "implementation_commits": []
+    },
+    {
+      "id": "FH-003",
+      "title": "Load sanitized legacy data and deterministic fixtures",
+      "status": "pending",
+      "path": "docs/modernization/tickets/FH-003-legacy-data-and-fixtures.md",
+      "depends_on": [
+        "FH-002"
+      ],
+      "claimed_at": null,
+      "updated_at": null,
+      "blocked_reason": null,
+      "unblock_condition": null,
+      "evidence": [],
+      "implementation_commits": []
+    },
+    {
+      "id": "FH-004",
+      "title": "Reconstitute the product specification and screenshot baseline",
+      "status": "pending",
+      "path": "docs/modernization/tickets/FH-004-product-spec-and-screenshots.md",
+      "depends_on": [
+        "FH-003"
+      ],
+      "claimed_at": null,
+      "updated_at": null,
+      "blocked_reason": null,
+      "unblock_condition": null,
+      "evidence": [],
+      "implementation_commits": []
+    },
+    {
+      "id": "FH-005",
+      "title": "Define the canonical data and behavior contract",
+      "status": "pending",
+      "path": "docs/modernization/tickets/FH-005-canonical-data-contract.md",
+      "depends_on": [
+        "FH-004"
+      ],
+      "claimed_at": null,
+      "updated_at": null,
+      "blocked_reason": null,
+      "unblock_condition": null,
+      "evidence": [],
+      "implementation_commits": []
+    },
+    {
+      "id": "FH-006",
+      "title": "Build and measure the portable TypeScript stack spike",
+      "status": "pending",
+      "path": "docs/modernization/tickets/FH-006-typescript-spike.md",
+      "depends_on": [
+        "FH-005"
+      ],
+      "claimed_at": null,
+      "updated_at": null,
+      "blocked_reason": null,
+      "unblock_condition": null,
+      "evidence": [],
+      "implementation_commits": []
+    },
+    {
+      "id": "FH-007",
+      "title": "Build and measure the modern Rails stack spike",
+      "status": "pending",
+      "path": "docs/modernization/tickets/FH-007-rails-spike.md",
+      "depends_on": [
+        "FH-005"
+      ],
+      "claimed_at": null,
+      "updated_at": null,
+      "blocked_reason": null,
+      "unblock_condition": null,
+      "evidence": [],
+      "implementation_commits": []
+    },
+    {
+      "id": "FH-008",
+      "title": "Select and record the modernization stack",
+      "status": "pending",
+      "path": "docs/modernization/tickets/FH-008-stack-decision.md",
+      "depends_on": [
+        "FH-006",
+        "FH-007"
+      ],
+      "claimed_at": null,
+      "updated_at": null,
+      "blocked_reason": null,
+      "unblock_condition": null,
+      "evidence": [],
+      "implementation_commits": []
+    },
+    {
+      "id": "FH-009",
+      "title": "Create the modern application foundation",
+      "status": "pending",
+      "path": "docs/modernization/tickets/FH-009-modern-foundation.md",
+      "depends_on": [
+        "FH-008"
+      ],
+      "claimed_at": null,
+      "updated_at": null,
+      "blocked_reason": null,
+      "unblock_condition": null,
+      "evidence": [],
+      "implementation_commits": []
+    },
+    {
+      "id": "FH-010",
+      "title": "Implement authentication and sessions",
+      "status": "pending",
+      "path": "docs/modernization/tickets/FH-010-authentication-and-sessions.md",
+      "depends_on": [
+        "FH-009"
+      ],
+      "claimed_at": null,
+      "updated_at": null,
+      "blocked_reason": null,
+      "unblock_condition": null,
+      "evidence": [],
+      "implementation_commits": []
+    },
+    {
+      "id": "FH-011",
+      "title": "Implement organizations, roles, and settings",
+      "status": "pending",
+      "path": "docs/modernization/tickets/FH-011-organizations-roles-and-settings.md",
+      "depends_on": [
+        "FH-010"
+      ],
+      "claimed_at": null,
+      "updated_at": null,
+      "blocked_reason": null,
+      "unblock_condition": null,
+      "evidence": [],
+      "implementation_commits": []
+    },
+    {
+      "id": "FH-012",
+      "title": "Implement people search, profiles, and archive behavior",
+      "status": "pending",
+      "path": "docs/modernization/tickets/FH-012-people-search-profile-and-archive.md",
+      "depends_on": [
+        "FH-011"
+      ],
+      "claimed_at": null,
+      "updated_at": null,
+      "blocked_reason": null,
+      "unblock_condition": null,
+      "evidence": [],
+      "implementation_commits": []
+    },
+    {
+      "id": "FH-013",
+      "title": "Implement tags and notes",
+      "status": "pending",
+      "path": "docs/modernization/tickets/FH-013-tags-and-notes.md",
+      "depends_on": [
+        "FH-012"
+      ],
+      "claimed_at": null,
+      "updated_at": null,
+      "blocked_reason": null,
+      "unblock_condition": null,
+      "evidence": [],
+      "implementation_commits": []
+    },
+    {
+      "id": "FH-014",
+      "title": "Implement visits and time tracking",
+      "status": "pending",
+      "path": "docs/modernization/tickets/FH-014-visits-and-time-tracking.md",
+      "depends_on": [
+        "FH-012"
+      ],
+      "claimed_at": null,
+      "updated_at": null,
+      "blocked_reason": null,
+      "unblock_condition": null,
+      "evidence": [],
+      "implementation_commits": []
+    },
+    {
+      "id": "FH-015",
+      "title": "Implement services and membership",
+      "status": "pending",
+      "path": "docs/modernization/tickets/FH-015-services-and-membership.md",
+      "depends_on": [
+        "FH-012"
+      ],
+      "claimed_at": null,
+      "updated_at": null,
+      "blocked_reason": null,
+      "unblock_condition": null,
+      "evidence": [],
+      "implementation_commits": []
+    },
+    {
+      "id": "FH-016",
+      "title": "Implement reports and exports",
+      "status": "pending",
+      "path": "docs/modernization/tickets/FH-016-reports-and-exports.md",
+      "depends_on": [
+        "FH-013",
+        "FH-014",
+        "FH-015"
+      ],
+      "claimed_at": null,
+      "updated_at": null,
+      "blocked_reason": null,
+      "unblock_condition": null,
+      "evidence": [],
+      "implementation_commits": []
+    },
+    {
+      "id": "FH-017",
+      "title": "Implement safe CSV member import",
+      "status": "pending",
+      "path": "docs/modernization/tickets/FH-017-csv-import.md",
+      "depends_on": [
+        "FH-012",
+        "FH-015"
+      ],
+      "claimed_at": null,
+      "updated_at": null,
+      "blocked_reason": null,
+      "unblock_condition": null,
+      "evidence": [],
+      "implementation_commits": []
+    },
+    {
+      "id": "FH-018",
+      "title": "Implement bulk management workflows",
+      "status": "pending",
+      "path": "docs/modernization/tickets/FH-018-bulk-management.md",
+      "depends_on": [
+        "FH-012",
+        "FH-016"
+      ],
+      "claimed_at": null,
+      "updated_at": null,
+      "blocked_reason": null,
+      "unblock_condition": null,
+      "evidence": [],
+      "implementation_commits": []
+    },
+    {
+      "id": "FH-019",
+      "title": "Implement the production deployment contract",
+      "status": "pending",
+      "path": "docs/modernization/tickets/FH-019-production-deployment.md",
+      "depends_on": [
+        "FH-016",
+        "FH-017",
+        "FH-018"
+      ],
+      "claimed_at": null,
+      "updated_at": null,
+      "blocked_reason": null,
+      "unblock_condition": null,
+      "evidence": [],
+      "implementation_commits": []
+    },
+    {
+      "id": "FH-020",
+      "title": "Migrate production data and cut over",
+      "status": "pending",
+      "path": "docs/modernization/tickets/FH-020-production-migration-and-cutover.md",
+      "depends_on": [
+        "FH-019"
+      ],
+      "claimed_at": null,
+      "updated_at": null,
+      "blocked_reason": null,
+      "unblock_condition": null,
+      "evidence": [],
+      "implementation_commits": []
+    }
+  ]
+}
