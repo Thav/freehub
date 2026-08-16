@@ -1,0 +1,45 @@
+#!/usr/bin/env sh
+set -eu
+
+reference=0a00d9a
+output=.legacy-build/reference
+
+rm -rf "$output"
+mkdir -p "$output"
+git archive "$reference" | tar -x -C "$output"
+
+cp legacy/Dockerfile "$output/Dockerfile"
+cp legacy/docker-entrypoint.sh "$output/docker-entrypoint.sh"
+cp /etc/ssl/certs/ca-certificates.crt "$output/ca-certificates.crt"
+chmod +x "$output/docker-entrypoint.sh"
+
+# The historical layout loads jQuery and Google Analytics over the public
+# internet. Keep product JavaScript behavior while making the reference fully
+# local and deterministic for visual/parity testing.
+cp "$output/vendor/plugins/blue-ridge/vendor/jquery-1.4.2.js" \
+  "$output/public/javascripts/jquery-1.4.2.js"
+sed -i "s#javascript_include_tag 'http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js'#javascript_include_tag 'jquery-1.4.2'#" \
+  "$output/app/views/layouts/application.html.haml"
+sed -i '/^    :javascript/,$d' "$output/app/views/layouts/application.html.haml"
+
+cat > "$output/config/database.yml" <<'YAML'
+development:
+  adapter: mysql
+  encoding: utf8
+  database: <%= ENV['LEGACY_DB_NAME'] || 'freehub_legacy' %>
+  username: <%= ENV['LEGACY_DB_USER'] || 'freehub' %>
+  password: <%= ENV['LEGACY_DB_PASSWORD'] || 'freehub' %>
+  host: <%= ENV['LEGACY_DB_HOST'] || 'db' %>
+  port: <%= ENV['LEGACY_DB_PORT'] || 3306 %>
+
+test:
+  adapter: mysql
+  encoding: utf8
+  database: <%= ENV['LEGACY_TEST_DB_NAME'] || 'freehub_legacy_test' %>
+  username: <%= ENV['LEGACY_DB_USER'] || 'freehub' %>
+  password: <%= ENV['LEGACY_DB_PASSWORD'] || 'freehub' %>
+  host: <%= ENV['LEGACY_DB_HOST'] || 'db' %>
+  port: <%= ENV['LEGACY_DB_PORT'] || 3306 %>
+YAML
+
+printf 'Prepared historical Freehub reference %s at %s\n' "$reference" "$output"

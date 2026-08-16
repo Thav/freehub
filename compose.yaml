@@ -1,0 +1,40 @@
+services:
+  legacy:
+    profiles: [legacy]
+    build:
+      context: .legacy-build/reference
+      args:
+        HTTP_PROXY: ${HTTP_PROXY:-}
+        HTTPS_PROXY: ${HTTPS_PROXY:-}
+        NO_PROXY: ${NO_PROXY:-localhost,127.0.0.1,db}
+    environment:
+      LEGACY_DB_HOST: db
+      LEGACY_DB_NAME: freehub_legacy
+      LEGACY_DB_USER: freehub
+      LEGACY_DB_PASSWORD: freehub
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:3000:3000"
+    networks: [legacy, ingress]
+
+  db:
+    profiles: [legacy]
+    image: mariadb@sha256:345fa26d595e8c7fe298e0c4098ed400356f502458769c8902229b3437d6da2b
+    environment:
+      MARIADB_DATABASE: freehub_legacy
+      MARIADB_USER: freehub
+      MARIADB_PASSWORD: freehub
+      MARIADB_ROOT_PASSWORD: local-only-root
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    networks: [legacy]
+
+networks:
+  legacy:
+    internal: true
+  ingress: {}

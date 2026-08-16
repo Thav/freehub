@@ -58,7 +58,7 @@ explanation in their verification evidence.
 | Browser capture/tests | `mcr.microsoft.com/playwright:v1.62.0-noble` | `mcr.microsoft.com/playwright@sha256:baed2032d533817f3dbe6425de795788430ba345e819a1201337009ba17c9d07` | FH-001; consumed by FH-004 |
 | TypeScript build/runtime | `node:24.18.1-bookworm-slim` | `node@sha256:235600a8101ab264e117b176e925532262668dc9b581ef1dd7d96ced463b8e7` | FH-001; consumed by FH-006 |
 | Modern Rails spike | `ruby:4.0.6-slim-trixie` | `ruby@sha256:607bf92fa7ecebb4a0c6654b62cb44c48d94b36b6f5a754611ddbbe3dc5b6135` | FH-001; consumed by FH-007 |
-| Legacy Rails build base | `ruby:2.7.8-bullseye` | `ruby@sha256:2347de892e419c7160fc21dec721d5952736909f8c3fbb7f84cb4a07aaf9ce7d` | FH-001; FH-002 builds the project-owned compatibility image from it |
+| Legacy Rails build base | Project-owned Ruby 1.9.3-p551 compatibility image | Ruby `v1_9_3_551` commit `a32f3789244b5f976dfaee75b06a91e3b4a18182` | FH-002; built from `legacy/Dockerfile` |
 
 Record a pulled image without relying on mutable tags:
 
@@ -83,10 +83,9 @@ The baseline was reviewed on 2026-08-16 against the upstream release policies:
 - Playwright has no LTS release line. Use the current pinned release for its
   browser-test image and update it deliberately with the paired test dependency.
 
-`ruby:2.7.8-bullseye` is an intentional exception: Ruby 2.7 is end-of-life and
-may be used only in the isolated, non-production legacy compatibility image.
-FH-002 must not expose it to the modern application's runtime or production
-image.
+Ruby 1.9.3-p551 is an intentional exception: it is end-of-life and may be used
+only in the isolated, non-production legacy compatibility image. FH-002 must
+not expose it to the modern application's runtime or production image.
 
 PostgreSQL 18 uses the versioned default data directory
 `/var/lib/postgresql/18/docker`. Any later Compose configuration must mount the
@@ -101,7 +100,7 @@ anything again:
 ```bash
 docker image inspect postgres:18.4-trixie mariadb:11.8.5 \
   mcr.microsoft.com/playwright:v1.62.0-noble node:24.18.1-bookworm-slim \
-  ruby:4.0.6-slim-trixie ruby:2.7.8-bullseye \
+  ruby:4.0.6-slim-trixie \
   --format '{{index .RepoTags 0}} {{index .RepoDigests 0}}'
 ```
 

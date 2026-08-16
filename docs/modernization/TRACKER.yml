@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "active_ticket": null,
+  "active_ticket": "FH-002",
   "tickets": [
     {
       "id": "FH-001",
@@ -22,16 +22,21 @@
     {
       "id": "FH-002",
       "title": "Run the legacy Rails application in containers",
-      "status": "pending",
+      "status": "in_progress",
       "path": "docs/modernization/tickets/FH-002-legacy-container.md",
       "depends_on": [
         "FH-001"
       ],
-      "claimed_at": null,
-      "updated_at": null,
+      "claimed_at": "2026-08-16T03:11:05.196Z",
+      "updated_at": "2026-08-16T04:32:10Z",
       "blocked_reason": null,
       "unblock_condition": null,
-      "evidence": [],
+      "evidence": [
+        "2026-08-16: bin/prepare-legacy-reference; docker compose --profile legacy build --no-cache legacy. Clean build completed with Ruby 1.9.3p551, Bundler 1.13.1, Rails LTS 2.3.18.18, and all 22 locked gems.",
+        "2026-08-16: docker compose --profile legacy up -d --force-recreate; docker compose --profile legacy ps/logs. MariaDB became healthy and WEBrick remained running on port 3000.",
+        "2026-08-16: isolated-network requests to /session/new and /javascripts/jquery-1.4.2.js both returned 200 (4,146 and 163,629 bytes). Login HTML contained no external script or stylesheet URLs.",
+        "2026-08-16: docker network inspect freehub_legacy reported internal=true; docker inspect freehub-legacy-1 reported the sole publication as 127.0.0.1:3000."
+      ],
       "implementation_commits": []
     },
     {
