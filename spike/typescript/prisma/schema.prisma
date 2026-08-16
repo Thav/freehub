@@ -1,0 +1,268 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrganizationRole {
+  manager
+  operator
+}
+enum ServiceType {
+  membership
+  earn_a_bike
+  class_
+}
+enum VisitActivity {
+  project
+  volunteering
+}
+enum MigrationIssueDisposition {
+  open
+  accepted
+  resolved
+  quarantined
+}
+enum ImportFormat {
+  freehub
+  corsizio
+}
+enum ImportDisposition {
+  create
+  existing_match
+  rejected
+}
+
+model Organization {
+  id BigInt @id @default(autoincrement())
+  name String @db.VarChar(80)
+  key String @unique @db.VarChar(40)
+  timezone String @db.VarChar(64)
+  location String? @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  memberships OrganizationMembership[]
+  people Person[]
+  visits Visit[]
+  services Service[]
+  sessions Session[]
+  tags Tag[]
+  archiveEvents PersonArchiveEvent[]
+  importJobs ImportJob[]
+}
+model User {
+  id BigInt @id @default(autoincrement())
+  login String @unique @db.VarChar(80)
+  email String @unique @db.VarChar(320)
+  name String @db.VarChar(160)
+  passwordDigest String @db.VarChar(255)
+  passwordChangeRequired Boolean @default(true)
+  platformAdministrator Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  memberships OrganizationMembership[]
+  sessions Session[]
+}
+model OrganizationMembership {
+  id BigInt @id @default(autoincrement())
+  organizationId BigInt
+  userId BigInt
+  role OrganizationRole
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([organizationId, userId])
+}
+model Session {
+  id String @id @default(uuid())
+  userId BigInt
+  organizationId BigInt?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  @@index([userId])
+}
+model Person {
+  id BigInt @id @default(autoincrement())
+  organizationId BigInt
+  firstName String @db.VarChar(120)
+  lastName String? @db.VarChar(120)
+  displayName String @db.VarChar(255)
+  email String? @db.VarChar(320)
+  normalizedEmail String? @db.VarChar(320)
+  phone String? @db.VarChar(80)
+  normalizedPhone String? @db.VarChar(32)
+  emailOptOut Boolean @default(false)
+  street1 String? @db.VarChar(255)
+  street2 String? @db.VarChar(255)
+  city String? @db.VarChar(120)
+  state String? @db.VarChar(120)
+  postalCode String? @db.VarChar(40)
+  country String? @db.Char(2)
+  staff Boolean @default(false)
+  yearOfBirth Int? @db.SmallInt
+  archivedAt DateTime?
+  archivedByUserId BigInt?
+  createdByUserId BigInt?
+  updatedByUserId BigInt?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  visits Visit[]
+  services Service[]
+  tags PersonTag[]
+  notes Note[]
+  archiveEvents PersonArchiveEvent[]
+  @@index([organizationId, normalizedEmail])
+  @@index([organizationId, normalizedPhone])
+  @@index([organizationId, displayName])
+}
+model Visit {
+  id BigInt @id @default(autoincrement())
+  organizationId BigInt
+  personId BigInt
+  activity VisitActivity
+  arrivedAt DateTime?
+  startedAt DateTime?
+  endedAt DateTime?
+  durationSeconds Int?
+  staffSnapshot Boolean
+  memberSnapshot Boolean
+  createdByUserId BigInt?
+  updatedByUserId BigInt?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  notes Note[]
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  person Person @relation(fields: [personId], references: [id], onDelete: Restrict)
+  @@index([organizationId, arrivedAt])
+}
+model Service {
+  id BigInt @id @default(autoincrement())
+  organizationId BigInt
+  personId BigInt
+  type ServiceType
+  startDate DateTime? @db.Date
+  endDate DateTime? @db.Date
+  paid Boolean @default(false)
+  volunteered Boolean @default(false)
+  createdByUserId BigInt?
+  updatedByUserId BigInt?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  person Person @relation(fields: [personId], references: [id], onDelete: Restrict)
+  notes Note[]
+}
+model Tag {
+  id BigInt @id @default(autoincrement())
+  organizationId BigInt
+  name String @db.VarChar(120)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  people PersonTag[]
+  @@unique([organizationId, name])
+}
+model PersonTag {
+  id BigInt @id @default(autoincrement())
+  organizationId BigInt
+  personId BigInt
+  tagId BigInt
+  createdAt DateTime @default(now())
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+  tag Tag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  @@unique([personId, tagId])
+}
+model Note {
+  id BigInt @id @default(autoincrement())
+  organizationId BigInt
+  personId BigInt?
+  visitId BigInt?
+  serviceId BigInt?
+  text String
+  createdByUserId BigInt?
+  updatedByUserId BigInt?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  person Person? @relation(fields: [personId], references: [id], onDelete: Cascade)
+  visit Visit? @relation(fields: [visitId], references: [id], onDelete: Cascade)
+  service Service? @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+}
+model PersonArchiveEvent {
+  id BigInt @id @default(autoincrement())
+  organizationId BigInt
+  personId BigInt
+  actorUserId BigInt
+  action String @db.VarChar(12)
+  occurredAt DateTime @default(now())
+  reason String?
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+}
+model ImportJob {
+  id BigInt @id @default(autoincrement())
+  organizationId BigInt
+  format ImportFormat
+  sourceSha256 String @db.Char(64)
+  status String @db.VarChar(16)
+  createdByUserId BigInt
+  createdAt DateTime @default(now())
+  appliedAt DateTime?
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  rows ImportRow[]
+  @@unique([organizationId, sourceSha256])
+}
+model ImportRow {
+  id BigInt @id @default(autoincrement())
+  importJobId BigInt
+  rowNumber Int
+  disposition ImportDisposition
+  matchedPersonId BigInt?
+  createdPersonId BigInt?
+  matchReason String? @db.VarChar(80)
+  warnings Json
+  errors Json
+  inputFingerprint String @db.Char(64)
+  importJob ImportJob @relation(fields: [importJobId], references: [id], onDelete: Cascade)
+  @@unique([importJobId, rowNumber])
+}
+model MigrationRun {
+  id BigInt @id @default(autoincrement())
+  sourceSha256 String @db.Char(64)
+  contractVersion Int
+  startedAt DateTime @default(now())
+  completedAt DateTime?
+  reportSha256 String? @db.Char(64)
+  issues MigrationIssue[]
+  identities LegacyIdentity[]
+}
+model MigrationIssue {
+  id BigInt @id @default(autoincrement())
+  migrationRunId BigInt
+  sourceTable String @db.VarChar(80)
+  sourceId BigInt?
+  category String @db.VarChar(120)
+  disposition MigrationIssueDisposition @default(open)
+  payloadFingerprint String @db.Char(64)
+  sanitizedDetail Json
+  resolvedByUserId BigInt?
+  resolvedAt DateTime?
+  migrationRun MigrationRun @relation(fields: [migrationRunId], references: [id], onDelete: Cascade)
+  @@unique([migrationRunId, sourceTable, sourceId, category])
+}
+model LegacyIdentity {
+  id BigInt @id @default(autoincrement())
+  migrationRunId BigInt
+  sourceTable String @db.VarChar(80)
+  sourceId BigInt
+  targetEntity String @db.VarChar(80)
+  targetId BigInt
+  migrationRun MigrationRun @relation(fields: [migrationRunId], references: [id], onDelete: Cascade)
+  @@unique([migrationRunId, sourceTable, sourceId, targetEntity, targetId])
+}

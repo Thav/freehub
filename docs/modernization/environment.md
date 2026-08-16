@@ -56,7 +56,7 @@ explanation in their verification evidence.
 | Modern database | `postgres:18.4-trixie` | `postgres@sha256:a02db8cac496f15b094798a38254f14d6e00741f709360e5e00bb6668ea31636` | FH-001; consumed by FH-009 |
 | Migration compatibility | `mariadb:11.8.5` | `mariadb@sha256:345fa26d595e8c7fe298e0c4098ed400356f502458769c8902229b3437d6da2b` | FH-001; consumed by FH-003 |
 | Browser capture/tests | `mcr.microsoft.com/playwright:v1.62.0-noble` | `mcr.microsoft.com/playwright@sha256:baed2032d533817f3dbe6425de795788430ba345e819a1201337009ba17c9d07` | FH-001; consumed by FH-004 |
-| TypeScript build/runtime | `node:24.18.1-bookworm-slim` | `node@sha256:235600a8101ab264e117b176e925532262668dc9b581ef1dd7d96ced463b8e7` | FH-001; consumed by FH-006 |
+| TypeScript build/runtime | `node:24.18.1-bookworm-slim` | `node@sha256:235600a8101ab264e117b1768e925532262668dc9b581ef1dd7d96ced463b8e7` | FH-001; consumed by FH-006 |
 | Modern Rails spike | `ruby:4.0.6-slim-trixie` | `ruby@sha256:607bf92fa7ecebb4a0c6654b62cb44c48d94b36b6f5a754611ddbbe3dc5b6135` | FH-001; consumed by FH-007 |
 | Legacy Rails build base | Project-owned Ruby 1.9.3-p551 compatibility image | Ruby `v1_9_3_551` commit `a32f3789244b5f976dfaee75b06a91e3b4a18182` | FH-002; built from `legacy/Dockerfile` |
 
@@ -132,3 +132,7 @@ from the sanitized dump or deterministic fixtures instead.
 The `sbx` CLI is intentionally host-side and is not expected inside the
 `freehub` sandbox. Inside the sandbox, `docker info`, `docker compose version`,
 and `bin/environment-diagnostics` must succeed against its nested daemon.
+
+On 2026-08-16, FH-006 verified the current daemon as `freehub` / Docker 29.7.1
+with Docker Compose v5.4.0. Agent commands need the sandbox's Docker access
+permission; once granted, they use this same nested daemon successfully.

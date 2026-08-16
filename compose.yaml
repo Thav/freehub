@@ -62,9 +62,71 @@ services:
       retries: 30
     networks: [migration]
 
+  modern-db:
+    profiles: [typescript]
+    image: postgres@sha256:a02db8cac496f15b094798a38254f14d6e00741f709360e5e00bb6668ea31636
+    environment:
+      POSTGRES_DB: freehub_modern
+      POSTGRES_USER: freehub
+      POSTGRES_PASSWORD: freehub
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U freehub -d freehub_modern"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    networks: [modern]
+
+  typescript:
+    profiles: [typescript]
+    build:
+      context: spike/typescript
+      target: runtime
+    environment:
+      DATABASE_URL: postgresql://freehub:freehub@modern-db:5432/freehub_modern?schema=public
+      PORT: 3001
+    command: ["sh", "-c", "npx prisma migrate deploy && npx tsx prisma/seed.ts && node dist-server/server.js"]
+    depends_on:
+      modern-db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:3001:3001"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/up').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    networks: [modern, ingress]
+
+  typescript-test:
+    profiles: [typescript-test]
+    build:
+      context: spike/typescript
+      target: test
+    environment:
+      DATABASE_URL: postgresql://freehub:freehub@modern-db:5432/freehub_modern?schema=public
+      XDG_CACHE_HOME: /tmp/prisma-cache
+    depends_on:
+      modern-db:
+        condition: service_healthy
+    networks: [modern]
+
+  typescript-visual:
+    profiles: [typescript-visual]
+    image: mcr.microsoft.com/playwright@sha256:baed2032d533817f3dbe6425de795788430ba345e819a1201337009ba17c9d07
+    environment:
+      BASE_URL: http://typescript:3001
+      HOME: /tmp
+    working_dir: /work
+    volumes:
+      - ./spike/typescript:/work:ro
+    command: ["npx", "playwright", "test"]
+    networks: [ingress]
+
 networks:
   legacy:
     internal: true
   ingress: {}
   migration:
+    internal: true
+  modern:
     internal: true

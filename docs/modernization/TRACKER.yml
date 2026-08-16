@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "active_ticket": "FH-005",
+  "active_ticket": "FH-006",
   "tickets": [
     {
       "id": "FH-001",
@@ -83,28 +83,32 @@
     {
       "id": "FH-005",
       "title": "Define the canonical data and behavior contract",
-      "status": "in_progress",
+      "status": "done",
       "path": "docs/modernization/tickets/FH-005-canonical-data-contract.md",
       "depends_on": [
         "FH-004"
       ],
       "claimed_at": "2026-08-16T16:23:23.666Z",
-      "updated_at": "2026-08-16T16:23:23.666Z",
+      "updated_at": "2026-08-16T18:05:06.442Z",
       "blocked_reason": null,
       "unblock_condition": null,
-      "evidence": [],
-      "implementation_commits": []
+      "evidence": [
+        "2026-08-16: Owner-reviewed implementation commit 6305ddb20c146ebaf56e05fb19e3eff02d41441f. Live MariaDB information_schema comparison confirmed the restored dump's columns/types/defaults/indexes match db/schema.rb for ten domain tables, while the dump adds 11 physical InnoDB FKs for people/services/visits and audit-user references; polymorphic notes, taggings, roles, and joins remain unenforced. node --check test/migration/preflight.mjs test/migration/reconcile.mjs test/migration/validate-contract.mjs; node test/migration/validate-contract.mjs; sh -n bin/restore-legacy-source bin/migration-preflight bin/migration-reconcile bin/verify-migration-preflight; docker compose config --quiet; bin/verify-migration-preflight; git diff --check; bin/ralph validate all passed. Deterministic reports: sanitized source 20597 = 9186 candidates + 11411 quarantined; edge cases 60 = 32 candidates + 28 quarantined."
+      ],
+      "implementation_commits": [
+        "6305ddb20c146ebaf56e05fb19e3eff02d41441f"
+      ]
     },
     {
       "id": "FH-006",
       "title": "Build and measure the portable TypeScript stack spike",
-      "status": "pending",
+      "status": "in_progress",
       "path": "docs/modernization/tickets/FH-006-typescript-spike.md",
       "depends_on": [
         "FH-005"
       ],
-      "claimed_at": null,
-      "updated_at": null,
+      "claimed_at": "2026-08-16T19:02:47.316Z",
+      "updated_at": "2026-08-16T19:02:47.316Z",
       "blocked_reason": null,
       "unblock_condition": null,
       "evidence": [],

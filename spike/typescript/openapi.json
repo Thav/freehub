@@ -1,0 +1,285 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Freehub TypeScript spike API",
+    "version": "0.1.0"
+  },
+  "components": {
+    "schemas": {}
+  },
+  "paths": {
+    "/up": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/login": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "login",
+                  "password"
+                ],
+                "properties": {
+                  "login": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "password": {
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/logout": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/organizations": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/organizations/{organizationId}/people": {
+      "get": {
+        "parameters": [
+          {
+            "schema": {
+              "minLength": 2,
+              "maxLength": 120,
+              "type": "string"
+            },
+            "in": "query",
+            "name": "q",
+            "required": true
+          },
+          {
+            "schema": {
+              "pattern": "^[0-9]+$",
+              "type": "string"
+            },
+            "in": "path",
+            "name": "organizationId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/organizations/{organizationId}/people/{personId}": {
+      "get": {
+        "parameters": [
+          {
+            "schema": {
+              "pattern": "^[0-9]+$",
+              "type": "string"
+            },
+            "in": "path",
+            "name": "organizationId",
+            "required": true
+          },
+          {
+            "schema": {
+              "pattern": "^[0-9]+$",
+              "type": "string"
+            },
+            "in": "path",
+            "name": "personId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/organizations/{organizationId}/visits": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "personId",
+                  "activity",
+                  "arrivedAt"
+                ],
+                "properties": {
+                  "personId": {
+                    "pattern": "^[0-9]+$",
+                    "type": "string"
+                  },
+                  "activity": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "project"
+                        ]
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "volunteering"
+                        ]
+                      }
+                    ]
+                  },
+                  "arrivedAt": {
+                    "format": "date-time",
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "pattern": "^[0-9]+$",
+              "type": "string"
+            },
+            "in": "path",
+            "name": "organizationId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/organizations/{organizationId}/visits/{visitId}/sign-in": {
+      "post": {
+        "parameters": [
+          {
+            "schema": {
+              "pattern": "^[0-9]+$",
+              "type": "string"
+            },
+            "in": "path",
+            "name": "organizationId",
+            "required": true
+          },
+          {
+            "schema": {
+              "pattern": "^[0-9]+$",
+              "type": "string"
+            },
+            "in": "path",
+            "name": "visitId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/organizations/{organizationId}/visits/{visitId}/sign-out": {
+      "post": {
+        "parameters": [
+          {
+            "schema": {
+              "pattern": "^[0-9]+$",
+              "type": "string"
+            },
+            "in": "path",
+            "name": "organizationId",
+            "required": true
+          },
+          {
+            "schema": {
+              "pattern": "^[0-9]+$",
+              "type": "string"
+            },
+            "in": "path",
+            "name": "visitId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/organizations/{organizationId}/reports/people.csv": {
+      "get": {
+        "parameters": [
+          {
+            "schema": {
+              "pattern": "^[0-9]+$",
+              "type": "string"
+            },
+            "in": "path",
+            "name": "organizationId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    }
+  }
+}

@@ -29,6 +29,11 @@ sbx run --name freehub
 
 The sandbox's nested Docker daemon is the only supported container host. Its image cache persists across reconnects. Repository files, not container volumes, are the durable source of truth.
 
+Verified 2026-08-16 during FH-006: the active `freehub` sandbox exposes Docker
+29.7.1 and Docker Compose v5.4.0. Commands run from an agent session may require
+the sandbox Docker permission, but must target this nested daemon—not a host
+socket or another Docker context.
+
 Compose will provide `legacy`, `modern`, and `test` profiles. No host installation of Ruby, Rails, PostgreSQL, MariaDB, or Playwright is required.
 
 ## Architecture gate
