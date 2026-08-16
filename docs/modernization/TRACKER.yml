@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "active_ticket": "FH-002",
+  "active_ticket": null,
   "tickets": [
     {
       "id": "FH-001",
@@ -22,22 +22,25 @@
     {
       "id": "FH-002",
       "title": "Run the legacy Rails application in containers",
-      "status": "in_progress",
+      "status": "done",
       "path": "docs/modernization/tickets/FH-002-legacy-container.md",
       "depends_on": [
         "FH-001"
       ],
       "claimed_at": "2026-08-16T03:11:05.196Z",
-      "updated_at": "2026-08-16T04:32:10Z",
+      "updated_at": "2026-08-16T12:50:20.324Z",
       "blocked_reason": null,
       "unblock_condition": null,
       "evidence": [
         "2026-08-16: bin/prepare-legacy-reference; docker compose --profile legacy build --no-cache legacy. Clean build completed with Ruby 1.9.3p551, Bundler 1.13.1, Rails LTS 2.3.18.18, and all 22 locked gems.",
         "2026-08-16: docker compose --profile legacy up -d --force-recreate; docker compose --profile legacy ps/logs. MariaDB became healthy and WEBrick remained running on port 3000.",
         "2026-08-16: isolated-network requests to /session/new and /javascripts/jquery-1.4.2.js both returned 200 (4,146 and 163,629 bytes). Login HTML contained no external script or stylesheet URLs.",
-        "2026-08-16: docker network inspect freehub_legacy reported internal=true; docker inspect freehub-legacy-1 reported the sole publication as 127.0.0.1:3000."
+        "2026-08-16: docker network inspect freehub_legacy reported internal=true; docker inspect freehub-legacy-1 reported the sole publication as 127.0.0.1:3000.",
+        "2026-08-16: Commit e875fc32904e38428fd17cd09af2dabdcf5b5df4. docker compose --profile legacy build --no-cache legacy succeeded; docker compose --profile legacy up -d --force-recreate booted the stack; docker port freehub-legacy-1 reported 3000/tcp -> 127.0.0.1:3000; host-network HTTP checks returned login=200 and asset=200 for /session/new and /javascripts/jquery-1.4.2.js. Compose publishes only 127.0.0.1:3000 and the database remains on the internal legacy network."
       ],
-      "implementation_commits": []
+      "implementation_commits": [
+        "e875fc32904e38428fd17cd09af2dabdcf5b5df4"
+      ]
     },
     {
       "id": "FH-003",
