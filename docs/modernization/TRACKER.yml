@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "active_ticket": "FH-003",
+  "active_ticket": "FH-004",
   "tickets": [
     {
       "id": "FH-001",
@@ -45,28 +45,32 @@
     {
       "id": "FH-003",
       "title": "Load sanitized legacy data and deterministic fixtures",
-      "status": "in_progress",
+      "status": "done",
       "path": "docs/modernization/tickets/FH-003-legacy-data-and-fixtures.md",
       "depends_on": [
         "FH-002"
       ],
       "claimed_at": "2026-08-16T12:59:01.434Z",
-      "updated_at": "2026-08-16T12:59:01.434Z",
+      "updated_at": "2026-08-16T13:16:32.340Z",
       "blocked_reason": null,
       "unblock_condition": null,
-      "evidence": [],
-      "implementation_commits": []
+      "evidence": [
+        "2026-08-16: bin/restore-legacy-fixtures run twice from empty Compose volumes; extracted aggregate-count sections matched exactly (organizations=3, users=4, people=38, visits=6835, services=123, notes=13546, taggings=102, tags=11; fixtures: orgs=2, users=3, people=26, services=4, visits=3, tags=3, notes=3, pagination people=21). Sanitized SQL SHA-256 verified as 971fa9dfcd1b167265c9dd535b803df025a2d244dfb8b1240829e238eb88e17a. Fixture manager login and routes for current/expired/patron/staff profiles, open/completed visits, service, note, report, tag, and page-2 pagination returned 200; invalid person submission rendered validation error 200; empty manager organization returned 200; observer protected access redirected 302. Commands: sh -n bin/prepare-legacy-reference bin/restore-legacy-fixtures bin/fixture-summary bin/legacy-aggregate-counts; git diff --check; bin/ralph validate."
+      ],
+      "implementation_commits": [
+        "26e47335b2d73492516cb5b838b551319df874be"
+      ]
     },
     {
       "id": "FH-004",
       "title": "Reconstitute the product specification and screenshot baseline",
-      "status": "pending",
+      "status": "in_progress",
       "path": "docs/modernization/tickets/FH-004-product-spec-and-screenshots.md",
       "depends_on": [
         "FH-003"
       ],
-      "claimed_at": null,
-      "updated_at": null,
+      "claimed_at": "2026-08-16T13:40:07.055Z",
+      "updated_at": "2026-08-16T13:40:07.055Z",
       "blocked_reason": null,
       "unblock_condition": null,
       "evidence": [],

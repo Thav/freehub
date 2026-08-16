@@ -10,15 +10,21 @@ git archive "$reference" | tar -x -C "$output"
 
 cp legacy/Dockerfile "$output/Dockerfile"
 cp legacy/docker-entrypoint.sh "$output/docker-entrypoint.sh"
+mkdir -p "$output/config/initializers"
+cp legacy/authorization_compat.rb "$output/config/initializers/authorization_compat.rb"
 cp /etc/ssl/certs/ca-certificates.crt "$output/ca-certificates.crt"
 chmod +x "$output/docker-entrypoint.sh"
 
 # The historical layout loads jQuery and Google Analytics over the public
 # internet. Keep product JavaScript behavior while making the reference fully
-# local and deterministic for visual/parity testing.
+# local and deterministic for visual/parity testing. jQuery must load before
+# Prototype; loading it again through :all afterward overwrites Prototype's
+# global $ helper and breaks script.aculo.us autocomplete.
 cp "$output/vendor/plugins/blue-ridge/vendor/jquery-1.4.2.js" \
   "$output/public/javascripts/jquery-1.4.2.js"
 sed -i "s#javascript_include_tag 'http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js'#javascript_include_tag 'jquery-1.4.2'#" \
+  "$output/app/views/layouts/application.html.haml"
+sed -i "s#javascript_include_tag :all#javascript_include_tag 'prototype', 'effects', 'dragdrop', 'controls', 'AC_Quicktime', 'application', 'tags.jquery'#" \
   "$output/app/views/layouts/application.html.haml"
 sed -i '/^    :javascript/,$d' "$output/app/views/layouts/application.html.haml"
 

@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+set -eu
+
+# Deliberately prints only record counts, never source-row content.
+docker compose --profile legacy exec -T db mariadb -N -B -ufreehub --password=freehub freehub_legacy <<'SQL'
+SELECT 'organizations', COUNT(*) FROM organizations;
+SELECT 'users', COUNT(*) FROM users;
+SELECT 'people', COUNT(*) FROM people;
+SELECT 'visits', COUNT(*) FROM visits;
+SELECT 'services', COUNT(*) FROM services;
+SELECT 'notes', COUNT(*) FROM notes;
+SELECT 'taggings', COUNT(*) FROM taggings;
+SELECT 'tags', COUNT(*) FROM tags;
+SQL

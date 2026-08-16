@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+set -eu
+
+docker compose --profile legacy exec -T db mariadb -N -B -ufreehub --password=freehub freehub_legacy <<'SQL'
+SELECT 'fixture_organizations', COUNT(*) FROM organizations WHERE id BETWEEN 900001 AND 900002;
+SELECT 'fixture_users', COUNT(*) FROM users WHERE id BETWEEN 900001 AND 900003;
+SELECT 'fixture_people', COUNT(*) FROM people WHERE id BETWEEN 900001 AND 900026;
+SELECT 'fixture_services', COUNT(*) FROM services WHERE id BETWEEN 900001 AND 900004;
+SELECT 'fixture_visits', COUNT(*) FROM visits WHERE id BETWEEN 900001 AND 900003;
+SELECT 'fixture_tags', COUNT(*) FROM tags WHERE id BETWEEN 900001 AND 900003;
+SELECT 'fixture_notes', COUNT(*) FROM notes WHERE id BETWEEN 900001 AND 900003;
+SELECT 'pagination_people', COUNT(*) FROM people WHERE id BETWEEN 900006 AND 900026;
+SQL
