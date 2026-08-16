@@ -53,11 +53,11 @@ explanation in their verification evidence.
 
 | Purpose | Baseline image | Immutable digest | Selected by |
 | --- | --- | --- | --- |
-| Modern database | `postgres:16-bookworm` | `postgres@sha256:60f4761b9035e0b8d5218f701a8c3382f641bf12b1604822574cf5be3baeb537` | FH-001; consumed by FH-009 |
-| Migration compatibility | `mariadb:10.11` | `mariadb@sha256:de61fed4a40d3842f3ee09944ba52792156cfd9adf489b2cc670fc6ded28df8d` | FH-001; consumed by FH-003 |
-| Browser capture/tests | `mcr.microsoft.com/playwright:v1.52.0-jammy` | `mcr.microsoft.com/playwright@sha256:ff2946177f0756c87482c0ef958b7cfbf389b92525ace78a1c9890281d0d60f4` | FH-001; consumed by FH-004 |
-| TypeScript build/runtime | `node:22-bookworm-slim` | `node@sha256:d649c27dae7ba0137b3cef5dd75baa422c08dc3d9e3fc0c23dfb172dc3cc6436` | FH-001; consumed by FH-006 |
-| Modern Rails spike | `ruby:3.3-slim-bookworm` | `ruby@sha256:41120b37f3a8147ae5dbca5020b5be4dafaa8ffa589ee539d184dad0ba0b5ae5` | FH-001; consumed by FH-007 |
+| Modern database | `postgres:18.4-trixie` | `postgres@sha256:a02db8cac496f15b094798a38254f14d6e00741f709360e5e00bb6668ea31636` | FH-001; consumed by FH-009 |
+| Migration compatibility | `mariadb:11.8.5` | `mariadb@sha256:345fa26d595e8c7fe298e0c4098ed400356f502458769c8902229b3437d6da2b` | FH-001; consumed by FH-003 |
+| Browser capture/tests | `mcr.microsoft.com/playwright:v1.62.0-noble` | `mcr.microsoft.com/playwright@sha256:baed2032d533817f3dbe6425de795788430ba345e819a1201337009ba17c9d07` | FH-001; consumed by FH-004 |
+| TypeScript build/runtime | `node:24.18.1-bookworm-slim` | `node@sha256:235600a8101ab264e117b176e925532262668dc9b581ef1dd7d96ced463b8e7` | FH-001; consumed by FH-006 |
+| Modern Rails spike | `ruby:4.0.6-slim-trixie` | `ruby@sha256:607bf92fa7ecebb4a0c6654b62cb44c48d94b36b6f5a754611ddbbe3dc5b6135` | FH-001; consumed by FH-007 |
 | Legacy Rails build base | `ruby:2.7.8-bullseye` | `ruby@sha256:2347de892e419c7160fc21dec721d5952736909f8c3fbb7f84cb4a07aaf9ce7d` | FH-001; FH-002 builds the project-owned compatibility image from it |
 
 Record a pulled image without relying on mutable tags:
@@ -70,15 +70,38 @@ The image names above are cache baselines, not application containers. FH-002
 will define the project-owned legacy compatibility image; FH-006 and FH-007
 will measure their respective stack choices against these bases.
 
+## Version and support policy
+
+The baseline was reviewed on 2026-08-16 against the upstream release policies:
+
+- PostgreSQL 18.4 is the current stable major; PostgreSQL 18 is supported through
+  November 2030.
+- MariaDB 11.8 is the current Community Server LTS series, maintained through
+  June 2028.
+- Node 24.18.1 is the current Node.js LTS release line.
+- Ruby 4.0.6 is the current stable release and is in normal maintenance.
+- Playwright has no LTS release line. Use the current pinned release for its
+  browser-test image and update it deliberately with the paired test dependency.
+
+`ruby:2.7.8-bullseye` is an intentional exception: Ruby 2.7 is end-of-life and
+may be used only in the isolated, non-production legacy compatibility image.
+FH-002 must not expose it to the modern application's runtime or production
+image.
+
+PostgreSQL 18 uses the versioned default data directory
+`/var/lib/postgresql/18/docker`. Any later Compose configuration must mount the
+parent `/var/lib/postgresql` volume or set `PGDATA` deliberately; it must not
+reuse a PostgreSQL 16 data volume.
+
 ## Cache persistence check
 
 After reconnecting to `freehub`, verify that the cache survived before pulling
 anything again:
 
 ```bash
-docker image inspect postgres:16-bookworm mariadb:10.11 \
-  mcr.microsoft.com/playwright:v1.52.0-jammy node:22-bookworm-slim \
-  ruby:3.3-slim-bookworm ruby:2.7.8-bullseye \
+docker image inspect postgres:18.4-trixie mariadb:11.8.5 \
+  mcr.microsoft.com/playwright:v1.62.0-noble node:24.18.1-bookworm-slim \
+  ruby:4.0.6-slim-trixie ruby:2.7.8-bullseye \
   --format '{{index .RepoTags 0}} {{index .RepoDigests 0}}'
 ```
 
