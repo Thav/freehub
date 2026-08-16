@@ -15,8 +15,8 @@ Next.js, React Server Components, Server Actions, proprietary build outputs, and
 
 - `0a00d9a` is the last coherent legacy baseline. Current `master` contains Rails 2 application code with an incompatible Rails 7 dependency set.
 - `origin/rails-latest` is an incomplete 2023 prototype. Its migration, export, pagination, and testing ideas may be ported selectively; the branch must not be merged wholesale.
-- The supplied sanitized dump contains one organization, one user, 12 people, 6,832 visits, 119 services, 6,538 notes, 79 taggings, and eight tags.
-- Sanitization left 5,548 orphaned notes, 61 orphaned taggings, one MySQL zero-date, and one duplicate normalized phone. Migration must account for these rather than silently dropping them.
+- Executable FH-005 preflight supersedes the early dump estimate: the supplied sanitized dump contains one organization, one user, one role and role join, 12 people, 6,832 visits, 119 services, 13,543 notes, 79 taggings, and eight tags.
+- Sanitization left 11,346 orphaned notes, 61 orphaned taggings, four tags without a valid organization, three MySQL zero arrival datetimes, and one duplicate normalized phone. Migration must account for these rather than silently dropping them.
 
 ## Runtime strategy
 

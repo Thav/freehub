@@ -1,31 +1,7 @@
 #!/usr/bin/env sh
 set -eu
 
-archive=${LEGACY_ARCHIVE:-inbox/dbc-googledrive-notes.zip}
-entry=freehub_for_all_development_Clean2.sql
-expected_checksum=971fa9dfcd1b167265c9dd535b803df025a2d244dfb8b1240829e238eb88e17a
-
-test -f "$archive" || { echo "missing sanitized archive: $archive" >&2; exit 1; }
-actual_checksum=$(unzip -p "$archive" "$entry" | sha256sum | awk '{print $1}')
-test "$actual_checksum" = "$expected_checksum" || {
-  echo "sanitized dump checksum mismatch: $actual_checksum" >&2
-  exit 1
-}
-
-# The compose database volume is disposable. The checked-in SQL and ignored
-# archive are the complete reproducible source of this state.
-docker compose --profile legacy down -v --remove-orphans
-bin/prepare-legacy-reference
-docker compose --profile legacy up -d db
-
-attempt=0
-until docker compose --profile legacy exec -T db mariadb-admin --protocol=tcp -ufreehub --password=freehub ping --silent; do
-  attempt=$((attempt + 1))
-  test "$attempt" -lt 30 || { echo 'MariaDB did not become ready' >&2; exit 1; }
-  sleep 2
-done
-
-unzip -p "$archive" "$entry" | docker compose --profile legacy exec -T db mariadb -ufreehub --password=freehub freehub_legacy
+bin/restore-legacy-source
 docker compose --profile legacy exec -T db mariadb -ufreehub --password=freehub freehub_legacy < legacy/fixture-data.sql
 docker compose --profile legacy up -d --build legacy
 

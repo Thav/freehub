@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "active_ticket": "FH-004",
+  "active_ticket": "FH-005",
   "tickets": [
     {
       "id": "FH-001",
@@ -64,28 +64,32 @@
     {
       "id": "FH-004",
       "title": "Reconstitute the product specification and screenshot baseline",
-      "status": "in_progress",
+      "status": "done",
       "path": "docs/modernization/tickets/FH-004-product-spec-and-screenshots.md",
       "depends_on": [
         "FH-003"
       ],
       "claimed_at": "2026-08-16T13:40:07.055Z",
-      "updated_at": "2026-08-16T13:40:07.055Z",
+      "updated_at": "2026-08-16T16:23:11.490Z",
       "blocked_reason": null,
       "unblock_condition": null,
-      "evidence": [],
-      "implementation_commits": []
+      "evidence": [
+        "2026-08-16: Owner-reviewed implementation commit 79026aa895db20952ef470b2e2952926430d1c68. bin/verify-legacy-baseline captured 51 manifest entries twice from independent clean fixture restores; runs matched byte-for-byte and matched the approved baseline. All 47 full-resolution screenshots received approved personal-data findings. node --check test/legacy-visual/capture.mjs; node --check test/legacy-visual/pixel-diff.mjs; sh -n bin/capture-legacy-baseline bin/verify-legacy-baseline bin/approve-legacy-baseline; docker compose config --quiet; git diff --check; bin/ralph validate all passed."
+      ],
+      "implementation_commits": [
+        "79026aa895db20952ef470b2e2952926430d1c68"
+      ]
     },
     {
       "id": "FH-005",
       "title": "Define the canonical data and behavior contract",
-      "status": "pending",
+      "status": "in_progress",
       "path": "docs/modernization/tickets/FH-005-canonical-data-contract.md",
       "depends_on": [
         "FH-004"
       ],
-      "claimed_at": null,
-      "updated_at": null,
+      "claimed_at": "2026-08-16T16:23:23.666Z",
+      "updated_at": "2026-08-16T16:23:23.666Z",
       "blocked_reason": null,
       "unblock_condition": null,
       "evidence": [],

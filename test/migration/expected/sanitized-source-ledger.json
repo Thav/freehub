@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": 1,
+  "sourceSha256": "971fa9dfcd1b167265c9dd535b803df025a2d244dfb8b1240829e238eb88e17a",
+  "summary": {
+    "sourceRows": 20597,
+    "importedSourceRows": 9186,
+    "quarantinedSourceRows": 11411,
+    "legacyIdentityMappings": 9186,
+    "reconciliationPass": true
+  },
+  "tables": [
+    {"sourceTable":"organizations","importedSourceRows":1,"quarantinedSourceRows":0,"legacyIdentityMappings":1,"quarantineCategories":{}},
+    {"sourceTable":"users","importedSourceRows":1,"quarantinedSourceRows":0,"legacyIdentityMappings":1,"quarantineCategories":{}},
+    {"sourceTable":"roles","importedSourceRows":1,"quarantinedSourceRows":0,"legacyIdentityMappings":1,"quarantineCategories":{}},
+    {"sourceTable":"roles_users","importedSourceRows":1,"quarantinedSourceRows":0,"legacyIdentityMappings":1,"quarantineCategories":{}},
+    {"sourceTable":"people","importedSourceRows":12,"quarantinedSourceRows":0,"legacyIdentityMappings":12,"quarantineCategories":{}},
+    {"sourceTable":"visits","importedSourceRows":6832,"quarantinedSourceRows":0,"legacyIdentityMappings":6832,"quarantineCategories":{}},
+    {"sourceTable":"services","importedSourceRows":119,"quarantinedSourceRows":0,"legacyIdentityMappings":119,"quarantineCategories":{}},
+    {"sourceTable":"notes","importedSourceRows":2197,"quarantinedSourceRows":11346,"legacyIdentityMappings":2197,"quarantineCategories":{"orphan_target":11346}},
+    {"sourceTable":"tags","importedSourceRows":4,"quarantinedSourceRows":4,"legacyIdentityMappings":4,"quarantineCategories":{"unowned_tag":4}},
+    {"sourceTable":"taggings","importedSourceRows":18,"quarantinedSourceRows":61,"legacyIdentityMappings":18,"quarantineCategories":{"orphan_person":61}}
+  ]
+}

@@ -1,0 +1,252 @@
+{
+  "contractVersion": 1,
+  "status": "proposed",
+  "database": {
+    "engine": "PostgreSQL",
+    "minimumMajor": 18,
+    "idType": "bigint",
+    "timestampType": "timestamp with time zone",
+    "localDateType": "date",
+    "durationType": "integer seconds",
+    "sourceIds": "Preserve a source bigint through legacy_identities; use it as the canonical primary key when one source row maps to one canonical row and no collision exists."
+  },
+  "enums": {
+    "organizationRole": ["manager", "operator"],
+    "serviceType": ["membership", "earn_a_bike", "class"],
+    "visitActivity": ["project", "volunteering"],
+    "importFormat": ["freehub", "corsizio"],
+    "importDisposition": ["create", "existing_match", "rejected"],
+    "migrationIssueDisposition": ["open", "accepted", "resolved", "quarantined"]
+  },
+  "entities": {
+    "organizations": {
+      "tenantOwned": false,
+      "fields": {
+        "id": "bigint primary key",
+        "name": "varchar(80) not null",
+        "key": "varchar(40) not null",
+        "timezone": "IANA timezone varchar(64) not null",
+        "location": "varchar(255) null",
+        "createdAt": "timestamp not null",
+        "updatedAt": "timestamp not null"
+      },
+      "constraints": ["unique(lower(key))", "timezone must resolve in the IANA database"]
+    },
+    "users": {
+      "tenantOwned": false,
+      "fields": {
+        "id": "bigint primary key",
+        "login": "varchar(80) not null",
+        "email": "varchar(320) not null",
+        "name": "varchar(160) not null",
+        "passwordDigest": "varchar(255) not null",
+        "passwordChangeRequired": "boolean not null default true",
+        "platformAdministrator": "boolean not null default false",
+        "createdAt": "timestamp not null",
+        "updatedAt": "timestamp not null"
+      },
+      "constraints": ["unique(lower(login))", "unique(lower(email))", "legacy credential material is forbidden"]
+    },
+    "organizationMemberships": {
+      "tenantOwned": true,
+      "fields": {
+        "id": "bigint primary key",
+        "organizationId": "bigint not null references organizations",
+        "userId": "bigint not null references users",
+        "role": "organizationRole not null",
+        "createdAt": "timestamp not null",
+        "updatedAt": "timestamp not null"
+      },
+      "constraints": ["unique(organizationId,userId)", "manager and operator are the only tenant roles"]
+    },
+    "people": {
+      "tenantOwned": true,
+      "fields": {
+        "id": "bigint primary key",
+        "organizationId": "bigint not null references organizations",
+        "firstName": "varchar(120) not null",
+        "lastName": "varchar(120) null",
+        "displayName": "varchar(255) not null derived from names",
+        "email": "varchar(320) null",
+        "normalizedEmail": "varchar(320) null",
+        "emailOptOut": "boolean not null default false",
+        "phone": "varchar(80) null",
+        "normalizedPhone": "varchar(32) null",
+        "street1": "varchar(255) null",
+        "street2": "varchar(255) null",
+        "city": "varchar(120) null",
+        "state": "varchar(120) null",
+        "postalCode": "varchar(40) null",
+        "country": "char(2) null",
+        "staff": "boolean not null default false",
+        "yearOfBirth": "smallint null",
+        "archivedAt": "timestamp null",
+        "archivedByUserId": "bigint null references users",
+        "createdByUserId": "bigint null references users",
+        "updatedByUserId": "bigint null references users",
+        "createdAt": "timestamp not null",
+        "updatedAt": "timestamp not null"
+      },
+      "constraints": ["normalized values are matching indexes, not unique constraints", "ordinary search requires archivedAt is null"]
+    },
+    "visits": {
+      "tenantOwned": true,
+      "fields": {
+        "id": "bigint primary key",
+        "organizationId": "bigint not null references organizations",
+        "personId": "bigint not null references people",
+        "activity": "visitActivity not null",
+        "arrivedAt": "timestamp null only for accepted legacy migration issues",
+        "startedAt": "timestamp null",
+        "endedAt": "timestamp null",
+        "durationSeconds": "integer null",
+        "staffSnapshot": "boolean not null",
+        "memberSnapshot": "boolean not null",
+        "createdByUserId": "bigint null references users",
+        "updatedByUserId": "bigint null references users",
+        "createdAt": "timestamp not null",
+        "updatedAt": "timestamp not null"
+      },
+      "constraints": ["organizationId equals the person's organizationId", "snapshots are immutable after insert", "new writes require arrivedAt", "new writes require nonnegative durationSeconds"]
+    },
+    "services": {
+      "tenantOwned": true,
+      "fields": {
+        "id": "bigint primary key",
+        "organizationId": "bigint not null references organizations",
+        "personId": "bigint not null references people",
+        "type": "serviceType not null",
+        "startDate": "date null",
+        "endDate": "date null",
+        "paid": "boolean not null default false",
+        "volunteered": "boolean not null default false",
+        "createdByUserId": "bigint null references users",
+        "updatedByUserId": "bigint null references users",
+        "createdAt": "timestamp not null",
+        "updatedAt": "timestamp not null"
+      },
+      "constraints": ["organizationId equals the person's organizationId", "startDate and endDate are inclusive organization-local dates"]
+    },
+    "tags": {
+      "tenantOwned": true,
+      "fields": {
+        "id": "bigint primary key",
+        "organizationId": "bigint not null references organizations",
+        "name": "varchar(120) not null",
+        "createdAt": "timestamp not null",
+        "updatedAt": "timestamp not null"
+      },
+      "constraints": ["unique(organizationId,lower(name))"]
+    },
+    "personTags": {
+      "tenantOwned": true,
+      "fields": {
+        "id": "bigint primary key",
+        "organizationId": "bigint not null references organizations",
+        "personId": "bigint not null references people",
+        "tagId": "bigint not null references tags",
+        "createdAt": "timestamp not null"
+      },
+      "constraints": ["unique(personId,tagId)", "organizationId is identical across person and tag"]
+    },
+    "notes": {
+      "tenantOwned": true,
+      "fields": {
+        "id": "bigint primary key",
+        "organizationId": "bigint not null references organizations",
+        "personId": "bigint null references people",
+        "visitId": "bigint null references visits",
+        "serviceId": "bigint null references services",
+        "text": "text not null",
+        "createdByUserId": "bigint null references users",
+        "updatedByUserId": "bigint null references users",
+        "createdAt": "timestamp not null",
+        "updatedAt": "timestamp not null"
+      },
+      "constraints": ["exactly one of personId, visitId, serviceId is non-null", "organizationId equals the target's organizationId"]
+    },
+    "personArchiveEvents": {
+      "tenantOwned": true,
+      "fields": {
+        "id": "bigint primary key",
+        "organizationId": "bigint not null references organizations",
+        "personId": "bigint not null references people",
+        "actorUserId": "bigint not null references users",
+        "action": "archive or restore",
+        "occurredAt": "timestamp not null",
+        "reason": "text null"
+      },
+      "constraints": ["append only"]
+    },
+    "importJobs": {
+      "tenantOwned": true,
+      "fields": {
+        "id": "bigint primary key",
+        "organizationId": "bigint not null references organizations",
+        "format": "importFormat not null",
+        "sourceSha256": "char(64) not null",
+        "status": "previewed, applied, or failed",
+        "createdByUserId": "bigint not null references users",
+        "createdAt": "timestamp not null",
+        "appliedAt": "timestamp null"
+      },
+      "constraints": ["unique(organizationId,sourceSha256)"]
+    },
+    "importRows": {
+      "tenantOwned": true,
+      "fields": {
+        "id": "bigint primary key",
+        "importJobId": "bigint not null references importJobs",
+        "rowNumber": "integer not null",
+        "disposition": "importDisposition not null",
+        "matchedPersonId": "bigint null references people",
+        "createdPersonId": "bigint null references people",
+        "matchReason": "varchar(80) null",
+        "warnings": "json array not null",
+        "errors": "json array not null",
+        "inputFingerprint": "char(64) not null"
+      },
+      "constraints": ["unique(importJobId,rowNumber)", "raw uploaded rows and secrets are not retained in diagnostics"]
+    },
+    "migrationRuns": {
+      "tenantOwned": false,
+      "fields": {
+        "id": "bigint primary key",
+        "sourceSha256": "char(64) not null",
+        "contractVersion": "integer not null",
+        "startedAt": "timestamp not null",
+        "completedAt": "timestamp null",
+        "reportSha256": "char(64) null"
+      },
+      "constraints": ["source is read-only", "a completed run has one deterministic reconciliation report"]
+    },
+    "migrationIssues": {
+      "tenantOwned": false,
+      "fields": {
+        "id": "bigint primary key",
+        "migrationRunId": "bigint not null references migrationRuns",
+        "sourceTable": "varchar(80) not null",
+        "sourceId": "bigint null",
+        "category": "varchar(120) not null",
+        "disposition": "migrationIssueDisposition not null",
+        "payloadFingerprint": "char(64) not null",
+        "sanitizedDetail": "json object not null",
+        "resolvedByUserId": "bigint null references users",
+        "resolvedAt": "timestamp null"
+      },
+      "constraints": ["unique(migrationRunId,sourceTable,sourceId,category)", "no credential or unrestricted source-row payload"]
+    },
+    "legacyIdentities": {
+      "tenantOwned": false,
+      "fields": {
+        "id": "bigint primary key",
+        "migrationRunId": "bigint not null references migrationRuns",
+        "sourceTable": "varchar(80) not null",
+        "sourceId": "bigint not null",
+        "targetEntity": "varchar(80) not null",
+        "targetId": "bigint not null"
+      },
+      "constraints": ["unique(migrationRunId,sourceTable,sourceId,targetEntity,targetId)"]
+    }
+  }
+}

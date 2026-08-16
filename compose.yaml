@@ -47,7 +47,24 @@ services:
       - .:/work
     networks: [ingress]
 
+  migration-db:
+    profiles: [migration]
+    image: mariadb@sha256:345fa26d595e8c7fe298e0c4098ed400356f502458769c8902229b3437d6da2b
+    environment:
+      MARIADB_DATABASE: freehub_preflight
+      MARIADB_USER: freehub
+      MARIADB_PASSWORD: freehub
+      MARIADB_ROOT_PASSWORD: local-only-root
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    networks: [migration]
+
 networks:
   legacy:
     internal: true
   ingress: {}
+  migration:
+    internal: true

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": 1,
+  "sourceSha256": "654487725baaff97ebbfad7f9c54809fe5b09e043a78c9a1d0159a251409ebd0",
+  "summary": {
+    "sourceRows": 60,
+    "importedSourceRows": 32,
+    "quarantinedSourceRows": 28,
+    "legacyIdentityMappings": 33,
+    "reconciliationPass": true
+  },
+  "tables": [
+    {"sourceTable":"organizations","importedSourceRows":2,"quarantinedSourceRows":3,"legacyIdentityMappings":2,"quarantineCategories":{"missing_required":1,"duplicate_key":1,"invalid_timezone":1}},
+    {"sourceTable":"users","importedSourceRows":4,"quarantinedSourceRows":3,"legacyIdentityMappings":4,"quarantineCategories":{"missing_required":1,"duplicate_login":1,"duplicate_email":1}},
+    {"sourceTable":"roles","importedSourceRows":3,"quarantinedSourceRows":5,"legacyIdentityMappings":3,"quarantineCategories":{"unknown_role":1,"retired_owner_role":1,"invalid_scope":1,"orphan_scope":1,"unassigned_role":1}},
+    {"sourceTable":"roles_users","importedSourceRows":3,"quarantinedSourceRows":4,"legacyIdentityMappings":3,"quarantineCategories":{"orphan_user":1,"orphan_role":1,"role_not_importable":1,"duplicate_join":1}},
+    {"sourceTable":"people","importedSourceRows":3,"quarantinedSourceRows":2,"legacyIdentityMappings":3,"quarantineCategories":{"orphan_organization":1,"missing_first_name":1}},
+    {"sourceTable":"visits","importedSourceRows":5,"quarantinedSourceRows":1,"legacyIdentityMappings":5,"quarantineCategories":{"orphan_person":1}},
+    {"sourceTable":"services","importedSourceRows":2,"quarantinedSourceRows":2,"legacyIdentityMappings":2,"quarantineCategories":{"orphan_person":1,"unknown_service_type":1}},
+    {"sourceTable":"notes","importedSourceRows":3,"quarantinedSourceRows":2,"legacyIdentityMappings":3,"quarantineCategories":{"unsupported_target_type":1,"orphan_target":1}},
+    {"sourceTable":"tags","importedSourceRows":3,"quarantinedSourceRows":2,"legacyIdentityMappings":4,"quarantineCategories":{"blank_name":1,"unowned_tag":1}},
+    {"sourceTable":"taggings","importedSourceRows":4,"quarantinedSourceRows":4,"legacyIdentityMappings":4,"quarantineCategories":{"unsupported_target":1,"orphan_tag":1,"orphan_person":1,"duplicate_join":1}}
+  ]
+}

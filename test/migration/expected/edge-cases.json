@@ -1,0 +1,229 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": 1,
+  "source": {
+    "label": "edge-cases",
+    "sha256": "654487725baaff97ebbfad7f9c54809fe5b09e043a78c9a1d0159a251409ebd0",
+    "engine": "MariaDB",
+    "database": "freehub_preflight",
+    "readOnlyTransaction": true
+  },
+  "contract": {
+    "canonicalSchemaSha256": "705fa029e51707255cd3e1765f937dc47e85361e89f4c16862c0ec80df81bccf",
+    "migrationRulesSha256": "a43fb03848f525d2be400726cd26a8632b6750f5f4bcba0a979cc62c6c17d292",
+    "preflightSqlSha256": "d7a660a0d7d85cc800fdf29dff1a0f4f8641aff0798a9176f5002e06da5ca26d"
+  },
+  "summary": {
+    "sourceRows": 60,
+    "importCandidates": 32,
+    "quarantined": 28,
+    "accountingPass": true
+  },
+  "tables": [
+    {
+      "sourceTable": "organizations",
+      "sourceCount": 5,
+      "importCandidates": 2,
+      "quarantined": 3,
+      "accountingPass": true,
+      "quarantineCategories": {
+        "missing_required": 1,
+        "duplicate_key": 1,
+        "invalid_timezone": 1
+      }
+    },
+    {
+      "sourceTable": "users",
+      "sourceCount": 7,
+      "importCandidates": 4,
+      "quarantined": 3,
+      "accountingPass": true,
+      "quarantineCategories": {
+        "missing_required": 1,
+        "duplicate_login": 1,
+        "duplicate_email": 1
+      }
+    },
+    {
+      "sourceTable": "roles",
+      "sourceCount": 8,
+      "importCandidates": 3,
+      "quarantined": 5,
+      "accountingPass": true,
+      "quarantineCategories": {
+        "unknown_role": 1,
+        "retired_owner_role": 1,
+        "invalid_scope": 1,
+        "orphan_scope": 1,
+        "unassigned_role": 1
+      }
+    },
+    {
+      "sourceTable": "roles_users",
+      "sourceCount": 7,
+      "importCandidates": 3,
+      "quarantined": 4,
+      "accountingPass": true,
+      "quarantineCategories": {
+        "orphan_user": 1,
+        "orphan_role": 1,
+        "role_not_importable": 1,
+        "duplicate_join": 1
+      }
+    },
+    {
+      "sourceTable": "people",
+      "sourceCount": 5,
+      "importCandidates": 3,
+      "quarantined": 2,
+      "accountingPass": true,
+      "quarantineCategories": {
+        "orphan_organization": 1,
+        "missing_first_name": 1
+      }
+    },
+    {
+      "sourceTable": "visits",
+      "sourceCount": 6,
+      "importCandidates": 5,
+      "quarantined": 1,
+      "accountingPass": true,
+      "quarantineCategories": {
+        "orphan_person": 1
+      }
+    },
+    {
+      "sourceTable": "services",
+      "sourceCount": 4,
+      "importCandidates": 2,
+      "quarantined": 2,
+      "accountingPass": true,
+      "quarantineCategories": {
+        "orphan_person": 1,
+        "unknown_service_type": 1
+      }
+    },
+    {
+      "sourceTable": "notes",
+      "sourceCount": 5,
+      "importCandidates": 3,
+      "quarantined": 2,
+      "accountingPass": true,
+      "quarantineCategories": {
+        "unsupported_target_type": 1,
+        "orphan_target": 1
+      }
+    },
+    {
+      "sourceTable": "tags",
+      "sourceCount": 5,
+      "importCandidates": 3,
+      "quarantined": 2,
+      "accountingPass": true,
+      "quarantineCategories": {
+        "blank_name": 1,
+        "unowned_tag": 1
+      }
+    },
+    {
+      "sourceTable": "taggings",
+      "sourceCount": 8,
+      "importCandidates": 4,
+      "quarantined": 4,
+      "accountingPass": true,
+      "quarantineCategories": {
+        "unsupported_target": 1,
+        "orphan_tag": 1,
+        "orphan_person": 1,
+        "duplicate_join": 1
+      }
+    }
+  ],
+  "issues": [
+    {
+      "sourceTable": "notes",
+      "category": "orphan_audit_user_to_null",
+      "count": 1
+    },
+    {
+      "sourceTable": "people",
+      "category": "duplicate_normalized_email",
+      "count": 1
+    },
+    {
+      "sourceTable": "people",
+      "category": "duplicate_normalized_phone",
+      "count": 1
+    },
+    {
+      "sourceTable": "people",
+      "category": "invalid_year_of_birth_to_null",
+      "count": 1
+    },
+    {
+      "sourceTable": "people",
+      "category": "orphan_audit_user_to_null",
+      "count": 1
+    },
+    {
+      "sourceTable": "services",
+      "category": "orphan_audit_user_to_null",
+      "count": 1
+    },
+    {
+      "sourceTable": "services",
+      "category": "service_end_before_start",
+      "count": 1
+    },
+    {
+      "sourceTable": "tags",
+      "category": "merge_duplicate_tenant_tag_name",
+      "count": 1
+    },
+    {
+      "sourceTable": "users",
+      "category": "discard_legacy_credentials",
+      "count": 4
+    },
+    {
+      "sourceTable": "users",
+      "category": "user_without_membership",
+      "count": 1
+    },
+    {
+      "sourceTable": "visits",
+      "category": "duration_timestamp_mismatch",
+      "count": 2
+    },
+    {
+      "sourceTable": "visits",
+      "category": "negative_duration_to_null",
+      "count": 1
+    },
+    {
+      "sourceTable": "visits",
+      "category": "orphan_audit_user_to_null",
+      "count": 1
+    },
+    {
+      "sourceTable": "visits",
+      "category": "visit_end_before_start",
+      "count": 1
+    },
+    {
+      "sourceTable": "visits",
+      "category": "visit_end_without_start",
+      "count": 1
+    },
+    {
+      "sourceTable": "visits",
+      "category": "visit_start_before_arrival",
+      "count": 1
+    },
+    {
+      "sourceTable": "visits",
+      "category": "zero_datetime_to_null",
+      "count": 1
+    }
+  ]
+}

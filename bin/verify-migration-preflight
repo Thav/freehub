@@ -1,0 +1,48 @@
+#!/usr/bin/env sh
+set -eu
+
+output_root=$(mktemp -d tmp/migration-preflight.XXXXXX)
+source_sha=971fa9dfcd1b167265c9dd535b803df025a2d244dfb8b1240829e238eb88e17a
+edge_sha=$(sha256sum test/migration/edge-cases.sql | awk '{print $1}')
+
+node test/migration/validate-contract.mjs
+bin/restore-legacy-source
+
+bin/migration-preflight \
+  --service db \
+  --database freehub_legacy \
+  --label sanitized-source \
+  --source-sha256 "$source_sha" > "$output_root/source-1.json"
+bin/migration-preflight \
+  --service db \
+  --database freehub_legacy \
+  --label sanitized-source \
+  --source-sha256 "$source_sha" > "$output_root/source-2.json"
+cmp "$output_root/source-1.json" "$output_root/source-2.json"
+cmp "$output_root/source-1.json" test/migration/expected/sanitized-source.json
+bin/migration-reconcile \
+  "$output_root/source-1.json" \
+  test/migration/expected/sanitized-source-ledger.json
+
+docker compose --profile migration rm -sfv migration-db
+docker compose --profile migration up -d --wait migration-db
+docker compose --profile migration exec -T migration-db \
+  mariadb -ufreehub --password=freehub freehub_preflight < test/migration/edge-cases.sql
+
+bin/migration-preflight \
+  --service migration-db \
+  --database freehub_preflight \
+  --label edge-cases \
+  --source-sha256 "$edge_sha" > "$output_root/edge-1.json"
+bin/migration-preflight \
+  --service migration-db \
+  --database freehub_preflight \
+  --label edge-cases \
+  --source-sha256 "$edge_sha" > "$output_root/edge-2.json"
+cmp "$output_root/edge-1.json" "$output_root/edge-2.json"
+cmp "$output_root/edge-1.json" test/migration/expected/edge-cases.json
+bin/migration-reconcile \
+  "$output_root/edge-1.json" \
+  test/migration/expected/edge-cases-ledger.json
+
+printf 'Deterministic source and edge-case preflight reports match: %s\n' "$output_root"

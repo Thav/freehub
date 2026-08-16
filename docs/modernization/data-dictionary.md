@@ -115,8 +115,9 @@ as DEF-006.
 | `created_by_id`, `updated_by_id` | integer, indexed | Optional userstamp references. |
 | `created_at`, `updated_at` | datetime | Lifecycle timestamps and aggregate ordering. |
 
-The source archive contains orphaned notes. Migration must import valid attachments
-plus quarantine invalid/orphaned rows to equal the source total.
+Preflight counts 13,543 source notes: 2,197 valid attachments and 11,346 missing
+targets. Migration imports valid attachments and quarantines every invalid/orphaned
+row so the categories equal the source total.
 
 ## `tags` and `taggings`
 
@@ -131,7 +132,9 @@ plus quarantine invalid/orphaned rows to equal the source total.
 
 Organization tags are inferred through tagged people, which allows global-name and
 orphan ambiguity. Modern tags require explicit organization ownership. The source
-contains orphaned taggings that must be quarantined and reconciled.
+contains 61 orphaned taggings that must be quarantined and reconciled. Four of the
+eight source tags have no valid organization after those taggings are removed and
+are quarantined as unowned.
 
 ## Modern-only records
 
@@ -144,4 +147,4 @@ contains orphaned taggings that must be quarantined and reconciled.
 
 FH-005 owns canonical naming, database constraints and exact conversion rules. It
 must reconcile each source table as `source = imported + quarantined`, convert the
-known zero-date to null with an issue, and preserve source IDs where safe.
+three zero arrival datetimes to null with issues, and preserve source IDs where safe.

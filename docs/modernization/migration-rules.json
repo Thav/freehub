@@ -1,0 +1,262 @@
+{
+  "contractVersion": 1,
+  "source": {
+    "engine": "MariaDB",
+    "database": "freehub_legacy",
+    "readOnly": true,
+    "tables": [
+      "organizations",
+      "users",
+      "roles",
+      "roles_users",
+      "people",
+      "visits",
+      "services",
+      "notes",
+      "tags",
+      "taggings"
+    ]
+  },
+  "accounting": {
+    "equation": "sourceCount = importCandidates + quarantined",
+    "categoryPrecedence": "The first matching quarantine category wins; categories are disjoint within a table.",
+    "tables": {
+      "organizations": ["missing_required", "duplicate_key", "invalid_timezone"],
+      "users": ["missing_required", "duplicate_login", "duplicate_email"],
+      "roles": ["unknown_role", "retired_owner_role", "invalid_scope", "orphan_scope", "unassigned_role"],
+      "roles_users": ["orphan_user", "orphan_role", "role_not_importable", "duplicate_join"],
+      "people": ["orphan_organization", "missing_first_name"],
+      "visits": ["orphan_person"],
+      "services": ["orphan_person", "unknown_service_type"],
+      "notes": ["unsupported_target_type", "orphan_target"],
+      "tags": ["blank_name", "unowned_tag"],
+      "taggings": ["unsupported_target", "orphan_tag", "orphan_person", "duplicate_join"]
+    }
+  },
+  "quarantineCategoryDefinitions": {
+    "organizations.missing_required": "Name, key, or timezone is null or blank.",
+    "organizations.duplicate_key": "A lower source ID has the same case-insensitive trimmed key.",
+    "organizations.invalid_timezone": "Timezone is not one of the explicit Rails-label mappings.",
+    "users.missing_required": "Login, email, or name is null or blank.",
+    "users.duplicate_login": "A lower source ID has the same case-insensitive trimmed login.",
+    "users.duplicate_email": "A lower source ID has the same case-insensitive trimmed email after login precedence.",
+    "roles.unknown_role": "Role name is null or is not admin, manager, or owner.",
+    "roles.retired_owner_role": "Resource-level owner authorization is deliberately not migrated.",
+    "roles.invalid_scope": "Admin is scoped or manager is not scoped to a concrete Organization.",
+    "roles.orphan_scope": "The manager role references a missing Organization.",
+    "roles.unassigned_role": "No existing source user is joined to the supported role.",
+    "roles_users.orphan_user": "The join references a missing source user.",
+    "roles_users.orphan_role": "The join references a missing source role.",
+    "roles_users.role_not_importable": "The referenced role fails the supported shape or organization checks.",
+    "roles_users.duplicate_join": "A prior row has the same user and role IDs.",
+    "people.orphan_organization": "Organization ID is null or references a missing source organization.",
+    "people.missing_first_name": "First name is null or blank.",
+    "visits.orphan_person": "Person ID is null or references a missing source person.",
+    "services.orphan_person": "Person ID is null or references a missing source person.",
+    "services.unknown_service_type": "Service type is null or is not MEMBERSHIP, EAB, or CLASS.",
+    "notes.unsupported_target_type": "Notable type is null or is not Person, Visit, or Service.",
+    "notes.orphan_target": "Notable ID is null or missing from the selected target table.",
+    "tags.blank_name": "Tag name is null or blank.",
+    "tags.unowned_tag": "No valid Person tagging connects the global source tag to an organization.",
+    "taggings.unsupported_target": "Target is not a Person in the tags context.",
+    "taggings.orphan_tag": "Tag ID is null or references a missing source tag.",
+    "taggings.orphan_person": "Person ID is null or references a missing source person.",
+    "taggings.duplicate_join": "A lower tagging ID has the same tag, target, type, and context."
+  },
+  "timezoneMappings": {
+    "Pacific Time (US & Canada)": "America/Los_Angeles",
+    "Mountain Time (US & Canada)": "America/Denver",
+    "Central Time (US & Canada)": "America/Chicago",
+    "Eastern Time (US & Canada)": "America/New_York",
+    "Alaska": "America/Anchorage",
+    "Hawaii": "Pacific/Honolulu",
+    "UTC": "Etc/UTC"
+  },
+  "roleMappings": {
+    "admin|null": "users.platformAdministrator=true",
+    "manager|Organization": "organizationMemberships.role=manager",
+    "owner|*": "quarantine:retired_owner_role"
+  },
+  "serviceTypeMappings": {
+    "MEMBERSHIP": "membership",
+    "EAB": "earn_a_bike",
+    "CLASS": "class"
+  },
+  "transformations": [
+    {
+      "id": "organization_timezone_to_iana",
+      "sourceTable": "organizations",
+      "action": "Map an accepted Rails timezone label to the listed IANA identifier before import.",
+      "issueWhenApplied": false
+    },
+    {
+      "id": "discard_legacy_credentials",
+      "sourceTable": "users",
+      "action": "Never copy crypted_password, salt, remember_token, activation_code, reset_code, or other bearer credentials; issue a temporary password and require change at first login.",
+      "issueWhenApplied": true
+    },
+    {
+      "id": "user_without_membership",
+      "sourceTable": "users",
+      "action": "Import the global user record but record an open issue when no valid platform or organization role survives preflight.",
+      "issueWhenApplied": true
+    },
+    {
+      "id": "map_legacy_role",
+      "sourceTable": "roles",
+      "action": "Map supported legacy role shapes through roleMappings; roles_users supplies the user side.",
+      "issueWhenApplied": false
+    },
+    {
+      "id": "derive_person_display_name",
+      "sourceTable": "people",
+      "action": "Derive displayName from trimmed firstName and lastName; do not trust legacy full_name.",
+      "issueWhenApplied": false
+    },
+    {
+      "id": "normalize_person_email",
+      "sourceTable": "people",
+      "action": "Set normalizedEmail to lowercase trimmed email while retaining the display value.",
+      "issueWhenApplied": false
+    },
+    {
+      "id": "normalize_person_phone",
+      "sourceTable": "people",
+      "action": "Set normalizedPhone to digits plus an optional leading plus while retaining the display value.",
+      "issueWhenApplied": false
+    },
+    {
+      "id": "duplicate_normalized_email",
+      "sourceTable": "people",
+      "action": "Import all rows; record an issue for every row after the lowest source ID in an organization-scoped normalized-email group.",
+      "issueWhenApplied": true
+    },
+    {
+      "id": "duplicate_normalized_phone",
+      "sourceTable": "people",
+      "action": "Import all rows; record an issue for every row after the lowest source ID in an organization-scoped normalized-phone group.",
+      "issueWhenApplied": true
+    },
+    {
+      "id": "invalid_year_of_birth_to_null",
+      "sourceTable": "people",
+      "action": "Convert years outside 1900 through the migration-year to null and record an issue.",
+      "issueWhenApplied": true
+    },
+    {
+      "id": "orphan_audit_user_to_null",
+      "sourceTable": "people|visits|services|notes",
+      "action": "Convert a non-null created_by_id or updated_by_id without a source user to null and record one issue per affected source row.",
+      "issueWhenApplied": true
+    },
+    {
+      "id": "visit_activity_to_enum",
+      "sourceTable": "visits",
+      "action": "Map volunteer=false to project and volunteer=true to volunteering.",
+      "issueWhenApplied": false
+    },
+    {
+      "id": "zero_datetime_to_null",
+      "sourceTable": "visits",
+      "action": "Convert a zero arrived_at, start_at, or end_at to null and record an issue; the migrated row remains an import candidate when its person exists.",
+      "issueWhenApplied": true
+    },
+    {
+      "id": "duration_to_integer_seconds",
+      "sourceTable": "visits",
+      "action": "Round a nonnegative finite legacy duration to integer seconds; negative values become null with an issue.",
+      "issueWhenApplied": false
+    },
+    {
+      "id": "duration_timestamp_mismatch",
+      "sourceTable": "visits",
+      "action": "Preserve rounded source duration and record an issue when complete timestamps imply a different duration.",
+      "issueWhenApplied": true
+    },
+    {
+      "id": "visit_temporal_anomaly",
+      "sourceTable": "visits",
+      "action": "Preserve historical timestamps but record an issue when start precedes arrival, end exists without start, or end precedes start; new writes reject these shapes.",
+      "issueWhenApplied": true
+    },
+    {
+      "id": "service_type_to_enum",
+      "sourceTable": "services",
+      "action": "Map service_type_id through serviceTypeMappings.",
+      "issueWhenApplied": false
+    },
+    {
+      "id": "service_inclusive_dates",
+      "sourceTable": "services",
+      "action": "Interpret both start_date and end_date as inclusive organization-local dates.",
+      "issueWhenApplied": false
+    },
+    {
+      "id": "service_temporal_anomaly",
+      "sourceTable": "services",
+      "action": "Preserve historical dates and record an issue when end_date precedes start_date; new writes reject this shape.",
+      "issueWhenApplied": true
+    },
+    {
+      "id": "note_polymorphic_target",
+      "sourceTable": "notes",
+      "action": "Map Person, Visit, or Service to exactly one explicit foreign key and derive organization ownership through that target.",
+      "issueWhenApplied": false
+    },
+    {
+      "id": "tag_tenant_fanout",
+      "sourceTable": "tags",
+      "action": "Create one organization-owned tag per distinct organization reached through valid Person taggings; record legacy identity mappings for every output row.",
+      "issueWhenApplied": false
+    },
+    {
+      "id": "merge_duplicate_tenant_tag_name",
+      "sourceTable": "tags",
+      "action": "Within an organization, map case-insensitively equal source names to the lowest canonical tag ID and record an issue for each merged source tag.",
+      "issueWhenApplied": true
+    },
+    {
+      "id": "tagging_tenant_from_person",
+      "sourceTable": "taggings",
+      "action": "Derive organizationId from the valid tagged Person and map to that organization's canonical tag.",
+      "issueWhenApplied": false
+    }
+  ],
+  "reportIssueCategories": [
+    "discard_legacy_credentials",
+    "user_without_membership",
+    "duplicate_normalized_email",
+    "duplicate_normalized_phone",
+    "invalid_year_of_birth_to_null",
+    "orphan_audit_user_to_null",
+    "zero_datetime_to_null",
+    "negative_duration_to_null",
+    "duration_timestamp_mismatch",
+    "visit_start_before_arrival",
+    "visit_end_without_start",
+    "visit_end_before_start",
+    "service_end_before_start",
+    "merge_duplicate_tenant_tag_name"
+  ],
+  "reportIssueCategoryDefinitions": {
+    "discard_legacy_credentials": "Candidate user has legacy credential material that is discarded and replaced at cutover.",
+    "user_without_membership": "Candidate user has no surviving platform or organization authorization.",
+    "duplicate_normalized_email": "A prior person in the organization has the same nonblank normalized email.",
+    "duplicate_normalized_phone": "A prior person in the organization has the same nonblank normalized phone.",
+    "invalid_year_of_birth_to_null": "Year of birth is outside 1900 through 2026 and becomes null.",
+    "orphan_audit_user_to_null": "At least one non-null audit user ID is missing and becomes null.",
+    "zero_datetime_to_null": "At least one visit datetime is a MySQL zero value and becomes null.",
+    "negative_duration_to_null": "Legacy visit duration is negative and becomes null.",
+    "duration_timestamp_mismatch": "Rounded source duration differs from the interval between complete start/end timestamps.",
+    "visit_start_before_arrival": "Visit start timestamp precedes arrival timestamp.",
+    "visit_end_without_start": "Visit has an end timestamp but no start timestamp.",
+    "visit_end_before_start": "Visit end timestamp precedes start timestamp.",
+    "service_end_before_start": "Service end date precedes start date.",
+    "merge_duplicate_tenant_tag_name": "A source tag maps to an organization where a lower source tag has the same case-insensitive name."
+  },
+  "privacy": {
+    "reportContents": "Aggregate counts, category identifiers, schema/rules hashes, and source label only.",
+    "forbidden": ["source row payloads", "names", "emails", "phones", "addresses", "password material", "tokens"],
+    "issuePersistence": "Store source table/id plus a SHA-256 payload fingerprint and narrowly sanitized category detail."
+  }
+}
