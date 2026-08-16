@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "active_ticket": null,
+  "active_ticket": "FH-003",
   "tickets": [
     {
       "id": "FH-001",
@@ -45,13 +45,13 @@
     {
       "id": "FH-003",
       "title": "Load sanitized legacy data and deterministic fixtures",
-      "status": "pending",
+      "status": "in_progress",
       "path": "docs/modernization/tickets/FH-003-legacy-data-and-fixtures.md",
       "depends_on": [
         "FH-002"
       ],
-      "claimed_at": null,
-      "updated_at": null,
+      "claimed_at": "2026-08-16T12:59:01.434Z",
+      "updated_at": "2026-08-16T12:59:01.434Z",
       "blocked_reason": null,
       "unblock_condition": null,
       "evidence": [],
