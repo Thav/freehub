@@ -1,17 +1,17 @@
 {
   "version": 1,
-  "active_ticket": null,
+  "active_ticket": "FH-001",
   "tickets": [
     {
       "id": "FH-001",
       "title": "Bootstrap the persistent sbx development sandbox",
-      "status": "blocked",
+      "status": "in_progress",
       "path": "docs/modernization/tickets/FH-001-sbx-bootstrap.md",
       "depends_on": [],
-      "claimed_at": "2026-08-15T19:42:36.111Z",
-      "updated_at": "2026-08-15T19:42:36.140Z",
-      "blocked_reason": "The sbx CLI is a host-side facility and is not available inside this workspace; the installed Docker client cannot access a daemon.",
-      "unblock_condition": "On the host, create or reconnect to sbx named freehub, then run bin/environment-diagnostics and verify image-cache persistence across reconnects.",
+      "claimed_at": "2026-08-16T01:00:36.173Z",
+      "updated_at": "2026-08-16T01:00:36.173Z",
+      "blocked_reason": null,
+      "unblock_condition": null,
       "evidence": [],
       "implementation_commits": []
     },
