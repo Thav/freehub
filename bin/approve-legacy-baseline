@@ -1,0 +1,57 @@
+#!/usr/bin/env sh
+set -eu
+
+candidate=${1:-}
+review=${2:-}
+test -n "$candidate" && test -n "$review" || {
+  echo "usage: bin/approve-legacy-baseline tmp/CANDIDATE REVIEW.json" >&2
+  exit 1
+}
+case "$candidate" in
+  tmp/*) ;;
+  *) echo "candidate must be below tmp/: $candidate" >&2; exit 1 ;;
+esac
+
+test -f "$candidate/manifest.json"
+test -f "$candidate/evidence.json"
+test -d "$candidate/screenshots"
+test -f "$review"
+
+node - "$candidate/manifest.json" "$candidate/evidence.json" "$review" <<'NODE'
+const fs = require("fs");
+const crypto = require("crypto");
+const [manifestPath, evidencePath, reviewPath] = process.argv.slice(2);
+const manifestBytes = fs.readFileSync(manifestPath);
+const manifest = JSON.parse(manifestBytes);
+const evidence = JSON.parse(fs.readFileSync(evidencePath));
+const review = JSON.parse(fs.readFileSync(reviewPath));
+const hash = crypto.createHash("sha256").update(manifestBytes).digest("hex");
+if (review.manifestSha256 !== hash || evidence.manifestSha256 !== hash) {
+  throw new Error("review, evidence, and manifest hashes do not match");
+}
+if (!review.reviewer || !review.reviewedAt || !review.reviewMethod) {
+  throw new Error("reviewer, reviewedAt, and reviewMethod are required");
+}
+const wanted = manifest.captures.filter((item) => (item.kind || "screenshot") === "screenshot").map((item) => item.id);
+const decisions = new Map((review.entries || []).map((entry) => [entry.id, entry]));
+for (const id of wanted) {
+  const decision = decisions.get(id);
+  if (!decision || decision.decision !== "approved" || !decision.personalDataFinding) {
+    throw new Error(`screenshot ${id} lacks an approved personal-data finding`);
+  }
+}
+if (decisions.size !== wanted.length) throw new Error("review contains missing or unexpected screenshot entries");
+NODE
+
+destination=docs/modernization/visual-baseline
+test ! -e "$destination/screenshots" || {
+  echo "approved baseline already exists; replacement requires owner review and explicit removal" >&2
+  exit 1
+}
+mkdir -p "$destination"
+cp -R "$candidate/screenshots" "$destination/screenshots"
+cp "$candidate/manifest.json" "$destination/manifest.json"
+cp "$candidate/evidence.json" "$destination/evidence.json"
+cp "$review" "$destination/personal-data-review.json"
+
+printf 'Approved visual baseline copied to %s\n' "$destination"

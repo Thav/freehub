@@ -27,7 +27,23 @@ FH-003.
 
 ## Verification
 
-Run the full capture twice and confirm stable manifest coverage and reviewed output.
+Run static validation, then the full capture twice and confirm stable manifest
+coverage and reviewed output:
+
+```bash
+node --check test/legacy-visual/capture.mjs
+node -e 'JSON.parse(require("fs").readFileSync("test/legacy-visual/manifest.json"))'
+sh -n bin/capture-legacy-baseline bin/verify-legacy-baseline bin/approve-legacy-baseline
+bin/verify-legacy-baseline
+git diff --check
+bin/ralph validate
+```
+
+`bin/verify-legacy-baseline` must byte-compare two independent clean fixture
+restores and the committed approved baseline. Approval additionally requires a
+completed per-image `personal-data-review.json`; CSV bodies remain ignored
+candidate artifacts and only their headers, sizes, filenames, and hashes are
+committed as evidence.
 
 ## Rollback and handoff
 

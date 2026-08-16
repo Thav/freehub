@@ -1,0 +1,244 @@
+{
+  "schemaVersion": 1,
+  "manifestSha256": "fb7d19c5889aaff9ac67f259e9112506a977d1435765d1a6620f9631d0fd6365",
+  "reviewer": "Codex full-resolution visual review",
+  "reviewedAt": "2026-08-16T15:00:00Z",
+  "reviewMethod": "Contact sheet plus every full-resolution PNG",
+  "entries": [
+    {
+      "id": "auth-login",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "auth-login-error",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "auth-forgot",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "organization-home",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "organization-settings",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "organization-empty-home",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "people-search-results",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "people-new",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "people-validation",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "person-current-member",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "person-expired-member",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "person-patron",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "person-staff",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "person-edit",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "person-tags-edit",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "tag-people",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "tag-pagination",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "visits-today",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "visits-historical",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "visits-empty",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "visits-index",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "visit-detail",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "visit-new",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "visit-edit",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "services-index",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "service-detail",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "service-new",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "service-edit",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "notes-index",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "note-detail",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "note-new",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "note-edit",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "reports-index",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "report-people",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "report-people-empty",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "report-services",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "report-services-empty",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "report-visits",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "report-visits-empty",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "report-summary",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "report-summary-empty-error",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "user-profile",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "user-edit",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "workflow-person-create",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "workflow-visit-queue",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "workflow-visit-sign-in",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    },
+    {
+      "id": "workflow-visit-sign-out",
+      "decision": "approved",
+      "personalDataFinding": "Only documented synthetic fixture data is visible; no personal data found."
+    }
+  ]
+}

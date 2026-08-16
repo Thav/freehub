@@ -1,0 +1,744 @@
+{
+  "schemaVersion": 1,
+  "manifestSha256": "fb7d19c5889aaff9ac67f259e9112506a977d1435765d1a6620f9631d0fd6365",
+  "baseOrigin": "http://legacy:3000",
+  "viewport": {
+    "width": 1280,
+    "height": 900
+  },
+  "results": [
+    {
+      "id": "auth-login",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/session/new",
+      "labels": [
+        "Log In",
+        "Login",
+        "Password",
+        "Forgot username or password?"
+      ],
+      "screenshot": "auth-login.png",
+      "bytes": 31231,
+      "sha256": "31ce345d4402c0d1f8cd4c13f9726f5268a00698532f607b0208a04c4939cd0c"
+    },
+    {
+      "id": "auth-login-error",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/session",
+      "labels": [
+        "Log in failed",
+        "Log In"
+      ],
+      "screenshot": "auth-login-error.png",
+      "bytes": 32221,
+      "sha256": "174eceabe215a7f94d58df769126377a50b45127345acb6e83a447c3eaf54faf"
+    },
+    {
+      "id": "auth-forgot",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/forgot",
+      "labels": [
+        "Send password reset",
+        "Email",
+        "Submit"
+      ],
+      "screenshot": "auth-forgot.png",
+      "bytes": 36602,
+      "sha256": "9d2c2a13664b10731ed4a6298c46dffa2465c6d7d28ec4b2abdf13d48db96d59"
+    },
+    {
+      "id": "organization-home",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab",
+      "labels": [
+        "Fixture Workshop",
+        "Add a person to the queue",
+        "Start typing to find a person"
+      ],
+      "screenshot": "organization-home.png",
+      "bytes": 35869,
+      "sha256": "6803f40bc877e41bec80ea54dd51b6c53ac5662ff487a2f93ca060a84fe6440d"
+    },
+    {
+      "id": "organization-settings",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/edit",
+      "labels": [
+        "Fixture Workshop",
+        "Edit",
+        "Organization Name",
+        "Timezone",
+        "Update"
+      ],
+      "screenshot": "organization-settings.png",
+      "bytes": 54040,
+      "sha256": "3ce216ed8d99c486b78c3a768d31da2e50022dea824f441c7dd786231fbd3689"
+    },
+    {
+      "id": "organization-empty-home",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-empty",
+      "labels": [
+        "Fixture Empty Workshop",
+        "Add a person to the queue"
+      ],
+      "screenshot": "organization-empty-home.png",
+      "bytes": 36746,
+      "sha256": "fa069327a13d42720a8edcef33f9493e954a2a4b50edb0b10217cfff93481935"
+    },
+    {
+      "id": "authorization-denied",
+      "kind": "probe",
+      "status": 200,
+      "finalPath": "/",
+      "labels": [
+        "fixture_observer"
+      ],
+      "bodySha256": "09883908369403fd6275a98568964d2357630c9d1b1efa6000fe629e72e50fc1"
+    },
+    {
+      "id": "people-search-results",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab",
+      "labels": [
+        "Current Member"
+      ],
+      "screenshot": "people-search-results.png",
+      "bytes": 35598,
+      "sha256": "ee4f39ff93299b78405aae30b0eacbf22216be70cf4f19d0d7a972dba8068ecf"
+    },
+    {
+      "id": "people-new",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/people/new",
+      "labels": [
+        "People : New",
+        "Only First Name is required",
+        "Name",
+        "Create"
+      ],
+      "screenshot": "people-new.png",
+      "bytes": 50917,
+      "sha256": "b12eb5c4482caba4224d4adc284ae611f04fc814403b48fb11bd943f2ad55490"
+    },
+    {
+      "id": "people-validation",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/people",
+      "labels": [
+        "There were problems with the following fields",
+        "First name can't be blank"
+      ],
+      "screenshot": "people-validation.png",
+      "bytes": 55971,
+      "sha256": "a8feaf05c67446959dad56606a0dd52757b8babe2bcd9221ac84c549fbb1b385"
+    },
+    {
+      "id": "person-current-member",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/people/900001",
+      "labels": [
+        "Current Member",
+        "Member",
+        "Membership expires",
+        "Recent Visits",
+        "Recent Notes"
+      ],
+      "screenshot": "person-current-member.png",
+      "bytes": 81883,
+      "sha256": "bcc94987c5987becf76a91a82afd11d6606dab5735b3918c1bb58b7917d81088"
+    },
+    {
+      "id": "person-expired-member",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/people/900002",
+      "labels": [
+        "Expired Member",
+        "Patron",
+        "Membership expired",
+        "Renew"
+      ],
+      "screenshot": "person-expired-member.png",
+      "bytes": 74229,
+      "sha256": "a8f9808e7440373d7688284fa7d9b940d5108ecab35944a92d66f2b2cd0d5412"
+    },
+    {
+      "id": "person-patron",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/people/900003",
+      "labels": [
+        "Patron NoService",
+        "Patron",
+        "Not a member",
+        "Class"
+      ],
+      "screenshot": "person-patron.png",
+      "bytes": 74821,
+      "sha256": "2b3d7f0b2d4e44c37bdda67e427668ace234f0e9c5e40eac22c89c81b5601897"
+    },
+    {
+      "id": "person-staff",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/people/900004",
+      "labels": [
+        "Staff Volunteer",
+        "Staff",
+        "Volunteer",
+        "Sign In"
+      ],
+      "screenshot": "person-staff.png",
+      "bytes": 89079,
+      "sha256": "44c1228e69ee1d2c23f74574cc39b8eb51bf7597e24d08b468fbf753e7562118"
+    },
+    {
+      "id": "person-edit",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/people/900001/edit",
+      "labels": [
+        "Current Member",
+        "Detail",
+        "Email",
+        "Update"
+      ],
+      "screenshot": "person-edit.png",
+      "bytes": 55646,
+      "sha256": "086c123d68b8756678ccc1c9aafb94d6d3683cac5f69eff3aaef973804b72bbc"
+    },
+    {
+      "id": "person-tags-edit",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/people/900001",
+      "labels": [
+        "fixture tag",
+        "Choose tag",
+        "New tag",
+        "Done"
+      ],
+      "screenshot": "person-tags-edit.png",
+      "bytes": 82537,
+      "sha256": "fb31e949ae053f99ed13bd6c2b92eb044e8b0efe75322c016531df433aa95e10"
+    },
+    {
+      "id": "tag-people",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/tags/900001",
+      "labels": [
+        "Tag : fixture tag",
+        "Current Member",
+        "All Tags"
+      ],
+      "screenshot": "tag-people.png",
+      "bytes": 49446,
+      "sha256": "fa41ff1f30a65555130a29812b766cabea8d1a1af45a455cc19885c89d10b208"
+    },
+    {
+      "id": "tag-pagination",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/tags/900003",
+      "labels": [
+        "Tag : fixture pagination",
+        "More:"
+      ],
+      "screenshot": "tag-pagination.png",
+      "bytes": 48074,
+      "sha256": "13da8fc16d7640f738086d54047afcd6dd1e36a0963f2c83f1889324d9300aa8"
+    },
+    {
+      "id": "visits-today",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/visits/2026/8/16",
+      "labels": [
+        "In the Shop Today",
+        "Current Member",
+        "Staff Volunteer",
+        "Projects",
+        "Volunteering"
+      ],
+      "screenshot": "visits-today.png",
+      "bytes": 59120,
+      "sha256": "b0ebc72b294c448c0127d9a4e307b778aafedc31d9ee9ec81a236bbabf38a373"
+    },
+    {
+      "id": "visits-historical",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/visits/2026/8/15",
+      "labels": [
+        "In the Shop on",
+        "Patron NoService",
+        "previous",
+        "next"
+      ],
+      "screenshot": "visits-historical.png",
+      "bytes": 42541,
+      "sha256": "21b8971588d5e3479f995fe912922e9bcd14f8218de61a6ba50fc2409f405028"
+    },
+    {
+      "id": "visits-empty",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-empty/visits/2026/8/16",
+      "labels": [
+        "In the Shop Today",
+        "No visits for"
+      ],
+      "screenshot": "visits-empty.png",
+      "bytes": 42983,
+      "sha256": "83a28e7199bdc4c090826515bac2fbf8921e6c8770cf3311ed8326be4ca204b7"
+    },
+    {
+      "id": "visits-index",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/people/900004/visits",
+      "labels": [
+        "Staff Volunteer",
+        "Visits",
+        "Arrived",
+        "Volunteer",
+        "Show",
+        "Edit"
+      ],
+      "screenshot": "visits-index.png",
+      "bytes": 44822,
+      "sha256": "5b9971e1c600d48fd6f087e2775a4ad81085b19589fcc1b30d1e83096ca7d02c"
+    },
+    {
+      "id": "visit-detail",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/people/900004/visits/900002",
+      "labels": [
+        "Visits",
+        "Detail",
+        "Datetime",
+        "Volunteer",
+        "Synthetic completed-visit note"
+      ],
+      "screenshot": "visit-detail.png",
+      "bytes": 42946,
+      "sha256": "b813cae279b62429bf586b0f1aed68df06d3490b51a038093b232664470bf201"
+    },
+    {
+      "id": "visit-new",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/people/900001/visits/new",
+      "labels": [
+        "Visits",
+        "New",
+        "Arrived At",
+        "Signed In At",
+        "Volunteer",
+        "Create"
+      ],
+      "screenshot": "visit-new.png",
+      "bytes": 41364,
+      "sha256": "50ce02c68874ce67b10af34ebc5a00312c525740a886d53cdc7860e21f1d2f72"
+    },
+    {
+      "id": "visit-edit",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/people/900004/visits/900002/edit",
+      "labels": [
+        "Visits",
+        "Edit",
+        "Signed Out At",
+        "Synthetic completed-visit note",
+        "Update"
+      ],
+      "screenshot": "visit-edit.png",
+      "bytes": 48345,
+      "sha256": "c41f3567121699a6c0a5aee92e9822695f179f2aef85acfcbff154ac153e40b4"
+    },
+    {
+      "id": "services-index",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/people/900001/services",
+      "labels": [
+        "Current Member",
+        "Services",
+        "Membership",
+        "Start date",
+        "End date"
+      ],
+      "screenshot": "services-index.png",
+      "bytes": 43560,
+      "sha256": "17d212cea68a5a65ffe105795f97f0769d8bf774e50e5ede991650312f30b86e"
+    },
+    {
+      "id": "service-detail",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/people/900004/services/900003",
+      "labels": [
+        "Services",
+        "Detail",
+        "Service type",
+        "Earn a Bike",
+        "Synthetic service note"
+      ],
+      "screenshot": "service-detail.png",
+      "bytes": 52665,
+      "sha256": "7bd1ae3f82f69a64bd247e83e5cdec7044345af10a232459c9362a473849496c"
+    },
+    {
+      "id": "service-new",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/people/900001/services/new",
+      "labels": [
+        "Services",
+        "New",
+        "Service type",
+        "Start date",
+        "Paid",
+        "Create"
+      ],
+      "screenshot": "service-new.png",
+      "bytes": 44311,
+      "sha256": "1b61c700713c9d8d69c35e93c39f3caf715646396ee1ec29704dca9f728af340"
+    },
+    {
+      "id": "service-edit",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/people/900004/services/900003/edit",
+      "labels": [
+        "Services",
+        "Edit",
+        "Earn a Bike",
+        "Synthetic service note",
+        "Update"
+      ],
+      "screenshot": "service-edit.png",
+      "bytes": 47404,
+      "sha256": "f15783c170b3d91583fb3d883c4408c031f22daf118d9928bab9706d81f2d334"
+    },
+    {
+      "id": "notes-index",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/people/900004/notes",
+      "labels": [
+        "Staff Volunteer",
+        "Notes",
+        "Synthetic completed-visit note",
+        "Synthetic service note"
+      ],
+      "screenshot": "notes-index.png",
+      "bytes": 54653,
+      "sha256": "ef0357db8899bdf1b6af1671e5ec76c95a1236250027dfd96ce78085e06d9554"
+    },
+    {
+      "id": "note-detail",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/people/900001/notes/900001",
+      "labels": [
+        "Notes",
+        "Detail",
+        "Notable",
+        "Synthetic person note"
+      ],
+      "screenshot": "note-detail.png",
+      "bytes": 40046,
+      "sha256": "6a952a724c906c9aa3eac5ac29d804ef032a21bf1e0ad7252439faff3420a48d"
+    },
+    {
+      "id": "note-new",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/people/900001/notes/new",
+      "labels": [
+        "Notes",
+        "New",
+        "Text",
+        "Create"
+      ],
+      "screenshot": "note-new.png",
+      "bytes": 35175,
+      "sha256": "45d7e1a62944a167fa22bdeede3c092a31f29ae830aacdb6fce9b8f41de6e7ef"
+    },
+    {
+      "id": "note-edit",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/people/900001/notes/900001/edit",
+      "labels": [
+        "Notes",
+        "Edit",
+        "Regarding",
+        "Synthetic person note"
+      ],
+      "screenshot": "note-edit.png",
+      "bytes": 40846,
+      "sha256": "2f4c4ae4aac4aa5e48ac2302aba42973c41996fcd47962af18bbebd53996a50f"
+    },
+    {
+      "id": "reports-index",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/reports",
+      "labels": [
+        "Listing reports",
+        "People Report",
+        "Services Report",
+        "Visits Report",
+        "Summary Report"
+      ],
+      "screenshot": "reports-index.png",
+      "bytes": 61893,
+      "sha256": "da30c00b16e60aa46012e03d8cc1c7a8d84833add89c4d557257a82216d31f9a"
+    },
+    {
+      "id": "report-people",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/reports/people",
+      "labels": [
+        "Reports",
+        "People",
+        "Current Member",
+        "Export all"
+      ],
+      "screenshot": "report-people.png",
+      "bytes": 65071,
+      "sha256": "72f261c6b321bd80d32509031b3310e5857e37679a774c7f0412b758e0febc7f"
+    },
+    {
+      "id": "report-people-empty",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-empty/reports/people",
+      "labels": [
+        "Reports",
+        "People",
+        "No people for date range"
+      ],
+      "screenshot": "report-people-empty.png",
+      "bytes": 53702,
+      "sha256": "ca71e7ce500d3564d214b5d963280ac562239a048954182703c6774383d06522"
+    },
+    {
+      "id": "report-services",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/reports/services",
+      "labels": [
+        "Reports",
+        "Services",
+        "Membership",
+        "Earn a Bike",
+        "Class",
+        "Export all"
+      ],
+      "screenshot": "report-services.png",
+      "bytes": 78033,
+      "sha256": "b9edfea8bdb19f41db81791d2b755112b0d3e0c472c3906517c4ebed3db0ca9d"
+    },
+    {
+      "id": "report-services-empty",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-empty/reports/services",
+      "labels": [
+        "Reports",
+        "Services",
+        "No services for date range"
+      ],
+      "screenshot": "report-services-empty.png",
+      "bytes": 49777,
+      "sha256": "4d0062b92f48198ea665b24bd88576ba4655facb89d6bee6069120ed2ef2e63e"
+    },
+    {
+      "id": "report-visits",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/reports/visits",
+      "labels": [
+        "Reports",
+        "Visits",
+        "Current Member",
+        "Staff Volunteer",
+        "Export all"
+      ],
+      "screenshot": "report-visits.png",
+      "bytes": 64231,
+      "sha256": "0b1ce7ccf8b3913727604be0fdca6ded283ed31fee83cd01790de09dc0c4da3d"
+    },
+    {
+      "id": "report-visits-empty",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-empty/reports/visits",
+      "labels": [
+        "Reports",
+        "Visits",
+        "No visits for date range"
+      ],
+      "screenshot": "report-visits-empty.png",
+      "bytes": 42933,
+      "sha256": "0b08d20382fb97a84d6b6c7046f8e12ae329d86fa045fda2e4ad8bb7b8da0581"
+    },
+    {
+      "id": "report-summary",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/reports/summary",
+      "labels": [
+        "Reports",
+        "Summary",
+        "Visits by Week",
+        "Visits by Day"
+      ],
+      "screenshot": "report-summary.png",
+      "bytes": 62715,
+      "sha256": "f9b28797b440ec2e54d3235ca41df52df96174b57bea5b5359329bebb70da281"
+    },
+    {
+      "id": "report-summary-empty-error",
+      "kind": "screenshot",
+      "status": 500,
+      "finalPath": "/fixture-empty/reports/summary",
+      "labels": [
+        "something went wrong"
+      ],
+      "screenshot": "report-summary-empty-error.png",
+      "bytes": 16737,
+      "sha256": "afcf7954e6bd3862c45bc745b2a686bae9e58b6a8fb989e9ee8cb7f4a21a980f"
+    },
+    {
+      "id": "user-profile",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/users/900001",
+      "labels": [
+        "Fixture Manager Profile",
+        "manager@fixtures.invalid",
+        "fixture_manager",
+        "Edit"
+      ],
+      "screenshot": "user-profile.png",
+      "bytes": 42709,
+      "sha256": "ff98866335fcf58a00397404da6bc10ed689b0e014e8d00b467ceb228141cfa3"
+    },
+    {
+      "id": "user-edit",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/users/900001/edit",
+      "labels": [
+        "Editing user",
+        "Full Name",
+        "Email",
+        "Login",
+        "Update"
+      ],
+      "screenshot": "user-edit.png",
+      "bytes": 41295,
+      "sha256": "bb4c2e863234927c2b1af4e200a5d0b01ff5be0f49586dd0c90b1847238d064c"
+    },
+    {
+      "id": "csv-people",
+      "kind": "download",
+      "status": 200,
+      "suggestedFilename": "fixture-lab_people_2020-01-01_2035-01-01.csv",
+      "header": "first_name,last_name,staff,email,email_opt_out,phone,postal_code,street1,street2,city,state,postal_code,country,yob,created_at,membership_expires_on",
+      "bytes": 268,
+      "sha256": "99f3f263a74f378daf241027f11d3272e2b56348cb090be58ed67791d8151031"
+    },
+    {
+      "id": "csv-services",
+      "kind": "download",
+      "status": 200,
+      "suggestedFilename": "fixture-lab_services_2020-01-01_2035-01-01.csv",
+      "header": "first_name,last_name,email,email_opt_out,phone,postal_code,service_type_id,start_date,end_date,volunteered,paid,note",
+      "bytes": 550,
+      "sha256": "8655a5c1b08d81041d2504dda61aa3166a5f7f912585dd92b990d46ace887c67"
+    },
+    {
+      "id": "csv-visits",
+      "kind": "download",
+      "status": 200,
+      "suggestedFilename": "fixture-lab_visits_2020-01-01_2035-01-01.csv",
+      "header": "person_id,first_name,last_name,email,email_opt_out,phone,postal_code,arrived_at,start_at,end_at,staff,member,volunteer,note",
+      "bytes": 490,
+      "sha256": "3bda499637b1d803a3b55263fececad524f2da3793c722d1613dd1483c4e735b"
+    },
+    {
+      "id": "workflow-person-create",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/people/900027",
+      "labels": [
+        "Person was successfully created",
+        "Capture Created",
+        "Not a member"
+      ],
+      "screenshot": "workflow-person-create.png",
+      "bytes": 73354,
+      "sha256": "d4a8d75239b68b4f51935a5b4288e641ca3b95e438d7c8dc6e09a9ca4e03da37"
+    },
+    {
+      "id": "workflow-visit-queue",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/visits/2026/8/16",
+      "labels": [
+        "Visit for Patron NoService was successfully created",
+        "In the Shop Today",
+        "Patron NoService",
+        "Sign In"
+      ],
+      "screenshot": "workflow-visit-queue.png",
+      "bytes": 67885,
+      "sha256": "9dd0dde6d04b0cbe06c5aa72d311ded9812f41e9f470cfc38e477c23c99cc3c8"
+    },
+    {
+      "id": "workflow-visit-sign-in",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/visits/2026/8/16",
+      "labels": [
+        "Patron NoService was successfully signed in",
+        "Sign Out"
+      ],
+      "screenshot": "workflow-visit-sign-in.png",
+      "bytes": 68021,
+      "sha256": "5b5ef12588f699d1d4c701fb425690f5280a66f856d2717de3cd43e6cb459d75"
+    },
+    {
+      "id": "workflow-visit-sign-out",
+      "kind": "screenshot",
+      "status": 200,
+      "finalPath": "/fixture-lab/visits/2026/8/16",
+      "labels": [
+        "Patron NoService was successfully signed out"
+      ],
+      "screenshot": "workflow-visit-sign-out.png",
+      "bytes": 68178,
+      "sha256": "7031404a01f85edf056e5700306db02bbfa5ed24966e5a76aa98debe490bd181"
+    }
+  ]
+}

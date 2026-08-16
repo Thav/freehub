@@ -34,6 +34,19 @@ services:
       retries: 30
     networks: [legacy]
 
+  legacy-capture:
+    profiles: [capture]
+    build:
+      context: test/legacy-visual
+    environment:
+      BASE_URL: http://legacy:3000
+      HOME: /tmp
+    user: "${CAPTURE_UID:-1000}:${CAPTURE_GID:-1000}"
+    working_dir: /work
+    volumes:
+      - .:/work
+    networks: [ingress]
+
 networks:
   legacy:
     internal: true

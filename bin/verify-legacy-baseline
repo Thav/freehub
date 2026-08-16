@@ -1,0 +1,26 @@
+#!/usr/bin/env sh
+set -eu
+
+run_root=$(mktemp -d tmp/legacy-baseline-verify.XXXXXX)
+run_one="$run_root/run-1"
+run_two="$run_root/run-2"
+
+bin/capture-legacy-baseline "$run_one"
+bin/capture-legacy-baseline "$run_two"
+
+diff -qr "$run_one/screenshots" "$run_two/screenshots"
+cmp "$run_one/evidence.json" "$run_two/evidence.json"
+cmp "$run_one/manifest.json" "$run_two/manifest.json"
+
+baseline=docs/modernization/visual-baseline
+test -f "$baseline/evidence.json" || {
+  echo "deterministic runs passed; no approved baseline exists yet" >&2
+  echo "review $run_one, complete a review file, and run bin/approve-legacy-baseline" >&2
+  exit 2
+}
+
+diff -qr "$run_one/screenshots" "$baseline/screenshots"
+cmp "$run_one/evidence.json" "$baseline/evidence.json"
+cmp "$run_one/manifest.json" "$baseline/manifest.json"
+
+printf 'Stable capture and approved baseline match: %s\n' "$run_root"

@@ -1,0 +1,35 @@
+#!/usr/bin/env sh
+set -eu
+
+output=${1:-tmp/legacy-baseline-candidate}
+case "$output" in
+  tmp/*) ;;
+  *) echo "capture output must be below tmp/: $output" >&2; exit 1 ;;
+esac
+test ! -e "$output" || {
+  echo "capture output already exists: $output" >&2
+  echo "choose a new path or remove the disposable candidate explicitly" >&2
+  exit 1
+}
+
+bin/restore-legacy-fixtures
+
+attempt=0
+until docker compose --profile legacy exec -T legacy \
+  ruby -rnet/http -ruri -e "exit(Net::HTTP.get_response(URI.parse('http://127.0.0.1:3000/session/new')).code == '200' ? 0 : 1)" \
+  >/dev/null 2>&1; do
+  attempt=$((attempt + 1))
+  test "$attempt" -lt 30 || {
+    echo "legacy application did not become ready" >&2
+    exit 1
+  }
+  sleep 2
+done
+
+CAPTURE_UID=$(id -u) CAPTURE_GID=$(id -g) \
+  docker compose --profile capture build legacy-capture
+CAPTURE_UID=$(id -u) CAPTURE_GID=$(id -g) \
+  docker compose --profile capture run --rm --no-deps legacy-capture "$output"
+
+printf 'Unreviewed candidate written to %s\n' "$output"
+printf 'Review %s/contact-sheet.png and every full-size image before approval.\n' "$output"

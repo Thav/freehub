@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "manifestSha256": "COPY FROM CANDIDATE evidence.json",
+  "reviewer": "REQUIRED",
+  "reviewedAt": "YYYY-MM-DDTHH:MM:SSZ",
+  "reviewMethod": "Contact sheet plus every full-resolution PNG",
+  "entries": [
+    {
+      "id": "REPEAT FOR EVERY SCREENSHOT MANIFEST ENTRY",
+      "decision": "approved or rejected",
+      "personalDataFinding": "Only documented synthetic fixture data is visible, or explain rejection."
+    }
+  ]
+}
