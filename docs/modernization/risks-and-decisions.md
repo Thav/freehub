@@ -9,4 +9,4 @@
 | Framework/provider lock-in | Explicit HTTP API, ordinary OCI image, managed PostgreSQL contract |
 | Persistent sandbox mistaken for durable state | Recreate all required state from Git plus approved external fixtures |
 | No outbound email | Temporary-password cutover; visibly disabled email-dependent features |
-| Concurrent sessions overwrite work | One active tracker ticket and Git-visible claim/completion commits |
+| Concurrent sessions overwrite work | One active tracker ticket in the persistent shared worktree; only the repository owner commits reviewed changes |

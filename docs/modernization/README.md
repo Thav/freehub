@@ -15,5 +15,7 @@ This directory is the durable source of truth for the Freehub modernization. It 
 
 Run `bin/ralph status` for current state and `bin/ralph next` to identify the next dependency-ready ticket.
 
+Agents leave ticket changes uncommitted for owner review. A ticket remains active while review is pending, and agents do not claim or start the following ticket. The review handoff includes the exact host and sandbox commands needed to run the ticket's demonstration; see the [session loop](RALPH.md).
+
 `TRACKER.yml` uses JSON syntax, which is valid YAML 1.2. This lets `bin/ralph`
 run with Node alone and without downloading a YAML package.
