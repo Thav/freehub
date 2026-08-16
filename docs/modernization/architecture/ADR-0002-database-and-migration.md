@@ -4,11 +4,12 @@ Status: Proposed
 
 ## Context
 
-The legacy schema has no database foreign keys and its polymorphic/global records
-do not express tenant ownership consistently. The sanitized source contains invalid
-relationships and historical temporal anomalies that direct SQL conversion would
-silently lose or reinterpret. Both architecture spikes need one data contract and
-one accounting standard.
+The legacy dump has 11 database foreign keys for people/services/visits and audit
+users, but its polymorphic/global notes, taggings, roles, and role joins do not
+express tenant ownership consistently. The sanitized source contains invalid
+unenforced relationships and historical temporal anomalies that direct SQL
+conversion would silently lose or reinterpret. Both architecture spikes need one
+data contract and one accounting standard.
 
 ## Proposed decision
 

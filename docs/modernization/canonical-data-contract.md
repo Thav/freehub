@@ -136,6 +136,12 @@ table. `bin/migration-reconcile` compares that ledger with a preflight report. O
 imported source row requires at least one identity mapping; fan-out may create more,
 as the edge fixture demonstrates for an organization-global tag.
 
+The restored source enforces foreign keys for people/services/visits and audit-user
+references, so non-null missing parents cannot occur in that dump. The preflight
+retains those categories for null values and malformed future/import fixtures. Its
+observed source quarantines are instead polymorphic notes and taggings, whose
+relationships are not database-enforced.
+
 Reports contain aggregate counts and contract hashes only. Per-row issue storage is
 limited to source table/ID, category, payload fingerprint, and sanitized detail;
 credentials and personal row payloads are forbidden.

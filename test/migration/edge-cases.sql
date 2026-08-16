@@ -1,5 +1,6 @@
 -- Synthetic migration-only fixtures. No values originate in the supplied archive.
--- This file is loaded only into the isolated migration-db service.
+-- This intentionally unconstrained fixture database exercises malformed input
+-- categories that the restored source's physical foreign keys prevent.
 SET sql_mode = 'NO_ENGINE_SUBSTITUTION';
 SET time_zone = '+00:00';
 

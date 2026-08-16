@@ -4,8 +4,11 @@ Status: FH-004 behavioral dictionary. `db/schema.rb` is authoritative for physic
 legacy columns; FH-005 defines canonical modern types, constraints, reconciliation,
 and ownership.
 
-All legacy primary keys are integer IDs. Timestamps are stored as MySQL datetimes;
-the source does not declare foreign keys even where associations are intended.
+All legacy primary keys are integer IDs. Timestamps are stored as MySQL datetimes.
+The restored dump declares InnoDB foreign keys for people/services/visits and their
+audit-user references, but leaves polymorphic note targets, taggings, roles, and
+role joins unenforced. `db/schema.rb` omits those physical foreign keys and is not
+complete as a dump-schema reference.
 
 ## `organizations`
 
@@ -58,14 +61,14 @@ infer access from orphaned or duplicate joins.
 | Column(s) | Legacy type/default | Meaning and observed rules |
 | --- | --- | --- |
 | `id` | integer PK | Person identity; preserve when safe. |
-| `organization_id` | integer, indexed | Required tenant owner in Rails; database permits null/orphan. |
+| `organization_id` | integer, indexed | Required tenant owner in Rails; database permits null, while the restored dump's FK rejects a non-null missing organization. |
 | `first_name`, `last_name`, `full_name` | strings | First required; names trim/titleize; full name is derived before save. |
 | `email`, `email_opt_out` | string, boolean false | Optional email, lower-cased and unique within tenant; opt-out is retained. |
 | `phone` | string | Optional unnormalized display value. |
 | `street1`, `street2`, `city`, `state`, `postal_code`, `country` | strings | Optional address; country defaults `US`; selected fields title/upper-case. |
 | `staff` | boolean false | Current staff flag; outranks membership in display role. |
 | `yob` | integer | Optional year of birth with rolling 100-year validation window. |
-| `created_by_id`, `updated_by_id` | integer, indexed | Optional userstamp references; no database FK. |
+| `created_by_id`, `updated_by_id` | integer, indexed | Optional userstamp references; the restored dump has FKs to users. |
 | `created_at`, `updated_at` | datetime | Lifecycle and people-report creation filters. |
 
 Model comments mention `volunteer_hours` and `project_hours` columns not present in
@@ -77,13 +80,13 @@ normalized email/phone/name fields without changing legacy display values.
 | Column(s) | Legacy type/default | Meaning and observed rules |
 | --- | --- | --- |
 | `id` | integer PK | Visit identity. |
-| `person_id` | integer, indexed | Required parent in Rails; database permits null/orphan. |
+| `person_id` | integer, indexed | Required parent in Rails; database permits null, while the restored dump's FK rejects a non-null missing person. |
 | `arrived_at` | datetime | Required queue/report date; incomplete source rows exist. |
 | `start_at`, `end_at` | datetime | Optional sign-in/out timestamps. |
 | `duration` | float, 0 | Recomputed as end minus start in seconds only when both exist. |
 | `volunteer` | boolean false | False means Project; true means Volunteering. |
 | `staff`, `member` | booleans | Historical snapshots taken from the person at save/arrival. |
-| `created_by_id`, `updated_by_id` | integer, indexed | Optional userstamp references. |
+| `created_by_id`, `updated_by_id` | integer, indexed | Optional userstamp references; the restored dump has FKs to users. |
 | `created_at`, `updated_at` | datetime | Lifecycle timestamps. |
 
 One Note may attach polymorphically. Modern duration is an integer seconds field;
@@ -94,11 +97,11 @@ snapshot fields become immutable historical facts after creation.
 | Column(s) | Legacy type/default | Meaning and observed rules |
 | --- | --- | --- |
 | `id` | integer PK | Service identity. |
-| `person_id` | integer, indexed | Required parent in Rails. |
+| `person_id` | integer, indexed | Required parent in Rails; database permits null, while the restored dump's FK rejects a non-null missing person. |
 | `service_type_id` | string | Required enum-like value: `MEMBERSHIP`, `EAB`, or `CLASS`. |
 | `start_date`, `end_date` | date | Optional in schema; new form defaults today through next year. |
 | `paid`, `volunteered` | booleans false | How the service was received. |
-| `created_by_id`, `updated_by_id` | integer, indexed | Optional userstamp references. |
+| `created_by_id`, `updated_by_id` | integer, indexed | Optional userstamp references; the restored dump has FKs to users. |
 | `created_at`, `updated_at` | datetime | Lifecycle timestamps. |
 
 One Note may attach polymorphically. Membership presentation uses inclusive start
@@ -112,7 +115,7 @@ as DEF-006.
 | `id` | integer PK | Note identity. |
 | `text` | text | Optional content; empty visit/service notes are discarded. |
 | `notable_type`, `notable_id` | string, integer, composite index | Required by Rails; supported types are Person, Visit, Service. |
-| `created_by_id`, `updated_by_id` | integer, indexed | Optional userstamp references. |
+| `created_by_id`, `updated_by_id` | integer, indexed | Optional userstamp references; the restored dump has FKs to users. The polymorphic notable target has no FK. |
 | `created_at`, `updated_at` | datetime | Lifecycle timestamps and aggregate ordering. |
 
 Preflight counts 13,543 source notes: 2,197 valid attachments and 11,346 missing
