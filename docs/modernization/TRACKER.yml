@@ -1,19 +1,23 @@
 {
   "version": 1,
-  "active_ticket": "FH-001",
+  "active_ticket": null,
   "tickets": [
     {
       "id": "FH-001",
       "title": "Bootstrap the persistent sbx development sandbox",
-      "status": "in_progress",
+      "status": "done",
       "path": "docs/modernization/tickets/FH-001-sbx-bootstrap.md",
       "depends_on": [],
       "claimed_at": "2026-08-16T01:00:36.173Z",
-      "updated_at": "2026-08-16T01:00:36.173Z",
+      "updated_at": "2026-08-16T01:04:26.968Z",
       "blocked_reason": null,
       "unblock_condition": null,
-      "evidence": [],
-      "implementation_commits": []
+      "evidence": [
+        "2026-08-16: docker info; docker compose version; docker image inspect postgres:16-bookworm mariadb:10.11 mcr.microsoft.com/playwright:v1.52.0-jammy node:22-bookworm-slim ruby:3.3-slim-bookworm ruby:2.7.8-bullseye; docker image ls; bin/environment-diagnostics; bin/ralph validate; bin/ralph status. Pinned inventory and recovery procedure: docs/modernization/environment.md. Implementation commit: f25eae2."
+      ],
+      "implementation_commits": [
+        "f25eae21fce1397093c516df7227231ec6a8ca8a"
+      ]
     },
     {
       "id": "FH-002",
