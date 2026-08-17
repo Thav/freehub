@@ -1,0 +1,22 @@
+#!/bin/sh
+set -eu
+
+root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+artifact="$root/modern/prisma/schema.sql"
+actual=$(mktemp)
+expected=$(mktemp)
+trap 'rm -f "$actual" "$expected"' EXIT HUP INT TERM
+
+cd "$root"
+docker compose --profile modern down -v --remove-orphans
+docker compose --profile modern up -d --build --wait
+docker compose --profile modern --profile test run --rm --build modern-test
+docker compose --profile visual run --rm --no-deps modern-visual
+docker exec freehub-modern-db-1 psql -U freehub -d freehub_modern -Atc "SHOW server_version_num" | grep -Eq '^18[0-9]{4}$'
+normalize_schema() {
+  sed '/restrict /d' "$1" | awk 'NF { for (; blanks > 0; blanks -= 1) print ""; print; next } { blanks += 1 }'
+}
+docker exec freehub-modern-db-1 pg_dump -U freehub --schema-only --no-owner --no-privileges --quote-all-identifiers freehub_modern > "$actual"
+normalize_schema "$artifact" > "$expected"
+normalize_schema "$actual" | cmp -s "$expected" -
+echo "modern foundation clean verification passed"

@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Freehub TypeScript spike API",
-    "version": "0.1.0"
+    "title": "Freehub API",
+    "version": "1.0.0"
   },
   "components": {
     "schemas": {}

@@ -14,7 +14,7 @@ enum OrganizationRole {
 enum ServiceType {
   membership
   earn_a_bike
-  class_
+  class_ @map("class")
 }
 enum VisitActivity {
   project

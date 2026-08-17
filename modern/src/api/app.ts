@@ -14,10 +14,16 @@ const personJson = (person: { id: bigint; displayName: string; staff: boolean; a
 });
 
 export async function buildApp(db = new PrismaClient()): Promise<FastifyInstance> {
-  const app = (await import("fastify")).default({ logger: process.env.NODE_ENV === "production" });
+  const app = (await import("fastify")).default({ logger: { level: process.env.LOG_LEVEL || "info" } });
   await app.register(cookie);
   await app.register(sensible);
-  await app.register(swagger, { openapi: { info: { title: "Freehub TypeScript spike API", version: "0.1.0" } } });
+  await app.register(swagger, { openapi: { info: { title: "Freehub API", version: "1.0.0" } } });
+  app.setErrorHandler((error, request, reply) => {
+    const safeError = error as { statusCode?: number; code?: string; message?: string };
+    request.log.error({ err: error, requestId: request.id }, "request failed");
+    const statusCode = safeError.statusCode && safeError.statusCode >= 400 ? safeError.statusCode : 500;
+    return reply.code(statusCode).send({ error: { code: safeError.code || "internal_error", message: statusCode < 500 ? safeError.message : "internal server error", requestId: request.id } });
+  });
 
   async function scoped(request: FastifyRequest, organizationId: string): Promise<Auth> {
     const sessionId = request.cookies[sessionCookie];

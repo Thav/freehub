@@ -1,0 +1,21 @@
+name: Modern foundation
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: modern/package-lock.json
+      - run: npm ci
+        working-directory: modern
+      - run: bin/verify-modern-foundation
+      - run: docker compose --profile modern build

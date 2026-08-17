@@ -1,16 +1,16 @@
-# FH-006 TypeScript spike measurements
+# FH-006 TypeScript spike measurements (selected foundation evidence)
 
-The spike is isolated in `spike/typescript` and uses React 19/Vite, React Router,
+The measured spike was promoted to `modern` by FH-009. It uses React 19/Vite, React Router,
 Fastify, TypeBox OpenAPI schemas, Prisma/PostgreSQL, plain CSS, and a database
 session cookie. It deliberately contains only the required vertical slice; FH-008
-must compare it with FH-007 and decide the selected architecture.
+compared it with FH-007; FH-008 selected this architecture.
 
 ## Reproducible gates
 
 | Gate | Command | Evidence |
 | --- | --- | --- |
 | Static/client/API test | `bin/verify-typescript-spike` | TypeScript check, Fastify injection health test |
-| Runtime contract | `npm run openapi && node scripts/verify-openapi.mjs` | `spike/typescript/openapi.json` |
+| Runtime contract | `npm run openapi && node scripts/verify-openapi.mjs` | `modern/openapi.json` |
 | Canonical reconciliation fixture | `node test/migration/reconcile.mjs test/migration/expected/edge-cases.json test/migration/expected/edge-cases-ledger.json` | 60 source rows reconcile exactly |
 | Clean OCI startup | `docker compose --profile typescript up -d --build --wait` | `/up` at port 3001 |
 | Browser smoke | `docker compose --profile typescript-visual run --rm --no-deps typescript-visual` | login, scoped search, and profile navigation from one origin |

@@ -63,7 +63,7 @@ services:
     networks: [migration]
 
   modern-db:
-    profiles: [typescript]
+    profiles: [modern]
     image: postgres@sha256:a02db8cac496f15b094798a38254f14d6e00741f709360e5e00bb6668ea31636
     environment:
       POSTGRES_DB: freehub_modern
@@ -76,10 +76,10 @@ services:
       retries: 30
     networks: [modern]
 
-  typescript:
-    profiles: [typescript]
+  modern:
+    profiles: [modern]
     build:
-      context: spike/typescript
+      context: modern
       target: runtime
     environment:
       DATABASE_URL: postgresql://freehub:freehub@modern-db:5432/freehub_modern?schema=public
@@ -97,10 +97,10 @@ services:
       retries: 20
     networks: [modern, ingress]
 
-  typescript-test:
-    profiles: [typescript-test]
+  modern-test:
+    profiles: [test]
     build:
-      context: spike/typescript
+      context: modern
       target: test
     environment:
       DATABASE_URL: postgresql://freehub:freehub@modern-db:5432/freehub_modern?schema=public
@@ -110,15 +110,15 @@ services:
         condition: service_healthy
     networks: [modern]
 
-  typescript-visual:
-    profiles: [typescript-visual]
+  modern-visual:
+    profiles: [visual]
     image: mcr.microsoft.com/playwright@sha256:baed2032d533817f3dbe6425de795788430ba345e819a1201337009ba17c9d07
     environment:
-      BASE_URL: http://typescript:3001
+      BASE_URL: http://modern:3001
       HOME: /tmp
     working_dir: /work
     volumes:
-      - ./spike/typescript:/work:ro
+      - ./modern:/work:ro
     command: ["npx", "playwright", "test"]
     networks: [ingress]
 

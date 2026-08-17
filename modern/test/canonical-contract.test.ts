@@ -4,7 +4,7 @@ import path from "node:path";
 import test from "node:test";
 
 const projectRoot = path.resolve(import.meta.dirname, "..");
-const workspaceRoot = path.resolve(projectRoot, "../..");
+const workspaceRoot = path.resolve(projectRoot, "..");
 const schema = await readFile(path.join(projectRoot, "prisma/schema.prisma"), "utf8");
 const prismaNames: Record<string, string> = {
   organizations: "Organization", users: "User", organizationMemberships: "OrganizationMembership",
@@ -17,12 +17,12 @@ try {
   contract = JSON.parse(await readFile(path.join(workspaceRoot, "docs/modernization/canonical-schema.json"), "utf8"));
 } catch (error: unknown) {
   if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
-  // The OCI build context is intentionally only spike/typescript. It still
+  // The OCI build context is intentionally only modern. It still
   // verifies every canonical entity; the host suite additionally verifies fields.
   contract = { entities: Object.fromEntries(Object.keys(prismaNames).map((entity) => [entity, { fields: { id: "bigint primary key" } }])) };
 }
 
-test("Prisma spike materializes every canonical entity and its contract fields", () => {
+test("modern Prisma schema materializes every canonical entity and its contract fields", () => {
   for (const [entity, definition] of Object.entries(contract.entities)) {
     const name = prismaNames[entity];
     assert.ok(name, `missing Prisma mapping for ${entity}`);

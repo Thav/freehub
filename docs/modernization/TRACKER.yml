@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "active_ticket": "FH-008",
+  "active_ticket": "FH-009",
   "tickets": [
     {
       "id": "FH-001",
@@ -140,29 +140,33 @@
     {
       "id": "FH-008",
       "title": "Select and record the modernization stack",
-      "status": "in_progress",
+      "status": "done",
       "path": "docs/modernization/tickets/FH-008-stack-decision.md",
       "depends_on": [
         "FH-006",
         "FH-007"
       ],
       "claimed_at": "2026-08-17T00:27:09.774Z",
-      "updated_at": "2026-08-17T00:27:09.774Z",
+      "updated_at": "2026-08-17T03:08:25.007Z",
       "blocked_reason": null,
       "unblock_condition": null,
-      "evidence": [],
-      "implementation_commits": []
+      "evidence": [
+        "Owner-reviewed implementation commit 2ee45b0d4fcb22111963f12142dd754ece0cc1f9. 2026-08-17: bin/verify-typescript-spike; docker compose config --quiet; docker compose --profile typescript up -d --build --wait; docker compose --profile typescript --profile typescript-test run --rm --build typescript-test; docker compose --profile typescript-visual run --rm --no-deps typescript-visual; ADR-0001 local link-target validation (14 targets); git diff --check; bin/ralph validate."
+      ],
+      "implementation_commits": [
+        "2ee45b0d4fcb22111963f12142dd754ece0cc1f9"
+      ]
     },
     {
       "id": "FH-009",
       "title": "Create the modern application foundation",
-      "status": "pending",
+      "status": "in_progress",
       "path": "docs/modernization/tickets/FH-009-modern-foundation.md",
       "depends_on": [
         "FH-008"
       ],
-      "claimed_at": null,
-      "updated_at": null,
+      "claimed_at": "2026-08-17T03:08:29.389Z",
+      "updated_at": "2026-08-17T03:08:29.389Z",
       "blocked_reason": null,
       "unblock_condition": null,
       "evidence": [],

@@ -1,10 +1,14 @@
 #!/bin/sh
 set -eu
+
 root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-cd "$root/spike/typescript"
+app="$root/modern"
+
+cd "$app"
 XDG_CACHE_HOME="${XDG_CACHE_HOME:-/tmp/freehub-prisma-cache}" npm run check
-npm run build
 npm run openapi
 node scripts/verify-openapi.mjs
-node "$root/test/migration/reconcile.mjs" "$root/test/migration/expected/edge-cases.json" "$root/test/migration/expected/edge-cases-ledger.json"
+npm run schema:check
 docker compose -f "$root/compose.yaml" config --quiet
+
+echo "modern foundation static verification passed"
