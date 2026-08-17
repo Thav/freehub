@@ -84,6 +84,8 @@ services:
     environment:
       DATABASE_URL: postgresql://freehub:freehub@modern-db:5432/freehub_modern?schema=public
       PORT: 3001
+      # Local Compose is plain HTTP; production keeps the secure-cookie default.
+      COOKIE_SECURE: "false"
     command: ["sh", "-c", "npx prisma migrate deploy && npx tsx prisma/seed.ts && node dist-server/server.js"]
     depends_on:
       modern-db:

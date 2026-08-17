@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 1Q0wJDI48Vfb5HkaAzOZhSLZWB5eUIbn95q3cnxONE8lGokB0oTwqzAsdsaa4mj
+\restrict CQd1MLJuDyRwHaMNljoWjlNsN4MuHLmQuRlbu9BLqJop5FYlQRTJrfXtyWCGxNC
 
 -- Dumped from database version 18.4 (Debian 18.4-1.pgdg13+1)
 -- Dumped by pg_dump version 18.4 (Debian 18.4-1.pgdg13+1)
@@ -631,7 +631,10 @@ CREATE TABLE "public"."Session" (
     "userId" bigint NOT NULL,
     "organizationId" bigint,
     "expiresAt" timestamp with time zone NOT NULL,
-    "createdAt" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    "createdAt" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "tokenDigest" character(64) NOT NULL,
+    "csrfTokenDigest" character(64),
+    "revokedAt" timestamp with time zone
 );
 
 
@@ -680,7 +683,8 @@ CREATE TABLE "public"."User" (
     "passwordChangeRequired" boolean DEFAULT true NOT NULL,
     "platformAdministrator" boolean DEFAULT false NOT NULL,
     "createdAt" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    "updatedAt" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    "updatedAt" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "disabledAt" timestamp with time zone
 );
 
 
@@ -1148,6 +1152,20 @@ CREATE INDEX "Service_organizationId_personId_idx" ON "public"."Service" USING "
 
 
 --
+-- Name: Session_expiresAt_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "Session_expiresAt_idx" ON "public"."Session" USING "btree" ("expiresAt");
+
+
+--
+-- Name: Session_tokenDigest_key; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "Session_tokenDigest_key" ON "public"."Session" USING "btree" ("tokenDigest");
+
+
+--
 -- Name: Session_userId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1594,4 +1612,4 @@ ALTER TABLE ONLY "public"."Visit"
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 1Q0wJDI48Vfb5HkaAzOZhSLZWB5eUIbn95q3cnxONE8lGokB0oTwqzAsdsaa4mj
+\unrestrict CQd1MLJuDyRwHaMNljoWjlNsN4MuHLmQuRlbu9BLqJop5FYlQRTJrfXtyWCGxNC

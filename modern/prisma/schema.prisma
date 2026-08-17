@@ -60,6 +60,7 @@ model User {
   name String @db.VarChar(160)
   passwordDigest String @db.VarChar(255)
   passwordChangeRequired Boolean @default(true)
+  disabledAt DateTime?
   platformAdministrator Boolean @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -79,13 +80,17 @@ model OrganizationMembership {
 }
 model Session {
   id String @id @default(uuid())
+  tokenDigest String @unique @db.Char(64)
+  csrfTokenDigest String? @db.Char(64)
   userId BigInt
   organizationId BigInt?
   expiresAt DateTime
+  revokedAt DateTime?
   createdAt DateTime @default(now())
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
   @@index([userId])
+  @@index([expiresAt])
 }
 model Person {
   id BigInt @id @default(autoincrement())

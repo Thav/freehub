@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "active_ticket": "FH-009",
+  "active_ticket": "FH-010",
   "tickets": [
     {
       "id": "FH-001",
@@ -160,28 +160,32 @@
     {
       "id": "FH-009",
       "title": "Create the modern application foundation",
-      "status": "in_progress",
+      "status": "done",
       "path": "docs/modernization/tickets/FH-009-modern-foundation.md",
       "depends_on": [
         "FH-008"
       ],
       "claimed_at": "2026-08-17T03:08:29.389Z",
-      "updated_at": "2026-08-17T03:08:29.389Z",
+      "updated_at": "2026-08-17T12:00:22.928Z",
       "blocked_reason": null,
       "unblock_condition": null,
-      "evidence": [],
-      "implementation_commits": []
+      "evidence": [
+        "Owner-approved implementation commit 55c5c16c723577516319a0c6386a3cf07e0b3514. 2026-08-17: bin/verify-modern-foundation; bin/verify-modern-foundation-clean (fresh modern volumes, PostgreSQL 18, migrations, seed, test, Playwright, and committed schema artifact comparison); git diff --check; bin/ralph validate all passed."
+      ],
+      "implementation_commits": [
+        "55c5c16c723577516319a0c6386a3cf07e0b3514"
+      ]
     },
     {
       "id": "FH-010",
       "title": "Implement authentication and sessions",
-      "status": "pending",
+      "status": "in_progress",
       "path": "docs/modernization/tickets/FH-010-authentication-and-sessions.md",
       "depends_on": [
         "FH-009"
       ],
-      "claimed_at": null,
-      "updated_at": null,
+      "claimed_at": "2026-08-17T12:00:29.752Z",
+      "updated_at": "2026-08-17T12:00:29.752Z",
       "blocked_reason": null,
       "unblock_condition": null,
       "evidence": [],

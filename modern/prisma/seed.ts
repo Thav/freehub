@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 const db = new PrismaClient();
 const passwordDigest = await bcrypt.hash("spike-password", 12);
 const organization = await db.organization.upsert({ where: { key: "spike-shop" }, update: {}, create: { key: "spike-shop", name: "Spike Bike Shop", timezone: "America/Chicago" } });
-const manager = await db.user.upsert({ where: { login: "manager" }, update: { passwordDigest }, create: { login: "manager", email: "manager@example.test", name: "Spike Manager", passwordDigest, passwordChangeRequired: false } });
+const manager = await db.user.upsert({ where: { login: "manager" }, update: { passwordDigest, platformAdministrator: true }, create: { login: "manager", email: "manager@example.test", name: "Spike Manager", passwordDigest, passwordChangeRequired: false, platformAdministrator: true } });
 await db.organizationMembership.upsert({ where: { organizationId_userId: { organizationId: organization.id, userId: manager.id } }, update: {}, create: { organizationId: organization.id, userId: manager.id, role: "manager" } });
 await db.person.upsert({ where: { id: 900001n }, update: {}, create: { id: 900001n, organizationId: organization.id, firstName: "Ada", lastName: "Rider", displayName: "Ada Rider", normalizedEmail: "ada@example.test", email: "ada@example.test" } });
 console.log("seeded manager / spike-password and Ada Rider");
