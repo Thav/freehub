@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "active_ticket": "FH-007",
+  "active_ticket": null,
   "tickets": [
     {
       "id": "FH-001",
@@ -121,17 +121,21 @@
     {
       "id": "FH-007",
       "title": "Build and measure the modern Rails stack spike",
-      "status": "in_progress",
+      "status": "done",
       "path": "docs/modernization/tickets/FH-007-rails-spike.md",
       "depends_on": [
         "FH-005"
       ],
       "claimed_at": "2026-08-16T20:13:08.575Z",
-      "updated_at": "2026-08-16T20:13:08.575Z",
+      "updated_at": "2026-08-17T00:25:35.879Z",
       "blocked_reason": null,
       "unblock_condition": null,
-      "evidence": [],
-      "implementation_commits": []
+      "evidence": [
+        "2026-08-16: Owner-reviewed implementation commit 95a93d0. Clean Rails PostgreSQL volume startup and /up=200; bin/verify-rails-spike; docker compose --profile rails --profile rails-test run --rm rails-test (3 tests); docker compose --profile rails --profile rails-migration run --rm rails-migration (persisted preflight evidence); docker compose --profile rails-visual run --rm --no-deps rails-visual (Playwright login/search/profile/visit smoke); image 123665441 bytes; internal rails network and only 127.0.0.1:3002 published; git diff --check; bin/ralph validate."
+      ],
+      "implementation_commits": [
+        "95a93d074b032614f5caa21520ce0632a6da4686"
+      ]
     },
     {
       "id": "FH-008",
