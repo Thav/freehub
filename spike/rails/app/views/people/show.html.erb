@@ -1,0 +1,15 @@
+<h1><%= @person.display_name %></h1>
+<%= turbo_frame_tag "visit_actions" do %>
+  <%= button_to "Sign in for project", organization_person_visits_path(@organization, @person), params: { activity: "project" } %>
+  <% @person.visits.order(arrived_at: :desc).limit(10).each do |visit| %>
+    <p>Visit <%= visit.id %>
+      <% if visit.started_at.nil? %>
+        <%= button_to "Start visit #{visit.id}", sign_in_organization_visit_path(@organization, visit), method: :post %>
+      <% elsif visit.ended_at.nil? %>
+        <%= button_to "End visit #{visit.id}", sign_out_organization_visit_path(@organization, visit), method: :post %>
+      <% else %>
+        completed in <%= visit.duration_seconds %> seconds
+      <% end %>
+    </p>
+  <% end %>
+<% end %>

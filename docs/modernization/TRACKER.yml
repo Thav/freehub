@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "active_ticket": "FH-006",
+  "active_ticket": "FH-007",
   "tickets": [
     {
       "id": "FH-001",
@@ -102,28 +102,32 @@
     {
       "id": "FH-006",
       "title": "Build and measure the portable TypeScript stack spike",
-      "status": "in_progress",
+      "status": "done",
       "path": "docs/modernization/tickets/FH-006-typescript-spike.md",
       "depends_on": [
         "FH-005"
       ],
       "claimed_at": "2026-08-16T19:02:47.316Z",
-      "updated_at": "2026-08-16T19:02:47.316Z",
+      "updated_at": "2026-08-16T19:26:43.386Z",
       "blocked_reason": null,
       "unblock_condition": null,
-      "evidence": [],
-      "implementation_commits": []
+      "evidence": [
+        "2026-08-16: Owner-reviewed implementation commit 637d9e4fa2af1ba581494442c2962d3da9532af5. bin/verify-typescript-spike; docker compose --profile typescript up -d --build --wait; clean modern-db/typescript container and anonymous-volume recreation followed by /up=200; docker compose --profile typescript --profile typescript-test run --rm --build typescript-test; docker compose --profile typescript-visual run --rm --no-deps typescript-visual; authenticated login/search/profile/visit/export smoke; OpenAPI validation; edge-case reconciliation 60 = 32 imported + 28 quarantined with 33 mappings; git diff --check; bin/ralph validate all passed."
+      ],
+      "implementation_commits": [
+        "637d9e4fa2af1ba581494442c2962d3da9532af5"
+      ]
     },
     {
       "id": "FH-007",
       "title": "Build and measure the modern Rails stack spike",
-      "status": "pending",
+      "status": "in_progress",
       "path": "docs/modernization/tickets/FH-007-rails-spike.md",
       "depends_on": [
         "FH-005"
       ],
-      "claimed_at": null,
-      "updated_at": null,
+      "claimed_at": "2026-08-16T20:13:08.575Z",
+      "updated_at": "2026-08-16T20:13:08.575Z",
       "blocked_reason": null,
       "unblock_condition": null,
       "evidence": [],

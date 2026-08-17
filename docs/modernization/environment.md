@@ -136,3 +136,45 @@ and `bin/environment-diagnostics` must succeed against its nested daemon.
 On 2026-08-16, FH-006 verified the current daemon as `freehub` / Docker 29.7.1
 with Docker Compose v5.4.0. Agent commands need the sandbox's Docker access
 permission; once granted, they use this same nested daemon successfully.
+
+### Instructions for agents already inside `freehub`
+
+Do not run `sbx`, search for its binary, or request a host Docker socket. Those
+actions are incorrect from an agent session and the missing host-only CLI is not
+a blocker. Request sandbox Docker permission if needed, then use `docker` and
+`docker compose` directly.
+
+Before diagnosing a build as blocked, check these separate concerns in order:
+
+1. `docker info --format '{{.ServerVersion}} {{.Name}}'` confirms nested-daemon
+   access (the expected name is `freehub`).
+2. `env | rg -i '^(http|https|no)_proxy='` identifies the sandbox proxy inputs.
+3. A failing language dependency fetch may require the sandbox proxy CA in the
+   pinned base image; preserve certificate verification and add the CA rather
+   than using insecure skip-verify flags.
+4. A native extension failure such as `make: not found` is a base-image/toolchain
+   issue. Test the required package path separately before changing the image.
+
+The proxy is not a generic Debian mirror: package retrieval through it may be
+denied while RubyGems or npm works. Record the exact command, protocol, and
+error (for example direct timeout versus proxy `403`) in a ticket's blocker or
+verification evidence so the host owner can repair the right service.
+
+#### Policy-addition request procedure
+
+When direct access to a necessary dependency host is denied and the proxy is
+not usable for that protocol, agents must ask the user—not attempt the policy
+change themselves—for a least-privilege `sbx policy` network addition. A useful
+request contains:
+
+1. the exact hostname or wildcard required (for the Rails builder, the observed
+   Debian endpoints are `deb.debian.org` and its `*.debian.org` paths);
+2. the reproducing direct and proxy commands plus their different errors;
+3. the dependency justification (for example, `build-essential` and `libpq-dev`
+   are required to compile native Ruby gems); and
+4. the verification command to run after the user changes policy.
+
+The repository owner must confirm the local `sbx policy --help` syntax and run
+the host-side command. Agents then rerun the narrow package or language-fetch
+probe. Do not request blanket network access, disable TLS verification, or use
+the workstation Docker socket as a workaround.

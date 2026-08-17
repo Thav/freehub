@@ -47,6 +47,11 @@ Open on host:
   http://127.0.0.1:<port>
 ```
 
+The `Host` section is for the repository owner only. An agent session already
+running in `freehub` must skip that section and invoke `docker compose` directly
+after obtaining sandbox Docker permission. It must not try to run `sbx` from
+inside the sandbox or fall back to a workstation Docker socket.
+
 Do not guess a generic profile, port, or fixture command; report the exact commands verified for the ticket.
 
 ## After owner acceptance

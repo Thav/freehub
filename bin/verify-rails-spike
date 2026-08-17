@@ -1,0 +1,9 @@
+#!/bin/sh
+set -eu
+root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+cd "$root"
+node test/migration/reconcile.mjs test/migration/expected/edge-cases.json test/migration/expected/edge-cases-ledger.json
+node spike/rails/test/canonical_contract.mjs
+docker compose -f compose.yaml config --quiet
+docker compose -f compose.yaml --profile rails build rails
+docker compose -f compose.yaml --profile rails --profile rails-test run --rm rails-test

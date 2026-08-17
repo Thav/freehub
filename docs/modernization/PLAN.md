@@ -34,6 +34,32 @@ Verified 2026-08-16 during FH-006: the active `freehub` sandbox exposes Docker
 the sandbox Docker permission, but must target this nested daemon—not a host
 socket or another Docker context.
 
+### Agent container rule
+
+`sbx create` and `sbx run` are **workstation-host commands only**. An agent
+already executing for this repository is inside the persistent `freehub`
+sandbox. It must not try to find or invoke `sbx`, and it must not treat the
+absence of that host-only CLI as a blocker. After obtaining the sandbox Docker
+permission, run ordinary `docker …` and `docker compose …` commands directly.
+They reach the nested daemon named `freehub`; do not mount, forward, or target a
+workstation Docker socket.
+
+The sandbox normally supplies `HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY`.
+Pass them as existing Compose build arguments where the Compose file supports
+them. When a build fails, distinguish a Docker-permission failure from a proxy
+TLS, package-mirror, or compiler-tool failure before blocking a ticket. Do not
+disable TLS verification merely to make a dependency install succeed; install
+or provide the required proxy CA instead.
+
+If a required dependency host is blocked directly and the proxy cannot serve
+that protocol (for example, apt receives a proxy `403`), request a narrowly
+scoped host-side `sbx policy` network addition from the repository owner. State
+the exact hostname or host pattern, the reproducing command and error, why the
+build needs it, and the smallest expected package set. Do not change sandbox
+policy yourself, request broad internet access, or substitute a host socket.
+After the owner applies the policy, retry the exact failing command before
+changing application code or marking the ticket blocked.
+
 Compose will provide `legacy`, `modern`, and `test` profiles. No host installation of Ruby, Rails, PostgreSQL, MariaDB, or Playwright is required.
 
 ## Architecture gate

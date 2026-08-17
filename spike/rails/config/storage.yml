@@ -1,0 +1,13 @@
+test:
+  service: Disk
+  root: <%= Rails.root.join("tmp/storage") %>
+
+local:
+  service: Disk
+  root: <%= Rails.root.join("storage") %>
+
+# The spike does not use Active Storage. This explicit configuration lets the
+# Rails framework eager-load in production without creating a storage dependency.
+production:
+  service: Disk
+  root: <%= Rails.root.join("tmp/storage") %>
