@@ -1,12 +1,17 @@
-# FH-007 Rails spike measurements
+# FH-007 Rails spike measurements (archived evidence)
 
-The Rails candidate is isolated in `spike/rails`. It uses maintained Ruby and
+The Rails candidate was isolated in `spike/rails`. It used maintained Ruby and
 Rails, PostgreSQL, ERB with Turbo, plain CSS, a database-backed canonical schema,
 a locked Bundler dependency graph, and an encrypted Rails cookie session. It implements only the comparison slice:
 login, organization selection, scoped people search/profile, visit lifecycle,
 people CSV export, and migration-accounting persistence.
 
 ## Reproducible gates
+
+These commands completed on 2026-08-17 before FH-008 removed the losing
+prototype. To reproduce the competitor measurement, check out
+`95a93d074b032614f5caa21520ce0632a6da4686` (or inspect that revision) and run
+the commands below.
 
 | Gate | Command | Evidence |
 | --- | --- | --- |

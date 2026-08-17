@@ -122,82 +122,6 @@ services:
     command: ["npx", "playwright", "test"]
     networks: [ingress]
 
-  rails-db:
-    profiles: [rails]
-    image: postgres@sha256:a02db8cac496f15b094798a38254f14d6e00741f709360e5e00bb6668ea31636
-    environment:
-      POSTGRES_DB: freehub_rails
-      POSTGRES_USER: freehub
-      POSTGRES_PASSWORD: freehub
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U freehub -d freehub_rails"]
-      interval: 3s
-      timeout: 3s
-      retries: 30
-    networks: [rails]
-
-  rails:
-    profiles: [rails]
-    image: freehub-rails
-    build:
-      context: spike/rails
-      args:
-        HTTP_PROXY: ${HTTP_PROXY:-}
-        HTTPS_PROXY: ${HTTPS_PROXY:-}
-        NO_PROXY: ${NO_PROXY:-localhost,127.0.0.1,rails-db}
-    environment:
-      DATABASE_URL: postgresql://freehub:freehub@rails-db:5432/freehub_rails
-      PORT: 3002
-      RAILS_ENV: production
-    depends_on:
-      rails-db: { condition: service_healthy }
-    ports: ["127.0.0.1:3002:3002"]
-    healthcheck:
-      test: ["CMD", "ruby", "-rnet/http", "-e", "exit(Net::HTTP.get_response(URI('http://127.0.0.1:3002/up')).is_a?(Net::HTTPSuccess) ? 0 : 1)"]
-      interval: 3s
-      timeout: 3s
-      retries: 20
-    networks: [rails, ingress]
-
-  rails-test:
-    profiles: [rails-test]
-    image: freehub-rails
-    environment:
-      DATABASE_URL: postgresql://freehub:freehub@rails-db:5432/freehub_rails
-      RAILS_ENV: test
-    command: ["sh", "-c", "bin/rails db:prepare && bin/rails test"]
-    depends_on:
-      rails-db: { condition: service_healthy }
-    networks: [rails]
-
-  rails-migration:
-    profiles: [rails-migration]
-    image: freehub-rails
-    environment:
-      DATABASE_URL: postgresql://freehub:freehub@rails-db:5432/freehub_rails
-      RAILS_ENV: production
-    command: ["sh", "-c", "bin/rails db:prepare && bin/rails 'freehub:record_preflight[/input/edge-cases.json]' && bin/rails runner 'abort(\"missing persisted migration evidence\") unless MigrationRun.exists? && MigrationIssue.where(disposition: \"quarantined\").exists?' "]
-    depends_on:
-      rails-db: { condition: service_healthy }
-    volumes:
-      - ./test/migration/expected:/input:ro
-    networks: [rails]
-
-  rails-visual:
-    profiles: [rails-visual]
-    # Reuse the project-built capture image: it pins the Playwright package,
-    # avoiding an interactive or networked npx install during verification.
-    image: freehub-legacy-capture
-    environment:
-      BASE_URL: http://rails:3002
-      HOME: /tmp
-      NODE_PATH: /capture/node_modules
-    working_dir: /work
-    volumes:
-      - ./spike/rails:/work:ro
-    entrypoint: ["/capture/node_modules/.bin/playwright", "test"]
-    networks: [ingress]
-
 networks:
   legacy:
     internal: true
@@ -205,6 +129,4 @@ networks:
   migration:
     internal: true
   modern:
-    internal: true
-  rails:
     internal: true

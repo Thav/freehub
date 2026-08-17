@@ -1,7 +1,0 @@
-default: &default
-  adapter: postgresql
-  encoding: unicode
-  url: <%= ENV.fetch("DATABASE_URL", "postgresql://freehub:freehub@rails-db:5432/freehub_rails") %>
-development: *default
-test: *default
-production: *default

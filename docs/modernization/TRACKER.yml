@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "active_ticket": null,
+  "active_ticket": "FH-008",
   "tickets": [
     {
       "id": "FH-001",
@@ -140,14 +140,14 @@
     {
       "id": "FH-008",
       "title": "Select and record the modernization stack",
-      "status": "pending",
+      "status": "in_progress",
       "path": "docs/modernization/tickets/FH-008-stack-decision.md",
       "depends_on": [
         "FH-006",
         "FH-007"
       ],
-      "claimed_at": null,
-      "updated_at": null,
+      "claimed_at": "2026-08-17T00:27:09.774Z",
+      "updated_at": "2026-08-17T00:27:09.774Z",
       "blocked_reason": null,
       "unblock_condition": null,
       "evidence": [],

@@ -1,6 +1,0 @@
-<h1>Choose an organization</h1>
-<ul>
-  <% @organizations.each do |organization| %>
-    <li><%= link_to organization.name, organization_people_path(organization) %></li>
-  <% end %>
-</ul>
