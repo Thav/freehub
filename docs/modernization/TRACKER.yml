@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "active_ticket": "FH-010",
+  "active_ticket": "FH-011",
   "tickets": [
     {
       "id": "FH-001",
@@ -179,28 +179,32 @@
     {
       "id": "FH-010",
       "title": "Implement authentication and sessions",
-      "status": "in_progress",
+      "status": "done",
       "path": "docs/modernization/tickets/FH-010-authentication-and-sessions.md",
       "depends_on": [
         "FH-009"
       ],
       "claimed_at": "2026-08-17T12:00:29.752Z",
-      "updated_at": "2026-08-17T12:00:29.752Z",
+      "updated_at": "2026-08-17T15:40:26.539Z",
       "blocked_reason": null,
       "unblock_condition": null,
-      "evidence": [],
-      "implementation_commits": []
+      "evidence": [
+        "Owner-reviewed implementation commit ad071754b9fb937311d6729dd715e36f0628ac8d. 2026-08-17: bin/verify-modern-foundation-clean; bin/verify-modern-foundation; docker compose --profile modern --profile test run --rm -e LOG_LEVEL=silent modern-test (password, session, CSRF, revocation, forced-change, migration-cutover and secret-redaction coverage); docker compose --profile visual run --rm --no-deps modern-visual; git diff --check; bin/ralph validate all passed."
+      ],
+      "implementation_commits": [
+        "ad071754b9fb937311d6729dd715e36f0628ac8d"
+      ]
     },
     {
       "id": "FH-011",
       "title": "Implement organizations, roles, and settings",
-      "status": "pending",
+      "status": "in_progress",
       "path": "docs/modernization/tickets/FH-011-organizations-roles-and-settings.md",
       "depends_on": [
         "FH-010"
       ],
-      "claimed_at": null,
-      "updated_at": null,
+      "claimed_at": "2026-08-17T15:40:30.486Z",
+      "updated_at": "2026-08-17T15:40:30.486Z",
       "blocked_reason": null,
       "unblock_condition": null,
       "evidence": [],

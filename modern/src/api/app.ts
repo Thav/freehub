@@ -5,7 +5,7 @@ import type { FastifyInstance, FastifyRequest } from "fastify";
 import { PrismaClient, VisitActivity } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
-import { LoginBody, OrganizationParams, PasswordBody, PersonParams, SearchQuery, UserParams, VisitBody, VisitParams } from "./contracts.js";
+import { LoginBody, MembershipBody, MembershipParams, MembershipUpdateBody, OrganizationBody, OrganizationParams, OrganizationSettingsBody, PasswordBody, PersonParams, ProvisionUserBody, SearchQuery, UserParams, UserSettingsBody, VisitBody, VisitParams } from "./contracts.js";
 
 type Auth = { userId: bigint; organizationId: bigint | null; role: "manager" | "operator" | null; csrfTokenDigest: string; sessionId: string; passwordChangeRequired: boolean; platformAdministrator: boolean };
 const sessionCookie = "freehub_session";
@@ -14,6 +14,8 @@ const digest = (value: string) => createHash("sha256").update(value).digest("hex
 const token = () => randomBytes(32).toString("base64url");
 const sessionLifetimeMs = () => Math.max(60, Number(process.env.SESSION_TTL_SECONDS || 8 * 60 * 60)) * 1000;
 const sameDigest = (left: string | null, right: string) => Boolean(left && timingSafeEqual(Buffer.from(left), Buffer.from(digest(right))));
+const today = () => new Date(new Date().toISOString().slice(0, 10));
+const date = (value: string) => new Date(`${value}T00:00:00.000Z`);
 const personJson = (person: { id: bigint; displayName: string; staff: boolean; archivedAt: Date | null }) => ({
   id: person.id.toString(), displayName: person.displayName, staff: person.staff, archivedAt: person.archivedAt
 });
@@ -26,7 +28,7 @@ export async function buildApp(db = new PrismaClient()): Promise<FastifyInstance
   app.setErrorHandler((error, request, reply) => {
     const safeError = error as { statusCode?: number; code?: string; message?: string };
     request.log.error({ err: error, requestId: request.id }, "request failed");
-    const statusCode = safeError.statusCode && safeError.statusCode >= 400 ? safeError.statusCode : 500;
+    const statusCode = safeError.statusCode && safeError.statusCode >= 400 ? safeError.statusCode : safeError.code === "P2002" ? 409 : 500;
     return reply.code(statusCode).send({ error: { code: safeError.code || "internal_error", message: statusCode < 500 ? safeError.message : "internal server error", requestId: request.id } });
   });
 
@@ -46,7 +48,7 @@ export async function buildApp(db = new PrismaClient()): Promise<FastifyInstance
     if (auth.passwordChangeRequired && !options.allowPasswordChange) throw app.httpErrors.forbidden("password change required");
     if (options.mutable) await csrf(request, auth);
     const orgId = bigint(organizationId);
-    const membership = await db.organizationMembership.findUnique({ where: { organizationId_userId: { organizationId: orgId, userId: auth.userId } } });
+    const membership = await db.organizationMembership.findFirst({ where: { organizationId: orgId, userId: auth.userId, startsAt: { lte: today() }, OR: [{ endsAt: null }, { endsAt: { gte: today() } }] } });
     if (!membership) throw app.httpErrors.forbidden("organization membership required");
     return { ...auth, organizationId: orgId, role: membership.role };
   }
@@ -66,7 +68,7 @@ export async function buildApp(db = new PrismaClient()): Promise<FastifyInstance
   app.post("/api/logout", async (request, reply) => { const auth = await authenticated(request); await csrf(request, auth); await db.session.update({ where: { id: auth.sessionId }, data: { revokedAt: new Date() } }); reply.clearCookie(sessionCookie, { path: "/" }); return reply.code(204).send(); });
   app.get("/api/organizations", async (request) => {
     const auth = await authenticated(request); if (auth.passwordChangeRequired) throw app.httpErrors.forbidden("password change required");
-    const rows = await db.organizationMembership.findMany({ where: { userId: auth.userId }, include: { organization: true } });
+    const rows = await db.organizationMembership.findMany({ where: { userId: auth.userId, startsAt: { lte: today() }, OR: [{ endsAt: null }, { endsAt: { gte: today() } }] }, include: { organization: true } });
     return rows.map(({ organization, role }) => ({ id: organization.id.toString(), name: organization.name, key: organization.key, role }));
   });
   app.post("/api/password", { schema: { body: PasswordBody } }, async (request, reply) => {
@@ -85,6 +87,76 @@ export async function buildApp(db = new PrismaClient()): Promise<FastifyInstance
     await db.$transaction([db.user.update({ where: { id: userId }, data: { passwordDigest, passwordChangeRequired: true, disabledAt: null } }), db.session.updateMany({ where: { userId }, data: { revokedAt: new Date() } })]);
     reply.header("cache-control", "no-store");
     return { temporaryPassword };
+  });
+  app.get("/api/users/me", async (request) => {
+    const auth = await authenticated(request); const user = await db.user.findUniqueOrThrow({ where: { id: auth.userId } });
+    return { id: user.id.toString(), login: user.login, name: user.name, email: user.email, platformAdministrator: user.platformAdministrator };
+  });
+  app.put("/api/users/me", { schema: { body: UserSettingsBody } }, async (request) => {
+    const auth = await authenticated(request); await csrf(request, auth); const input = request.body as { name: string; email: string };
+    const user = await db.user.update({ where: { id: auth.userId }, data: { name: input.name.trim(), email: input.email.trim().toLowerCase() } });
+    return { id: user.id.toString(), login: user.login, name: user.name, email: user.email };
+  });
+  async function requireOrganizationAdministrator(request: FastifyRequest, organizationId: string) {
+    const auth = await scoped(request, organizationId, { mutable: true });
+    if (!auth.platformAdministrator && auth.role !== "manager") throw app.httpErrors.forbidden("organization manager required");
+    return auth;
+  }
+  async function recordRoleChange(input: { organizationId: bigint; userId: bigint; actorUserId: bigint; action: "granted" | "changed" | "revoked"; previousRole?: "manager" | "operator"; role?: "manager" | "operator"; previousStartsAt?: Date; startsAt?: Date; previousEndsAt?: Date | null; endsAt?: Date | null }) {
+    return db.roleAuditEvent.create({ data: input });
+  }
+  app.get("/api/organizations/:organizationId/settings", { schema: { params: OrganizationParams } }, async (request) => {
+    const { organizationId } = request.params as { organizationId: string }; const auth = await scoped(request, organizationId);
+    const organization = await db.organization.findUniqueOrThrow({ where: { id: bigint(organizationId) } });
+    return { id: organization.id.toString(), name: organization.name, key: organization.key, timezone: organization.timezone, location: organization.location, canManage: auth.platformAdministrator || auth.role === "manager" };
+  });
+  app.put("/api/organizations/:organizationId/settings", { schema: { params: OrganizationParams, body: OrganizationSettingsBody } }, async (request) => {
+    const { organizationId } = request.params as { organizationId: string }; await requireOrganizationAdministrator(request, organizationId); const input = request.body as { name: string; timezone: string; location?: string };
+    const organization = await db.organization.update({ where: { id: bigint(organizationId) }, data: { name: input.name.trim(), timezone: input.timezone, location: input.location?.trim() || null } });
+    return { id: organization.id.toString(), name: organization.name, key: organization.key, timezone: organization.timezone, location: organization.location };
+  });
+  app.get("/api/organizations/:organizationId/memberships", { schema: { params: OrganizationParams } }, async (request) => {
+    const { organizationId } = request.params as { organizationId: string }; const auth = await scoped(request, organizationId);
+    if (!auth.platformAdministrator && auth.role !== "manager") throw app.httpErrors.forbidden("organization manager required");
+    const rows = await db.organizationMembership.findMany({ where: { organizationId: bigint(organizationId) }, include: { user: true }, orderBy: [{ user: { name: "asc" } }] });
+    return rows.map((row) => ({ userId: row.userId.toString(), login: row.user.login, name: row.user.name, role: row.role, startsAt: row.startsAt.toISOString().slice(0, 10), endsAt: row.endsAt?.toISOString().slice(0, 10) || null }));
+  });
+  app.post("/api/organizations/:organizationId/memberships", { schema: { params: OrganizationParams, body: MembershipBody } }, async (request, reply) => {
+    const { organizationId } = request.params as { organizationId: string }; const auth = await requireOrganizationAdministrator(request, organizationId); const input = request.body as { userId: string; role: "manager" | "operator"; startsAt?: string; endsAt?: string | null };
+    const startsAt = input.startsAt ? date(input.startsAt) : today(); const endsAt = input.endsAt ? date(input.endsAt) : null; if (endsAt && endsAt < startsAt) throw app.httpErrors.badRequest("membership end date must not precede start date");
+    await db.user.findUniqueOrThrow({ where: { id: bigint(input.userId) } });
+    const membership = await db.organizationMembership.create({ data: { organizationId: bigint(organizationId), userId: bigint(input.userId), role: input.role, startsAt, endsAt } });
+    await recordRoleChange({ organizationId: membership.organizationId, userId: membership.userId, actorUserId: auth.userId, action: "granted", role: membership.role, startsAt, endsAt });
+    return reply.code(201).send({ userId: membership.userId.toString(), role: membership.role, startsAt: startsAt.toISOString().slice(0, 10), endsAt: endsAt?.toISOString().slice(0, 10) || null });
+  });
+  app.put("/api/organizations/:organizationId/memberships/:userId", { schema: { params: MembershipParams, body: MembershipUpdateBody } }, async (request) => {
+    const { organizationId, userId } = request.params as { organizationId: string; userId: string }; const auth = await requireOrganizationAdministrator(request, organizationId); const input = request.body as { role: "manager" | "operator"; startsAt: string; endsAt?: string | null };
+    const startsAt = date(input.startsAt); const endsAt = input.endsAt ? date(input.endsAt) : null; if (endsAt && endsAt < startsAt) throw app.httpErrors.badRequest("membership end date must not precede start date");
+    const existing = await db.organizationMembership.findUniqueOrThrow({ where: { organizationId_userId: { organizationId: bigint(organizationId), userId: bigint(userId) } } });
+    const membership = await db.organizationMembership.update({ where: { id: existing.id }, data: { role: input.role, startsAt, endsAt } });
+    await recordRoleChange({ organizationId: membership.organizationId, userId: membership.userId, actorUserId: auth.userId, action: "changed", previousRole: existing.role, role: membership.role, previousStartsAt: existing.startsAt, startsAt, previousEndsAt: existing.endsAt, endsAt });
+    return { userId: membership.userId.toString(), role: membership.role, startsAt: startsAt.toISOString().slice(0, 10), endsAt: endsAt?.toISOString().slice(0, 10) || null };
+  });
+  app.delete("/api/organizations/:organizationId/memberships/:userId", { schema: { params: MembershipParams } }, async (request, reply) => {
+    const { organizationId, userId } = request.params as { organizationId: string; userId: string }; const auth = await requireOrganizationAdministrator(request, organizationId); const existing = await db.organizationMembership.findUniqueOrThrow({ where: { organizationId_userId: { organizationId: bigint(organizationId), userId: bigint(userId) } } }); const endsAt = today();
+    await db.organizationMembership.update({ where: { id: existing.id }, data: { endsAt } }); await recordRoleChange({ organizationId: existing.organizationId, userId: existing.userId, actorUserId: auth.userId, action: "revoked", previousRole: existing.role, previousStartsAt: existing.startsAt, previousEndsAt: existing.endsAt, endsAt });
+    return reply.code(204).send();
+  });
+  app.post("/api/admin/organizations", { schema: { body: OrganizationBody } }, async (request, reply) => {
+    const auth = await authenticated(request); await csrf(request, auth); if (!auth.platformAdministrator) throw app.httpErrors.forbidden("platform administrator required"); const input = request.body as { name: string; key: string; timezone: string; location?: string; managerUserId: string };
+    const organization = await db.$transaction(async (tx) => { await tx.user.findUniqueOrThrow({ where: { id: bigint(input.managerUserId) } }); const created = await tx.organization.create({ data: { name: input.name.trim(), key: input.key, timezone: input.timezone, location: input.location?.trim() || null } }); const membership = await tx.organizationMembership.create({ data: { organizationId: created.id, userId: bigint(input.managerUserId), role: "manager", startsAt: today() } }); await tx.roleAuditEvent.create({ data: { organizationId: created.id, userId: membership.userId, actorUserId: auth.userId, action: "granted", role: "manager", startsAt: membership.startsAt } }); return created; });
+    return reply.code(201).send({ id: organization.id.toString(), name: organization.name, key: organization.key });
+  });
+  app.get("/api/admin/users", async (request) => {
+    const auth = await authenticated(request); if (!auth.platformAdministrator) throw app.httpErrors.forbidden("platform administrator required");
+    const users = await db.user.findMany({ include: { memberships: { include: { organization: true } } }, orderBy: { login: "asc" } });
+    return users.map((user) => ({ id: user.id.toString(), login: user.login, name: user.name, email: user.email, disabledAt: user.disabledAt, memberships: user.memberships.map((membership) => ({ organizationId: membership.organizationId.toString(), organizationName: membership.organization.name, role: membership.role, startsAt: membership.startsAt.toISOString().slice(0, 10), endsAt: membership.endsAt?.toISOString().slice(0, 10) || null })) }));
+  });
+  app.post("/api/admin/users", { schema: { body: ProvisionUserBody } }, async (request, reply) => {
+    const auth = await authenticated(request); await csrf(request, auth); if (!auth.platformAdministrator) throw app.httpErrors.forbidden("platform administrator required"); const input = request.body as { login: string; name: string; email: string };
+    const temporaryPassword = randomBytes(18).toString("base64url"); const passwordDigest = await bcrypt.hash(temporaryPassword, 12);
+    const user = await db.user.create({ data: { login: input.login.trim(), name: input.name.trim(), email: input.email.trim().toLowerCase(), passwordDigest, passwordChangeRequired: true } }); reply.header("cache-control", "no-store");
+    return reply.code(201).send({ id: user.id.toString(), login: user.login, temporaryPassword });
   });
   app.get("/api/organizations/:organizationId/people", { schema: { params: OrganizationParams, querystring: SearchQuery } }, async (request) => {
     const { organizationId } = request.params as { organizationId: string }; const { q } = request.query as { q: string }; await scoped(request, organizationId);

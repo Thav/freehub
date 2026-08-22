@@ -52,6 +52,7 @@ model Organization {
   tags Tag[]
   archiveEvents PersonArchiveEvent[]
   importJobs ImportJob[]
+  roleAuditEvents RoleAuditEvent[]
 }
 model User {
   id BigInt @id @default(autoincrement())
@@ -66,17 +67,37 @@ model User {
   updatedAt DateTime @updatedAt
   memberships OrganizationMembership[]
   sessions Session[]
+  roleAuditEvents RoleAuditEvent[]
 }
 model OrganizationMembership {
   id BigInt @id @default(autoincrement())
   organizationId BigInt
   userId BigInt
   role OrganizationRole
+  startsAt DateTime @default(now()) @db.Date
+  endsAt DateTime? @db.Date
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@unique([organizationId, userId])
+}
+model RoleAuditEvent {
+  id BigInt @id @default(autoincrement())
+  organizationId BigInt
+  userId BigInt
+  actorUserId BigInt
+  action String @db.VarChar(24)
+  previousRole OrganizationRole?
+  role OrganizationRole?
+  previousStartsAt DateTime? @db.Date
+  startsAt DateTime? @db.Date
+  previousEndsAt DateTime? @db.Date
+  endsAt DateTime? @db.Date
+  createdAt DateTime @default(now())
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+  @@index([organizationId, userId, createdAt])
 }
 model Session {
   id String @id @default(uuid())

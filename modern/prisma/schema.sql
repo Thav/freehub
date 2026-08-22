@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict CQd1MLJuDyRwHaMNljoWjlNsN4MuHLmQuRlbu9BLqJop5FYlQRTJrfXtyWCGxNC
+\restrict fMIFeoAZNpkZFo6rcdDtNsmUo5O74l7VY9sUHNw7IZItVpubp1oPYmFRRegMCeH
 
 -- Dumped from database version 18.4 (Debian 18.4-1.pgdg13+1)
 -- Dumped by pg_dump version 18.4 (Debian 18.4-1.pgdg13+1)
@@ -147,6 +147,16 @@ BEGIN
   IF NEW."createdPersonId" IS NOT NULL AND NOT EXISTS (SELECT 1 FROM "Person" WHERE id = NEW."createdPersonId" AND "organizationId" = job_organization_id) THEN RAISE EXCEPTION 'created person must belong to import organization' USING ERRCODE = 'foreign_key_violation'; END IF;
   RETURN NEW;
 END $$;
+
+
+--
+-- Name: freehub_role_audit_append_only(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION "public"."freehub_role_audit_append_only"() RETURNS "trigger"
+    LANGUAGE "plpgsql"
+    AS $$
+BEGIN RAISE EXCEPTION 'role audit events are append only' USING ERRCODE = 'integrity_constraint_violation'; END $$;
 
 
 --
@@ -422,7 +432,10 @@ CREATE TABLE "public"."OrganizationMembership" (
     "userId" bigint NOT NULL,
     "role" "public"."OrganizationRole" NOT NULL,
     "createdAt" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    "updatedAt" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    "updatedAt" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "startsAt" "date" DEFAULT CURRENT_DATE NOT NULL,
+    "endsAt" "date",
+    CONSTRAINT "OrganizationMembership_date_range" CHECK ((("endsAt" IS NULL) OR ("endsAt" >= "startsAt")))
 );
 
 
@@ -580,6 +593,46 @@ CREATE SEQUENCE "public"."Person_id_seq"
 --
 
 ALTER SEQUENCE "public"."Person_id_seq" OWNED BY "public"."Person"."id";
+
+
+--
+-- Name: RoleAuditEvent; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE "public"."RoleAuditEvent" (
+    "id" bigint NOT NULL,
+    "organizationId" bigint NOT NULL,
+    "userId" bigint NOT NULL,
+    "actorUserId" bigint NOT NULL,
+    "action" character varying(24) NOT NULL,
+    "previousRole" "public"."OrganizationRole",
+    "role" "public"."OrganizationRole",
+    "previousStartsAt" "date",
+    "startsAt" "date",
+    "previousEndsAt" "date",
+    "endsAt" "date",
+    "createdAt" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT "RoleAuditEvent_action" CHECK ((("action")::"text" = ANY ((ARRAY['granted'::character varying, 'changed'::character varying, 'revoked'::character varying])::"text"[])))
+);
+
+
+--
+-- Name: RoleAuditEvent_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE "public"."RoleAuditEvent_id_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: RoleAuditEvent_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE "public"."RoleAuditEvent_id_seq" OWNED BY "public"."RoleAuditEvent"."id";
 
 
 --
@@ -844,6 +897,13 @@ ALTER TABLE ONLY "public"."PersonTag" ALTER COLUMN "id" SET DEFAULT "nextval"('"
 
 
 --
+-- Name: RoleAuditEvent id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY "public"."RoleAuditEvent" ALTER COLUMN "id" SET DEFAULT "nextval"('"public"."RoleAuditEvent_id_seq"'::"regclass");
+
+
+--
 -- Name: Service id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1016,6 +1076,14 @@ ALTER TABLE ONLY "public"."Person"
 
 
 --
+-- Name: RoleAuditEvent RoleAuditEvent_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY "public"."RoleAuditEvent"
+    ADD CONSTRAINT "RoleAuditEvent_pkey" PRIMARY KEY ("id");
+
+
+--
 -- Name: Service Service_organizationId_id_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1103,6 +1171,13 @@ CREATE INDEX "Note_organizationId_personId_idx" ON "public"."Note" USING "btree"
 
 
 --
+-- Name: OrganizationMembership_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "OrganizationMembership_active_idx" ON "public"."OrganizationMembership" USING "btree" ("organizationId", "userId", "startsAt", "endsAt");
+
+
+--
 -- Name: Organization_key_key; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1142,6 +1217,13 @@ CREATE INDEX "Person_organizationId_normalizedEmail_idx" ON "public"."Person" US
 --
 
 CREATE INDEX "Person_organizationId_normalizedPhone_idx" ON "public"."Person" USING "btree" ("organizationId", "normalizedPhone");
+
+
+--
+-- Name: RoleAuditEvent_organization_user_created_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "RoleAuditEvent_organization_user_created_idx" ON "public"."RoleAuditEvent" USING "btree" ("organizationId", "userId", "createdAt");
 
 
 --
@@ -1247,6 +1329,13 @@ CREATE TRIGGER "PersonArchiveEvent_append_only" BEFORE DELETE OR UPDATE ON "publ
 --
 
 CREATE TRIGGER "Person_displayName_derived" BEFORE INSERT OR UPDATE OF "firstName", "lastName" ON "public"."Person" FOR EACH ROW EXECUTE FUNCTION "public"."freehub_derive_person_display_name"();
+
+
+--
+-- Name: RoleAuditEvent RoleAuditEvent_append_only; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER "RoleAuditEvent_append_only" BEFORE DELETE OR UPDATE ON "public"."RoleAuditEvent" FOR EACH ROW EXECUTE FUNCTION "public"."freehub_role_audit_append_only"();
 
 
 --
@@ -1497,6 +1586,22 @@ ALTER TABLE ONLY "public"."Person"
 
 
 --
+-- Name: RoleAuditEvent RoleAuditEvent_organizationId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY "public"."RoleAuditEvent"
+    ADD CONSTRAINT "RoleAuditEvent_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "public"."Organization"("id") ON DELETE RESTRICT;
+
+
+--
+-- Name: RoleAuditEvent RoleAuditEvent_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY "public"."RoleAuditEvent"
+    ADD CONSTRAINT "RoleAuditEvent_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT;
+
+
+--
 -- Name: Service Service_createdByUserId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1612,4 +1717,4 @@ ALTER TABLE ONLY "public"."Visit"
 -- PostgreSQL database dump complete
 --
 
-\unrestrict CQd1MLJuDyRwHaMNljoWjlNsN4MuHLmQuRlbu9BLqJop5FYlQRTJrfXtyWCGxNC
+\unrestrict fMIFeoAZNpkZFo6rcdDtNsmUo5O74l7VY9sUHNw7IZItVpubp1oPYmFRRegMCeH
