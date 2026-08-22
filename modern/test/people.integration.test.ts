@@ -30,4 +30,25 @@ test("people preserve display contacts, normalize match fields, archive reversib
   const crossWrite = await app.inject({ method: "PUT", url: `/api/organizations/${other.id}/people/${personId}`, headers: { cookie: auth.cookie, "x-csrf-token": auth.csrf }, payload: { firstName: "Escape" } }); assert.equal(crossWrite.statusCode, 403);
 });
 
+test("tags are organization-owned and notes aggregate person, visit, and service targets with audit attribution", { skip: !db }, async () => {
+  assert.ok(db && app); const organization = await db.organization.findUniqueOrThrow({ where: { key: "spike-shop" } }); const auth = await session();
+  const person = await db.person.create({ data: { organizationId: organization.id, firstName: "Tagged", lastName: `Rider ${suffix}`, displayName: `Tagged Rider ${suffix}` } });
+  const visit = await db.visit.create({ data: { organizationId: organization.id, personId: person.id, activity: "project", arrivedAt: new Date(), staffSnapshot: false, memberSnapshot: false } });
+  const service = await db.service.create({ data: { organizationId: organization.id, personId: person.id, type: "membership" } });
+  const headers = { cookie: auth.cookie, "x-csrf-token": auth.csrf };
+  const volunteerName = `Volunteer ${suffix}`; const safetyName = `Safety ${suffix}`;
+  const tags = await app.inject({ method: "PUT", url: `/api/organizations/${organization.id}/people/${person.id}/tags`, headers, payload: { names: [volunteerName, safetyName] } }); assert.equal(tags.statusCode, 200); assert.deepEqual((tags.json() as { name: string }[]).map((tag) => tag.name), [volunteerName, safetyName]);
+  const listed = await app.inject({ method: "GET", url: `/api/organizations/${organization.id}/tags`, headers: { cookie: auth.cookie } }); assert.equal(listed.statusCode, 200); const volunteer = (listed.json() as { id: string; name: string; peopleCount: number }[]).find((tag) => tag.name === volunteerName); assert.ok(volunteer); assert.equal(volunteer.peopleCount, 1);
+  const tagged = await app.inject({ method: "GET", url: `/api/organizations/${organization.id}/tags/${volunteer.id}`, headers: { cookie: auth.cookie } }); assert.equal(tagged.statusCode, 200); assert.equal((tagged.json() as { people: { id: string }[] }).people[0].id, person.id.toString());
+  const createNote = async (target: Record<string, string>, text: string) => app.inject({ method: "POST", url: `/api/organizations/${organization.id}/notes`, headers, payload: { ...target, text } });
+  const personNote = await createNote({ personId: person.id.toString() }, "person note"); const visitNote = await createNote({ visitId: visit.id.toString() }, "visit note"); const serviceNote = await createNote({ serviceId: service.id.toString() }, "service note");
+  for (const response of [personNote, visitNote, serviceNote]) assert.equal(response.statusCode, 201); assert.equal((personNote.json() as { createdByUserId: string }).createdByUserId, "1");
+  const aggregate = await app.inject({ method: "GET", url: `/api/organizations/${organization.id}/people/${person.id}/notes`, headers: { cookie: auth.cookie } }); assert.equal(aggregate.statusCode, 200); assert.deepEqual(new Set((aggregate.json() as { text: string }[]).map((note) => note.text)), new Set(["person note", "visit note", "service note"]));
+  const update = await app.inject({ method: "PUT", url: `/api/organizations/${organization.id}/notes/${(personNote.json() as { id: string }).id}`, headers, payload: { text: "updated person note" } }); assert.equal(update.statusCode, 200); assert.equal((update.json() as { updatedByUserId: string }).updatedByUserId, "1");
+  const other = await db.organization.create({ data: { name: `Tags other ${suffix}`, key: `tags-other-${suffix}`, timezone: "America/New_York" } });
+  const crossTag = await app.inject({ method: "GET", url: `/api/organizations/${other.id}/tags/${volunteer.id}`, headers: { cookie: auth.cookie } }); assert.equal(crossTag.statusCode, 403);
+  const crossNote = await app.inject({ method: "PUT", url: `/api/organizations/${other.id}/notes/${(personNote.json() as { id: string }).id}`, headers, payload: { text: "escape" } }); assert.equal(crossNote.statusCode, 403);
+  const invalidTarget = await app.inject({ method: "POST", url: `/api/organizations/${organization.id}/notes`, headers, payload: { personId: person.id.toString(), visitId: visit.id.toString(), text: "invalid" } }); assert.equal(invalidTarget.statusCode, 400);
+});
+
 after(async () => { await app?.close(); await db?.$disconnect(); });
