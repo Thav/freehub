@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "active_ticket": "FH-011",
+  "active_ticket": "FH-012",
   "tickets": [
     {
       "id": "FH-001",
@@ -198,28 +198,32 @@
     {
       "id": "FH-011",
       "title": "Implement organizations, roles, and settings",
-      "status": "in_progress",
+      "status": "done",
       "path": "docs/modernization/tickets/FH-011-organizations-roles-and-settings.md",
       "depends_on": [
         "FH-010"
       ],
       "claimed_at": "2026-08-17T15:40:30.486Z",
-      "updated_at": "2026-08-17T15:40:30.486Z",
+      "updated_at": "2026-08-22T13:42:14.704Z",
       "blocked_reason": null,
       "unblock_condition": null,
-      "evidence": [],
-      "implementation_commits": []
+      "evidence": [
+        "Owner-reviewed implementation commit 1a9d3ca85700591ec8458fe27ccacffd94ae2751. 2026-08-22: bin/verify-modern-foundation-clean; bin/verify-modern-foundation; docker compose --profile modern --profile test run --rm -e LOG_LEVEL=silent modern-test (exhaustive platform-admin, manager, operator, membership-audit, and cross-tenant read/write coverage); docker compose --profile visual run --rm --no-deps modern-visual (settings terminology/layout); git diff --check; bin/ralph validate all passed."
+      ],
+      "implementation_commits": [
+        "1a9d3ca85700591ec8458fe27ccacffd94ae2751"
+      ]
     },
     {
       "id": "FH-012",
       "title": "Implement people search, profiles, and archive behavior",
-      "status": "pending",
+      "status": "in_progress",
       "path": "docs/modernization/tickets/FH-012-people-search-profile-and-archive.md",
       "depends_on": [
         "FH-011"
       ],
-      "claimed_at": null,
-      "updated_at": null,
+      "claimed_at": "2026-08-22T13:42:15.270Z",
+      "updated_at": "2026-08-22T13:42:15.270Z",
       "blocked_reason": null,
       "unblock_condition": null,
       "evidence": [],

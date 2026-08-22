@@ -5,7 +5,7 @@ import type { FastifyInstance, FastifyRequest } from "fastify";
 import { PrismaClient, VisitActivity } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
-import { LoginBody, MembershipBody, MembershipParams, MembershipUpdateBody, OrganizationBody, OrganizationParams, OrganizationSettingsBody, PasswordBody, PersonParams, ProvisionUserBody, SearchQuery, UserParams, UserSettingsBody, VisitBody, VisitParams } from "./contracts.js";
+import { LoginBody, MembershipBody, MembershipParams, MembershipUpdateBody, OrganizationBody, OrganizationParams, OrganizationSettingsBody, PasswordBody, PersonBody, PersonParams, ProvisionUserBody, SearchQuery, UserParams, UserSettingsBody, VisitBody, VisitParams } from "./contracts.js";
 
 type Auth = { userId: bigint; organizationId: bigint | null; role: "manager" | "operator" | null; csrfTokenDigest: string; sessionId: string; passwordChangeRequired: boolean; platformAdministrator: boolean };
 const sessionCookie = "freehub_session";
@@ -19,6 +19,12 @@ const date = (value: string) => new Date(`${value}T00:00:00.000Z`);
 const personJson = (person: { id: bigint; displayName: string; staff: boolean; archivedAt: Date | null }) => ({
   id: person.id.toString(), displayName: person.displayName, staff: person.staff, archivedAt: person.archivedAt
 });
+const trimmed = (value: string | null | undefined) => value?.trim() || null;
+const normalizePhone = (value: string | null) => value ? `${value.trim().startsWith("+") ? "+" : ""}${value.replace(/\D/g, "")}` || null : null;
+const personValues = (input: { firstName: string; lastName?: string | null; email?: string | null; phone?: string | null; street1?: string | null; street2?: string | null; city?: string | null; state?: string | null; postalCode?: string | null; country?: string | null; yearOfBirth?: number | null; staff?: boolean; emailOptOut?: boolean }) => {
+  const firstName = input.firstName.trim(); const lastName = trimmed(input.lastName); const email = trimmed(input.email); const phone = trimmed(input.phone);
+  return { firstName, lastName, displayName: [firstName, lastName].filter(Boolean).join(" "), email, normalizedEmail: email?.toLowerCase() || null, phone, normalizedPhone: normalizePhone(phone), street1: trimmed(input.street1), street2: trimmed(input.street2), city: trimmed(input.city), state: trimmed(input.state), postalCode: trimmed(input.postalCode), country: trimmed(input.country)?.toUpperCase() || null, yearOfBirth: input.yearOfBirth ?? null, staff: input.staff ?? false, emailOptOut: input.emailOptOut ?? false };
+};
 
 export async function buildApp(db = new PrismaClient()): Promise<FastifyInstance> {
   const app = (await import("fastify")).default({ logger: { level: process.env.LOG_LEVEL || "info", redact: ["req.headers.authorization", "req.headers.cookie", "req.body.password", "res.headers.set-cookie"] } });
@@ -166,7 +172,20 @@ export async function buildApp(db = new PrismaClient()): Promise<FastifyInstance
   app.get("/api/organizations/:organizationId/people/:personId", { schema: { params: PersonParams } }, async (request) => {
     const { organizationId, personId } = request.params as { organizationId: string; personId: string }; await scoped(request, organizationId);
     const person = await db.person.findFirst({ where: { id: bigint(personId), organizationId: bigint(organizationId) }, include: { visits: { orderBy: { arrivedAt: "desc" }, take: 10 }, services: true } });
-    if (!person) throw app.httpErrors.notFound(); return { ...personJson(person), visits: person.visits.map((visit) => ({ ...visit, id: visit.id.toString(), personId: visit.personId.toString(), organizationId: visit.organizationId.toString() })), services: person.services.map((service) => ({ id: service.id.toString(), type: service.type, startDate: service.startDate, endDate: service.endDate, paid: service.paid, volunteered: service.volunteered })) };
+    if (!person) throw app.httpErrors.notFound(); return { ...personJson(person), firstName: person.firstName, lastName: person.lastName, email: person.email, phone: person.phone, street1: person.street1, street2: person.street2, city: person.city, state: person.state, postalCode: person.postalCode, country: person.country, yearOfBirth: person.yearOfBirth, emailOptOut: person.emailOptOut, archivedByUserId: person.archivedByUserId?.toString() || null, visits: person.visits.map((visit) => ({ ...visit, id: visit.id.toString(), personId: visit.personId.toString(), organizationId: visit.organizationId.toString() })), services: person.services.map((service) => ({ id: service.id.toString(), type: service.type, startDate: service.startDate, endDate: service.endDate, paid: service.paid, volunteered: service.volunteered })) };
+  });
+  app.post("/api/organizations/:organizationId/people", { schema: { params: OrganizationParams, body: PersonBody } }, async (request, reply) => {
+    const { organizationId } = request.params as { organizationId: string }; const auth = await scoped(request, organizationId, { mutable: true }); const input = request.body as Parameters<typeof personValues>[0]; if (!input.firstName.trim()) throw app.httpErrors.badRequest("first name is required"); const values = personValues(input); if (values.country && values.country.length !== 2) throw app.httpErrors.badRequest("country must be a two-letter code");
+    const person = await db.person.create({ data: { ...values, organizationId: bigint(organizationId), createdByUserId: auth.userId, updatedByUserId: auth.userId } }); return reply.code(201).send(personJson(person));
+  });
+  app.put("/api/organizations/:organizationId/people/:personId", { schema: { params: PersonParams, body: PersonBody } }, async (request) => {
+    const { organizationId, personId } = request.params as { organizationId: string; personId: string }; const auth = await scoped(request, organizationId, { mutable: true }); const existing = await db.person.findFirst({ where: { id: bigint(personId), organizationId: bigint(organizationId) } }); if (!existing) throw app.httpErrors.notFound(); const input = request.body as Parameters<typeof personValues>[0]; if (!input.firstName.trim()) throw app.httpErrors.badRequest("first name is required");
+    const values = personValues(input); if (values.country && values.country.length !== 2) throw app.httpErrors.badRequest("country must be a two-letter code"); const person = await db.person.update({ where: { id: existing.id }, data: { ...values, updatedByUserId: auth.userId } }); return personJson(person);
+  });
+  for (const action of ["archive", "restore"] as const) app.post(`/api/organizations/:organizationId/people/:personId/${action}`, { schema: { params: PersonParams } }, async (request) => {
+    const { organizationId, personId } = request.params as { organizationId: string; personId: string }; const auth = await scoped(request, organizationId, { mutable: true }); const existing = await db.person.findFirst({ where: { id: bigint(personId), organizationId: bigint(organizationId) } }); if (!existing) throw app.httpErrors.notFound();
+    if (action === "archive" && existing.archivedAt) throw app.httpErrors.conflict("person is already archived"); if (action === "restore" && !existing.archivedAt) throw app.httpErrors.conflict("person is not archived");
+    const person = await db.$transaction(async (tx) => { const updated = await tx.person.update({ where: { id: existing.id }, data: action === "archive" ? { archivedAt: new Date(), archivedByUserId: auth.userId, updatedByUserId: auth.userId } : { archivedAt: null, archivedByUserId: null, updatedByUserId: auth.userId } }); await tx.personArchiveEvent.create({ data: { organizationId: updated.organizationId, personId: updated.id, actorUserId: auth.userId, action } }); return updated; }); return personJson(person);
   });
   app.post("/api/organizations/:organizationId/visits", { schema: { params: OrganizationParams, body: VisitBody } }, async (request, reply) => {
     const { organizationId } = request.params as { organizationId: string }; const input = request.body as { personId: string; activity: VisitActivity; arrivedAt: string }; await scoped(request, organizationId, { mutable: true });
