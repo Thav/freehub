@@ -161,6 +161,8 @@ model Visit {
   memberSnapshot Boolean
   createdByUserId BigInt?
   updatedByUserId BigInt?
+  cancelledAt DateTime?
+  cancelledByUserId BigInt?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   notes Note[]

@@ -32,6 +32,7 @@ test("login, scoped search, and profile navigation work from one origin", async 
   await page.getByRole("link", { name: "Ada Rider" }).click();
   await expect(page.getByRole("heading", { name: "Ada Rider" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Sign in for project" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Sign in for volunteer" })).toBeVisible();
 });
 
 test("manager settings retain the legacy organization terminology", async ({ page }) => {
@@ -99,4 +100,19 @@ test("person tags can be assigned and notes can be added", async ({ page }) => {
   await page.getByRole("button", { name: "Add note" }).click();
   await expect(page.getByRole("status")).toHaveText("Note added.");
   await expect(page.getByText("Visual note")).toBeVisible();
+});
+
+test("daily visits support quick sign-in, queue transitions, and visit detail", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("Login").fill("manager");
+  await page.getByLabel("Password").fill("spike-password");
+  await page.getByRole("button", { name: "Log in" }).click();
+  await page.getByRole("link", { name: "New person" }).click();
+  await page.getByLabel("First name").fill("Visit Queue");
+  await page.getByLabel("Last name").fill(`Rider ${Date.now()}`);
+  await page.getByRole("button", { name: "Create person" }).click();
+  await page.getByRole("button", { name: "Sign in for project" }).click();
+  await expect(page.getByRole("heading", { name: /Visits for/ })).toBeVisible();
+  await page.getByRole("link", { name: "View visit" }).last().click();
+  await expect(page.getByRole("heading", { name: "Visit detail" })).toBeVisible();
 });

@@ -5,7 +5,7 @@ import type { FastifyInstance, FastifyRequest } from "fastify";
 import { PrismaClient, VisitActivity } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
-import { LoginBody, MembershipBody, MembershipParams, MembershipUpdateBody, NoteBody, NoteParams, NoteUpdateBody, OrganizationBody, OrganizationParams, OrganizationSettingsBody, PasswordBody, PersonBody, PersonParams, PersonTagParams, ProvisionUserBody, SearchQuery, TagAssignmentBody, TagParams, UserParams, UserSettingsBody, VisitBody, VisitParams } from "./contracts.js";
+import { LoginBody, MembershipBody, MembershipParams, MembershipUpdateBody, NoteBody, NoteParams, NoteUpdateBody, OrganizationBody, OrganizationParams, OrganizationSettingsBody, PasswordBody, PersonBody, PersonParams, PersonTagParams, ProvisionUserBody, SearchQuery, TagAssignmentBody, TagParams, UserParams, UserSettingsBody, VisitActionBody, VisitBody, VisitDayParams, VisitListQuery, VisitParams, VisitTransferBody, VisitUpdateBody } from "./contracts.js";
 
 type Auth = { userId: bigint; organizationId: bigint | null; role: "manager" | "operator" | null; csrfTokenDigest: string; sessionId: string; passwordChangeRequired: boolean; platformAdministrator: boolean };
 const sessionCookie = "freehub_session";
@@ -16,6 +16,34 @@ const sessionLifetimeMs = () => Math.max(60, Number(process.env.SESSION_TTL_SECO
 const sameDigest = (left: string | null, right: string) => Boolean(left && timingSafeEqual(Buffer.from(left), Buffer.from(digest(right))));
 const today = () => new Date(new Date().toISOString().slice(0, 10));
 const date = (value: string) => new Date(`${value}T00:00:00.000Z`);
+const instant = (value: string) => {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) throw new Error("invalid timestamp");
+  return parsed;
+};
+const nextDay = (day: string) => {
+  const [year, month, date] = day.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, date + 1)).toISOString().slice(0, 10);
+};
+const previousDay = (day: string) => {
+  const [year, month, date] = day.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, date - 1)).toISOString().slice(0, 10);
+};
+const zonedDayStart = (day: string, timezone: string) => {
+  const [year, month, date] = day.split("-").map(Number);
+  const guess = Date.UTC(year, month - 1, date);
+  const parts = new Intl.DateTimeFormat("en-US", { timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" }).formatToParts(new Date(guess));
+  const value = (type: string) => Number(parts.find((part) => part.type === type)?.value);
+  return new Date(guess - (Date.UTC(value("year"), value("month") - 1, value("day"), value("hour"), value("minute"), value("second")) - guess));
+};
+const localDay = (at: Date, timezone: string) => new Intl.DateTimeFormat("en-CA", { timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit" }).format(at);
+const visitJson = (visit: { id: bigint; organizationId: bigint; personId: bigint; activity: string; arrivedAt: Date | null; startedAt: Date | null; endedAt: Date | null; durationSeconds: number | null; staffSnapshot: boolean; memberSnapshot: boolean; createdByUserId: bigint | null; updatedByUserId: bigint | null; cancelledAt: Date | null; cancelledByUserId: bigint | null; createdAt: Date; updatedAt: Date; person?: { displayName: string } }) => ({ id: visit.id.toString(), organizationId: visit.organizationId.toString(), personId: visit.personId.toString(), activity: visit.activity, arrivedAt: visit.arrivedAt, startedAt: visit.startedAt, endedAt: visit.endedAt, durationSeconds: visit.durationSeconds, staffSnapshot: visit.staffSnapshot, memberSnapshot: visit.memberSnapshot, createdByUserId: visit.createdByUserId?.toString() || null, updatedByUserId: visit.updatedByUserId?.toString() || null, cancelledAt: visit.cancelledAt, cancelledByUserId: visit.cancelledByUserId?.toString() || null, createdAt: visit.createdAt, updatedAt: visit.updatedAt, person: visit.person ? { displayName: visit.person.displayName } : undefined });
+const duration = (startedAt: Date | null, endedAt: Date | null) => {
+  if (!startedAt || !endedAt) return null;
+  const seconds = Math.round((endedAt.getTime() - startedAt.getTime()) / 1000);
+  if (seconds < 0) throw new Error("sign-out must not precede sign-in");
+  return seconds;
+};
 const personJson = (person: { id: bigint; displayName: string; staff: boolean; archivedAt: Date | null }) => ({
   id: person.id.toString(), displayName: person.displayName, staff: person.staff, archivedAt: person.archivedAt
 });
@@ -172,13 +200,18 @@ export async function buildApp(db = new PrismaClient()): Promise<FastifyInstance
   });
   app.get("/api/organizations/:organizationId/people", { schema: { params: OrganizationParams, querystring: SearchQuery } }, async (request) => {
     const { organizationId } = request.params as { organizationId: string }; const { q } = request.query as { q: string }; await scoped(request, organizationId);
-    const people = await db.person.findMany({ where: { organizationId: bigint(organizationId), archivedAt: null, displayName: { contains: q, mode: "insensitive" } }, orderBy: { displayName: "asc" }, take: 15 });
+    const people = await db.person.findMany({ where: { organizationId: bigint(organizationId), archivedAt: null, displayName: { contains: q, mode: "insensitive" } }, orderBy: { displayName: "asc" }, take: 100 });
+    return people.map(personJson);
+  });
+  app.get("/api/organizations/:organizationId/people/archived", { schema: { params: OrganizationParams, querystring: SearchQuery } }, async (request) => {
+    const { organizationId } = request.params as { organizationId: string }; const { q } = request.query as { q: string }; await scoped(request, organizationId);
+    const people = await db.person.findMany({ where: { organizationId: bigint(organizationId), archivedAt: { not: null }, displayName: { contains: q, mode: "insensitive" } }, orderBy: { displayName: "asc" }, take: 100 });
     return people.map(personJson);
   });
   app.get("/api/organizations/:organizationId/people/:personId", { schema: { params: PersonParams } }, async (request) => {
     const { organizationId, personId } = request.params as { organizationId: string; personId: string }; await scoped(request, organizationId);
-    const person = await db.person.findFirst({ where: { id: bigint(personId), organizationId: bigint(organizationId) }, include: { visits: { orderBy: { arrivedAt: "desc" }, take: 10 }, services: true, tags: { include: { tag: true } } } });
-    if (!person) throw app.httpErrors.notFound(); return { ...personJson(person), firstName: person.firstName, lastName: person.lastName, email: person.email, phone: person.phone, street1: person.street1, street2: person.street2, city: person.city, state: person.state, postalCode: person.postalCode, country: person.country, yearOfBirth: person.yearOfBirth, emailOptOut: person.emailOptOut, archivedByUserId: person.archivedByUserId?.toString() || null, tags: person.tags.map(({ tag }) => ({ id: tag.id.toString(), name: tag.name })), visits: person.visits.map((visit) => ({ ...visit, id: visit.id.toString(), personId: visit.personId.toString(), organizationId: visit.organizationId.toString() })), services: person.services.map((service) => ({ id: service.id.toString(), type: service.type, startDate: service.startDate, endDate: service.endDate, paid: service.paid, volunteered: service.volunteered })) };
+    const person = await db.person.findFirst({ where: { id: bigint(personId), organizationId: bigint(organizationId) }, include: { visits: { where: { cancelledAt: null }, orderBy: { arrivedAt: "desc" }, take: 10 }, services: true, tags: { include: { tag: true } } } });
+    if (!person) throw app.httpErrors.notFound(); return { ...personJson(person), firstName: person.firstName, lastName: person.lastName, email: person.email, phone: person.phone, street1: person.street1, street2: person.street2, city: person.city, state: person.state, postalCode: person.postalCode, country: person.country, yearOfBirth: person.yearOfBirth, emailOptOut: person.emailOptOut, archivedByUserId: person.archivedByUserId?.toString() || null, tags: person.tags.map(({ tag }) => ({ id: tag.id.toString(), name: tag.name })), visits: person.visits.map(visitJson), services: person.services.map((service) => ({ id: service.id.toString(), type: service.type, startDate: service.startDate, endDate: service.endDate, paid: service.paid, volunteered: service.volunteered })) };
   });
   app.post("/api/organizations/:organizationId/people", { schema: { params: OrganizationParams, body: PersonBody } }, async (request, reply) => {
     const { organizationId } = request.params as { organizationId: string }; const auth = await scoped(request, organizationId, { mutable: true }); const input = request.body as Parameters<typeof personValues>[0]; if (!input.firstName.trim()) throw app.httpErrors.badRequest("first name is required"); const values = personValues(input); if (values.country && values.country.length !== 2) throw app.httpErrors.badRequest("country must be a two-letter code");
@@ -252,18 +285,68 @@ export async function buildApp(db = new PrismaClient()): Promise<FastifyInstance
   app.delete("/api/organizations/:organizationId/notes/:noteId", { schema: { params: NoteParams } }, async (request, reply) => {
     const { organizationId, noteId } = request.params as { organizationId: string; noteId: string }; await scoped(request, organizationId, { mutable: true }); const existing = await db.note.findFirst({ where: { id: bigint(noteId), organizationId: bigint(organizationId) } }); if (!existing) throw app.httpErrors.notFound(); await db.note.delete({ where: { id: existing.id } }); return reply.code(204).send();
   });
-  app.post("/api/organizations/:organizationId/visits", { schema: { params: OrganizationParams, body: VisitBody } }, async (request, reply) => {
-    const { organizationId } = request.params as { organizationId: string }; const input = request.body as { personId: string; activity: VisitActivity; arrivedAt: string }; await scoped(request, organizationId, { mutable: true });
-    const person = await db.person.findFirst({ where: { id: bigint(input.personId), organizationId: bigint(organizationId), archivedAt: null }, include: { services: true } }); if (!person) throw app.httpErrors.notFound("active person not found");
-    const day = input.arrivedAt.slice(0, 10); const member = person.services.some((service) => service.type === "membership" && (!service.startDate || service.startDate <= new Date(day)) && (!service.endDate || service.endDate >= new Date(day)));
-    const visit = await db.visit.create({ data: { organizationId: bigint(organizationId), personId: person.id, activity: input.activity, arrivedAt: new Date(input.arrivedAt), staffSnapshot: person.staff, memberSnapshot: member } });
-    return reply.code(201).send({ id: visit.id.toString(), staffSnapshot: visit.staffSnapshot, memberSnapshot: visit.memberSnapshot });
+  async function visitForOrganization(organizationId: string, visitId: string) {
+    const visit = await db.visit.findFirst({ where: { id: bigint(visitId), organizationId: bigint(organizationId) }, include: { person: true, notes: { orderBy: { createdAt: "desc" } } } });
+    if (!visit) throw app.httpErrors.notFound("visit not found");
+    return visit;
+  }
+  async function memberAtArrival(person: { services: { type: string; startDate: Date | null; endDate: Date | null }[] }, arrivedAt: Date, timezone: string) {
+    const day = localDay(arrivedAt, timezone);
+    return person.services.some((service) => service.type === "membership" && (!service.startDate || service.startDate.toISOString().slice(0, 10) <= day) && (!service.endDate || service.endDate.toISOString().slice(0, 10) >= day));
+  }
+  app.get("/api/organizations/:organizationId/visits/days/:day", { schema: { params: VisitDayParams } }, async (request) => {
+    const { organizationId, day } = request.params as { organizationId: string; day: string }; await scoped(request, organizationId);
+    const organization = await db.organization.findUniqueOrThrow({ where: { id: bigint(organizationId) } }); const start = zonedDayStart(day, organization.timezone); const end = zonedDayStart(nextDay(day), organization.timezone);
+    const visits = await db.visit.findMany({ where: { organizationId: bigint(organizationId), arrivedAt: { gte: start, lt: end } }, include: { person: true, notes: { orderBy: { createdAt: "desc" }, take: 1 } }, orderBy: { arrivedAt: "asc" } });
+    return { day, today: localDay(new Date(), organization.timezone), previousDay: previousDay(day), nextDay: nextDay(day), timezone: organization.timezone, visits: visits.map((visit) => ({ ...visitJson(visit), note: visit.notes[0] ? noteJson(visit.notes[0]) : null })) };
   });
-  for (const [action, field] of [["sign-in", "startedAt"], ["sign-out", "endedAt"]] as const) app.post(`/api/organizations/:organizationId/visits/:visitId/${action}`, { schema: { params: VisitParams } }, async (request) => {
-    const { organizationId, visitId } = request.params as { organizationId: string; visitId: string }; await scoped(request, organizationId, { mutable: true });
-    const existing = await db.visit.findFirst({ where: { id: bigint(visitId), organizationId: bigint(organizationId) } }); if (!existing) throw app.httpErrors.notFound();
-    const now = new Date(); const values = field === "endedAt" ? { endedAt: now, durationSeconds: existing.startedAt ? Math.max(0, Math.round((now.getTime() - existing.startedAt.getTime()) / 1000)) : null } : { startedAt: now };
-    const visit = await db.visit.update({ where: { id: existing.id }, data: values }); return { id: visit.id.toString(), durationSeconds: visit.durationSeconds };
+  app.get("/api/organizations/:organizationId/people/:personId/visits", { schema: { params: PersonParams, querystring: VisitListQuery } }, async (request) => {
+    const { organizationId, personId } = request.params as { organizationId: string; personId: string }; await scoped(request, organizationId); const page = (request.query as { page?: number }).page || 1;
+    const person = await db.person.findFirst({ where: { id: bigint(personId), organizationId: bigint(organizationId) } }); if (!person) throw app.httpErrors.notFound();
+    const [visits, total] = await db.$transaction([db.visit.findMany({ where: { organizationId: bigint(organizationId), personId: person.id, cancelledAt: null }, include: { notes: { orderBy: { createdAt: "desc" }, take: 1 } }, orderBy: { arrivedAt: "desc" }, skip: (page - 1) * 25, take: 25 }), db.visit.count({ where: { organizationId: bigint(organizationId), personId: person.id, cancelledAt: null } })]);
+    return { page, total, visits: visits.map((visit) => ({ ...visitJson(visit), note: visit.notes[0] ? noteJson(visit.notes[0]) : null })) };
+  });
+  app.get("/api/organizations/:organizationId/visits/:visitId", { schema: { params: VisitParams } }, async (request) => {
+    const { organizationId, visitId } = request.params as { organizationId: string; visitId: string }; await scoped(request, organizationId); const visit = await visitForOrganization(organizationId, visitId);
+    return { ...visitJson(visit), note: visit.notes[0] ? noteJson(visit.notes[0]) : null, notes: visit.notes.map(noteJson) };
+  });
+  app.post("/api/organizations/:organizationId/visits", { schema: { params: OrganizationParams, body: VisitBody } }, async (request, reply) => {
+    const { organizationId } = request.params as { organizationId: string }; const input = request.body as { personId: string; activity: "project" | "volunteering"; arrivedAt: string; startedAt?: string | null; endedAt?: string | null; note?: string }; const auth = await scoped(request, organizationId, { mutable: true });
+    const organization = await db.organization.findUniqueOrThrow({ where: { id: bigint(organizationId) } }); const arrivedAt = instant(input.arrivedAt); const startedAt = input.startedAt ? instant(input.startedAt) : null; const endedAt = input.endedAt ? instant(input.endedAt) : null;
+    let durationSeconds: number | null; try { durationSeconds = duration(startedAt, endedAt); } catch (error) { throw app.httpErrors.badRequest((error as Error).message); }
+    const person = await db.person.findFirst({ where: { id: bigint(input.personId), organizationId: bigint(organizationId), archivedAt: null }, include: { services: true } }); if (!person) throw app.httpErrors.notFound("active person not found");
+    const arrivalDay = localDay(arrivedAt, organization.timezone); const duplicate = await db.visit.findFirst({ where: { organizationId: bigint(organizationId), personId: person.id, activity: input.activity, cancelledAt: null, endedAt: null, arrivedAt: { gte: zonedDayStart(arrivalDay, organization.timezone), lt: zonedDayStart(nextDay(arrivalDay), organization.timezone) } } });
+    if (duplicate) throw app.httpErrors.conflict("person already has an active visit of this type today");
+    const visit = await db.$transaction(async (tx) => { const created = await tx.visit.create({ data: { organizationId: bigint(organizationId), personId: person.id, activity: input.activity, arrivedAt, startedAt, endedAt, durationSeconds, staffSnapshot: person.staff, memberSnapshot: await memberAtArrival(person, arrivedAt, organization.timezone), createdByUserId: auth.userId, updatedByUserId: auth.userId }, include: { person: true } }); const text = input.note?.trim(); if (text) await tx.note.create({ data: { organizationId: bigint(organizationId), visitId: created.id, text, createdByUserId: auth.userId, updatedByUserId: auth.userId } }); return created; });
+    return reply.code(201).send(visitJson(visit));
+  });
+  app.put("/api/organizations/:organizationId/visits/:visitId", { schema: { params: VisitParams, body: VisitUpdateBody } }, async (request) => {
+    const { organizationId, visitId } = request.params as { organizationId: string; visitId: string }; const input = request.body as { activity: "project" | "volunteering"; arrivedAt: string; startedAt?: string | null; endedAt?: string | null; note?: string }; const auth = await scoped(request, organizationId, { mutable: true }); const existing = await visitForOrganization(organizationId, visitId);
+    if (existing.cancelledAt) throw app.httpErrors.conflict("visit has been removed from the queue");
+    const arrivedAt = instant(input.arrivedAt); const startedAt = input.startedAt ? instant(input.startedAt) : null; const endedAt = input.endedAt ? instant(input.endedAt) : null; let durationSeconds: number | null; try { durationSeconds = duration(startedAt, endedAt); } catch (error) { throw app.httpErrors.badRequest((error as Error).message); }
+    const visit = await db.$transaction(async (tx) => { const updated = await tx.visit.update({ where: { id: existing.id }, data: { activity: input.activity, arrivedAt, startedAt, endedAt, durationSeconds, updatedByUserId: auth.userId }, include: { person: true } }); const text = input.note?.trim(); if (text) await tx.note.create({ data: { organizationId: updated.organizationId, visitId: updated.id, text, createdByUserId: auth.userId, updatedByUserId: auth.userId } }); return updated; }); return visitJson(visit);
+  });
+  for (const [action, field] of [["sign-in", "startedAt"], ["sign-out", "endedAt"]] as const) app.post(`/api/organizations/:organizationId/visits/:visitId/${action}`, { schema: { params: VisitParams, body: VisitActionBody } }, async (request) => {
+    const { organizationId, visitId } = request.params as { organizationId: string; visitId: string }; const auth = await scoped(request, organizationId, { mutable: true }); const existing = await visitForOrganization(organizationId, visitId); const at = (request.body as { at?: string } | undefined)?.at ? instant((request.body as { at: string }).at) : new Date();
+    if (existing.cancelledAt) throw app.httpErrors.conflict("visit has been removed from the queue");
+    if (field === "startedAt" && (existing.startedAt || existing.endedAt)) throw app.httpErrors.conflict("visit is already signed in or out");
+    if (field === "endedAt" && (!existing.startedAt || existing.endedAt)) throw app.httpErrors.conflict("visit must be signed in before sign-out");
+    let durationSeconds: number | null; try { durationSeconds = field === "endedAt" ? duration(existing.startedAt, at) : existing.durationSeconds; } catch (error) { throw app.httpErrors.badRequest((error as Error).message); }
+    const visit = await db.visit.update({ where: { id: existing.id }, data: field === "startedAt" ? { startedAt: at, updatedByUserId: auth.userId } : { endedAt: at, durationSeconds, updatedByUserId: auth.userId }, include: { person: true } }); return visitJson(visit);
+  });
+  app.post("/api/organizations/:organizationId/visits/:visitId/transfer", { schema: { params: VisitParams, body: VisitTransferBody } }, async (request, reply) => {
+    const { organizationId, visitId } = request.params as { organizationId: string; visitId: string }; const input = request.body as { activity: "project" | "volunteering"; at?: string }; const auth = await scoped(request, organizationId, { mutable: true }); const existing = await visitForOrganization(organizationId, visitId); const at = input.at ? instant(input.at) : new Date();
+    if (existing.cancelledAt || !existing.startedAt || existing.endedAt) throw app.httpErrors.conflict("only an active signed-in visit can be transferred");
+    if (existing.activity === input.activity) throw app.httpErrors.badRequest("visit is already this activity");
+    let durationSeconds: number; try { durationSeconds = duration(existing.startedAt, at)!; } catch (error) { throw app.httpErrors.badRequest((error as Error).message); }
+    const transferred = await db.$transaction(async (tx) => { await tx.visit.update({ where: { id: existing.id }, data: { endedAt: at, durationSeconds, updatedByUserId: auth.userId } }); return tx.visit.create({ data: { organizationId: existing.organizationId, personId: existing.personId, activity: input.activity, arrivedAt: at, startedAt: at, staffSnapshot: existing.staffSnapshot, memberSnapshot: existing.memberSnapshot, createdByUserId: auth.userId, updatedByUserId: auth.userId }, include: { person: true } }); });
+    return reply.code(201).send(visitJson(transferred));
+  });
+  app.delete("/api/organizations/:organizationId/visits/:visitId", { schema: { params: VisitParams } }, async (request, reply) => {
+    const { organizationId, visitId } = request.params as { organizationId: string; visitId: string }; const auth = await scoped(request, organizationId, { mutable: true }); const existing = await visitForOrganization(organizationId, visitId);
+    if (existing.cancelledAt) throw app.httpErrors.conflict("visit is already removed from the queue");
+    if (existing.startedAt) throw app.httpErrors.conflict("signed-in visits must be signed out or transferred, not removed");
+    await db.visit.update({ where: { id: existing.id }, data: { cancelledAt: new Date(), cancelledByUserId: auth.userId, updatedByUserId: auth.userId } }); return reply.code(204).send();
   });
   app.get("/api/organizations/:organizationId/reports/people.csv", { schema: { params: OrganizationParams } }, async (request, reply) => {
     const { organizationId } = request.params as { organizationId: string }; await scoped(request, organizationId); const people = await db.person.findMany({ where: { organizationId: bigint(organizationId) }, orderBy: { displayName: "asc" } });
