@@ -289,18 +289,20 @@
     {
       "id": "FH-016",
       "title": "Implement reports and exports",
-      "status": "pending",
+      "status": "done",
       "path": "docs/modernization/tickets/FH-016-reports-and-exports.md",
       "depends_on": [
         "FH-013",
         "FH-014",
         "FH-015"
       ],
-      "claimed_at": null,
-      "updated_at": null,
+      "claimed_at": "2026-08-24T00:42:50.267Z",
+      "updated_at": "2026-08-24T01:16:43.731Z",
       "blocked_reason": null,
       "unblock_condition": null,
-      "evidence": [],
+      "evidence": [
+        "2026-08-24: docker compose --profile modern --profile test run --rm --build -e LOG_LEVEL=silent modern-test (11 passing tests including report reconciliation, organization-local timezone boundaries, snapshot classifications, pagination, CSV contract, and tenant authorization); docker compose --profile visual run --rm --no-deps modern-visual (9 passing Playwright workflows including populated, empty, summary, and export report states); bin/verify-modern-foundation; bin/verify-migration-preflight (sanitized source 20597 = 9186 imported + 11411 quarantined; edge cases 60 = 32 imported + 28 quarantined); git diff --check; bin/ralph validate."
+      ],
       "implementation_commits": []
     },
     {

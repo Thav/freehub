@@ -5,7 +5,8 @@ import type { FastifyInstance, FastifyRequest } from "fastify";
 import { PrismaClient, ServiceType, VisitActivity } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
-import { LoginBody, MembershipBody, MembershipParams, MembershipUpdateBody, NoteBody, NoteParams, NoteUpdateBody, OrganizationBody, OrganizationParams, OrganizationSettingsBody, PasswordBody, PersonBody, PersonParams, PersonTagParams, ProvisionUserBody, SearchQuery, ServiceBody, ServiceParams, ServiceRenewalBody, TagAssignmentBody, TagParams, UserParams, UserSettingsBody, VisitActionBody, VisitBody, VisitDayParams, VisitListQuery, VisitParams, VisitTransferBody, VisitUpdateBody } from "./contracts.js";
+import { Readable } from "node:stream";
+import { LoginBody, MembershipBody, MembershipParams, MembershipUpdateBody, NoteBody, NoteParams, NoteUpdateBody, OrganizationBody, OrganizationParams, OrganizationSettingsBody, PasswordBody, PersonBody, PersonParams, PersonTagParams, ProvisionUserBody, ReportQuery, SearchQuery, ServiceBody, ServiceParams, ServiceRenewalBody, SummaryQuery, TagAssignmentBody, TagParams, UserParams, UserSettingsBody, VisitActionBody, VisitBody, VisitDayParams, VisitListQuery, VisitParams, VisitTransferBody, VisitUpdateBody } from "./contracts.js";
 
 type Auth = { userId: bigint; organizationId: bigint | null; role: "manager" | "operator" | null; csrfTokenDigest: string; sessionId: string; passwordChangeRequired: boolean; platformAdministrator: boolean };
 const sessionCookie = "freehub_session";
@@ -59,6 +60,10 @@ const personValues = (input: { firstName: string; lastName?: string | null; emai
   const firstName = input.firstName.trim(); const lastName = trimmed(input.lastName); const email = trimmed(input.email); const phone = trimmed(input.phone);
   return { firstName, lastName, displayName: [firstName, lastName].filter(Boolean).join(" "), email, normalizedEmail: email?.toLowerCase() || null, phone, normalizedPhone: normalizePhone(phone), street1: trimmed(input.street1), street2: trimmed(input.street2), city: trimmed(input.city), state: trimmed(input.state), postalCode: trimmed(input.postalCode), country: trimmed(input.country)?.toUpperCase() || null, yearOfBirth: input.yearOfBirth ?? null, staff: input.staff ?? false, emailOptOut: input.emailOptOut ?? false };
 };
+const csv = (values: Array<string | number | boolean | null | undefined>) => values.map((value) => { const text = value === null || value === undefined ? "" : String(value); return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text; }).join(",");
+const reportFilename = (key: string, report: string, after?: string, before?: string) => `${key}_${report}${after || before ? `_${after || "all"}_${before || "all"}` : ""}.csv`;
+const pageOf = (value?: number) => value || 1;
+const reportPageSize = 25;
 
 export async function buildApp(db = new PrismaClient()): Promise<FastifyInstance> {
   const app = (await import("fastify")).default({ logger: { level: process.env.LOG_LEVEL || "info", redact: ["req.headers.authorization", "req.headers.cookie", "req.body.password", "res.headers.set-cookie"] } });
@@ -383,10 +388,58 @@ export async function buildApp(db = new PrismaClient()): Promise<FastifyInstance
     if (existing.startedAt) throw app.httpErrors.conflict("signed-in visits must be signed out or transferred, not removed");
     await db.visit.update({ where: { id: existing.id }, data: { cancelledAt: new Date(), cancelledByUserId: auth.userId, updatedByUserId: auth.userId } }); return reply.code(204).send();
   });
-  app.get("/api/organizations/:organizationId/reports/people.csv", { schema: { params: OrganizationParams } }, async (request, reply) => {
-    const { organizationId } = request.params as { organizationId: string }; await scoped(request, organizationId); const people = await db.person.findMany({ where: { organizationId: bigint(organizationId) }, orderBy: { displayName: "asc" } });
-    const body = ["id,display_name,archived", ...people.map((p) => `${p.id},${JSON.stringify(p.displayName)},${p.archivedAt ? "true" : "false"}`)].join("\n") + "\n";
-    return reply.header("content-type", "text/csv; charset=utf-8").header("content-disposition", "attachment; filename=people.csv").send(body);
+  type ReportInput = { after?: string; before?: string; name?: string; type?: "all" | "staff" | "patron"; serviceTypes?: string; page?: number };
+  const reportRange = (input: ReportInput, timezone: string, startName = "after", endName = "before") => {
+    const start = input[startName as keyof ReportInput] as string | undefined; const end = input[endName as keyof ReportInput] as string | undefined;
+    return { ...(start ? { gte: zonedDayStart(start, timezone) } : {}), ...(end ? { lt: zonedDayStart(nextDay(end), timezone) } : {}) };
+  };
+  const reportServices = async (organizationId: string, input: ReportInput, paged: boolean) => {
+    const organization = await db.organization.findUniqueOrThrow({ where: { id: bigint(organizationId) } }); const types = input.serviceTypes?.split(",").filter((type): type is ApiServiceType => type === "membership" || type === "earn_a_bike" || type === "class") || [];
+    if (input.serviceTypes && !types.length) throw app.httpErrors.badRequest("at least one valid service type is required");
+    const where = { organizationId: bigint(organizationId), ...(types.length ? { type: { in: types.map(databaseServiceType) } } : {}), ...(input.after || input.before ? { endDate: reportRange(input, organization.timezone) } : {}) };
+    const [total, rows] = await Promise.all([db.service.count({ where }), db.service.findMany({ where, include: { person: true, notes: { orderBy: { createdAt: "desc" }, take: 1 } }, orderBy: [{ endDate: "desc" }, { id: "desc" }], ...(paged ? { skip: (pageOf(input.page) - 1) * reportPageSize, take: reportPageSize } : {}) })]);
+    return { organization, total, rows };
+  };
+  const reportVisits = async (organizationId: string, input: ReportInput, paged: boolean) => {
+    const organization = await db.organization.findUniqueOrThrow({ where: { id: bigint(organizationId) } }); const where = { organizationId: bigint(organizationId), cancelledAt: null, arrivedAt: reportRange(input, organization.timezone) };
+    const [total, rows] = await Promise.all([db.visit.count({ where }), db.visit.findMany({ where, include: { person: true, notes: { orderBy: { createdAt: "desc" }, take: 1 } }, orderBy: [{ arrivedAt: "desc" }, { id: "desc" }], ...(paged ? { skip: (pageOf(input.page) - 1) * reportPageSize, take: reportPageSize } : {}) })]);
+    return { organization, total, rows };
+  };
+  const reportPeople = async (organizationId: string, input: ReportInput, paged: boolean) => {
+    const organization = await db.organization.findUniqueOrThrow({ where: { id: bigint(organizationId) } }); const name = input.name?.trim(); const where = { organizationId: bigint(organizationId), ...(name && name.length >= 3 ? { displayName: { contains: name, mode: "insensitive" as const } } : {}), ...(input.type === "staff" ? { staff: true } : input.type === "patron" ? { staff: false } : {}), ...(input.after || input.before ? { createdAt: reportRange(input, organization.timezone) } : {}) };
+    const [total, rows] = await Promise.all([db.person.count({ where }), db.person.findMany({ where, include: { services: { where: { type: "membership" }, orderBy: [{ endDate: "desc" }, { id: "desc" }], take: 1 } }, orderBy: [{ displayName: "asc" }, { id: "asc" }], ...(paged ? { skip: (pageOf(input.page) - 1) * reportPageSize, take: reportPageSize } : {}) })]);
+    return { organization, total, rows };
+  };
+  const csvReply = (reply: import("fastify").FastifyReply, filename: string, lines: Iterable<string>) => reply.header("content-type", "text/csv; charset=utf-8").header("content-disposition", `attachment; filename="${filename}"`).send(Readable.from((function* () { for (const line of lines) yield `${line}\r\n`; })()));
+  app.get("/api/organizations/:organizationId/reports/people", { schema: { params: OrganizationParams, querystring: ReportQuery } }, async (request) => {
+    const { organizationId } = request.params as { organizationId: string }; await scoped(request, organizationId); const input = request.query as ReportInput; const result = await reportPeople(organizationId, input, true);
+    return { page: pageOf(input.page), pageSize: reportPageSize, total: result.total, rows: result.rows.map((person) => ({ id: person.id.toString(), displayName: person.displayName, firstName: person.firstName, lastName: person.lastName, email: person.email, phone: person.phone, staff: person.staff, archivedAt: person.archivedAt, createdAt: person.createdAt, membershipExpiresOn: dayString(person.services[0]?.endDate || null) })) };
+  });
+  app.get("/api/organizations/:organizationId/reports/people.csv", { schema: { params: OrganizationParams, querystring: ReportQuery } }, async (request, reply) => {
+    const { organizationId } = request.params as { organizationId: string }; await scoped(request, organizationId); const input = request.query as ReportInput; const result = await reportPeople(organizationId, input, false);
+    return csvReply(reply, reportFilename(result.organization.key, "people", input.after, input.before), [csv(["id", "first_name", "last_name", "email", "email_opt_out", "phone", "postal_code", "staff", "created_at", "membership_expires_on", "archived"]), ...result.rows.map((p) => csv([p.id.toString(), p.firstName, p.lastName, p.email, p.emailOptOut, p.phone, p.postalCode, p.staff, p.createdAt.toISOString(), dayString(p.services[0]?.endDate || null), Boolean(p.archivedAt)]))]);
+  });
+  app.get("/api/organizations/:organizationId/reports/services", { schema: { params: OrganizationParams, querystring: ReportQuery } }, async (request) => {
+    const { organizationId } = request.params as { organizationId: string }; await scoped(request, organizationId); const input = request.query as ReportInput; const result = await reportServices(organizationId, input, true);
+    return { page: pageOf(input.page), pageSize: reportPageSize, total: result.total, rows: result.rows.map((service) => ({ id: service.id.toString(), personId: service.personId.toString(), personName: service.person.displayName, type: service.type === "class_" ? "class" : service.type, startDate: dayString(service.startDate), endDate: dayString(service.endDate), paid: service.paid, volunteered: service.volunteered, note: service.notes[0]?.text || null })) };
+  });
+  app.get("/api/organizations/:organizationId/reports/services.csv", { schema: { params: OrganizationParams, querystring: ReportQuery } }, async (request, reply) => {
+    const { organizationId } = request.params as { organizationId: string }; await scoped(request, organizationId); const input = request.query as ReportInput; const result = await reportServices(organizationId, input, false);
+    return csvReply(reply, reportFilename(result.organization.key, "services", input.after, input.before), [csv(["first_name", "last_name", "email", "email_opt_out", "phone", "postal_code", "service_type_id", "start_date", "end_date", "volunteered", "paid", "note"]), ...result.rows.map((s) => csv([s.person.firstName, s.person.lastName, s.person.email, s.person.emailOptOut, s.person.phone, s.person.postalCode, s.type === "class_" ? "class" : s.type, dayString(s.startDate), dayString(s.endDate), s.volunteered, s.paid, s.notes[0]?.text]))]);
+  });
+  app.get("/api/organizations/:organizationId/reports/visits", { schema: { params: OrganizationParams, querystring: ReportQuery } }, async (request) => {
+    const { organizationId } = request.params as { organizationId: string }; await scoped(request, organizationId); const input = request.query as ReportInput; const result = await reportVisits(organizationId, input, true);
+    return { page: pageOf(input.page), pageSize: reportPageSize, total: result.total, rows: result.rows.map((visit) => ({ id: visit.id.toString(), personId: visit.personId.toString(), personName: visit.person.displayName, activity: visit.activity, classification: visit.staffSnapshot ? (visit.activity === "volunteering" ? "staff volunteer" : "member") : visit.activity === "volunteering" ? "volunteer" : visit.memberSnapshot ? "member" : "patron", arrivedAt: visit.arrivedAt, startedAt: visit.startedAt, endedAt: visit.endedAt, durationSeconds: visit.durationSeconds, note: visit.notes[0]?.text || null })) };
+  });
+  app.get("/api/organizations/:organizationId/reports/visits.csv", { schema: { params: OrganizationParams, querystring: ReportQuery } }, async (request, reply) => {
+    const { organizationId } = request.params as { organizationId: string }; await scoped(request, organizationId); const input = request.query as ReportInput; const result = await reportVisits(organizationId, input, false);
+    return csvReply(reply, reportFilename(result.organization.key, "visits", input.after, input.before), [csv(["person_id", "first_name", "last_name", "email", "email_opt_out", "phone", "postal_code", "arrived_at", "start_at", "end_at", "staff", "member", "volunteer", "note"]), ...result.rows.map((v) => csv([v.personId.toString(), v.person.firstName, v.person.lastName, v.person.email, v.person.emailOptOut, v.person.phone, v.person.postalCode, v.arrivedAt?.toISOString(), v.startedAt?.toISOString(), v.endedAt?.toISOString(), v.staffSnapshot, v.memberSnapshot, v.activity === "volunteering", v.notes[0]?.text]))]);
+  });
+  app.get("/api/organizations/:organizationId/reports/summary", { schema: { params: OrganizationParams, querystring: SummaryQuery } }, async (request) => {
+    const { organizationId } = request.params as { organizationId: string }; await scoped(request, organizationId); const input = request.query as { from?: string; to?: string }; const organization = await db.organization.findUniqueOrThrow({ where: { id: bigint(organizationId) } }); const range = reportRange({ after: input.from, before: input.to }, organization.timezone); const visits = await db.visit.findMany({ where: { organizationId: bigint(organizationId), cancelledAt: null, arrivedAt: range }, select: { arrivedAt: true, staffSnapshot: true, memberSnapshot: true, activity: true } });
+    const days = new Map<string, { day: string; staff: number; volunteer: number; member: number; patron: number; total: number }>(); for (const visit of visits) { if (!visit.arrivedAt) continue; const day = localDay(visit.arrivedAt, organization.timezone); const row = days.get(day) || { day, staff: 0, volunteer: 0, member: 0, patron: 0, total: 0 }; if (visit.staffSnapshot && visit.activity === "volunteering") row.staff++; else if (visit.activity === "volunteering") row.volunteer++; else if (visit.memberSnapshot || visit.staffSnapshot) row.member++; else row.patron++; row.total++; days.set(day, row); }
+    const dayRows = [...days.values()].sort((a, b) => a.day.localeCompare(b.day)); const weeks = new Map<string, typeof dayRows[number]>(); for (const row of dayRows) { const value = new Date(`${row.day}T00:00:00Z`); value.setUTCDate(value.getUTCDate() - value.getUTCDay()); const week = value.toISOString().slice(0, 10); const total = weeks.get(week) || { day: week, staff: 0, volunteer: 0, member: 0, patron: 0, total: 0 }; for (const key of ["staff", "volunteer", "member", "patron", "total"] as const) total[key] += row[key]; weeks.set(week, total); }
+    return { timezone: organization.timezone, days: dayRows, weeks: [...weeks.values()] };
   });
   return app;
 }

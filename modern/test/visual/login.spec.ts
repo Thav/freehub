@@ -134,3 +134,18 @@ test("services can be created, reviewed, and renewed from a profile", async ({ p
   await page.getByRole("button", { name: "Renew membership" }).click();
   await expect(page.getByText("Current member")).toBeVisible();
 });
+
+test("reports provide populated, empty, and export states", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Log in" }).click();
+  await page.getByRole("link", { name: "Reports" }).click();
+  await expect(page.getByRole("heading", { name: "Reports" })).toBeVisible();
+  await page.getByRole("button", { name: "Update report" }).click();
+  await expect(page.getByRole("heading", { name: "People" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Export all" })).toBeVisible();
+  await page.getByLabel("Matching name").fill("No such person");
+  await page.getByRole("button", { name: "Update report" }).click();
+  await expect(page.getByText("No people for date range.")).toBeVisible();
+  await page.getByRole("button", { name: "Summary" }).click();
+  await expect(page.getByRole("heading", { name: "Visits by Day" })).toBeVisible();
+});
