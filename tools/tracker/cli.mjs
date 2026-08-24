@@ -3,7 +3,6 @@
 import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { execFileSync } from 'node:child_process';
 
 export const STATUSES = new Set(['pending', 'in_progress', 'blocked', 'done']);
 const TOOL_DIR = dirname(fileURLToPath(import.meta.url));
@@ -36,8 +35,8 @@ export function validateTracker(tracker, repoRoot = REPO_ROOT) {
     if (!Array.isArray(ticket.evidence)) errors.push(`${ticket.id}: evidence must be an array`);
     if (!Array.isArray(ticket.implementation_commits)) errors.push(`${ticket.id}: implementation_commits must be an array`);
     if (!ticket.path || !existsSync(resolve(repoRoot, ticket.path))) errors.push(`${ticket.id}: missing ticket file ${ticket.path}`);
-    if (ticket.status === 'done' && (!ticket.evidence?.length || !ticket.implementation_commits?.length)) {
-      errors.push(`${ticket.id}: done tickets require evidence and an implementation commit`);
+    if (ticket.status === 'done' && !ticket.evidence?.length) {
+      errors.push(`${ticket.id}: done tickets require verification evidence`);
     }
     if (ticket.status === 'blocked' && (!ticket.blocked_reason || !ticket.unblock_condition)) {
       errors.push(`${ticket.id}: blocked tickets require a reason and unblock condition`);
@@ -76,10 +75,6 @@ function findTicket(tracker, id) {
   return ticket;
 }
 
-function currentCommit(repoRoot = REPO_ROOT) {
-  return execFileSync('git', ['rev-parse', 'HEAD'], { cwd: repoRoot, encoding: 'utf8' }).trim();
-}
-
 export function mutateTracker(tracker, command, id, options = {}) {
   const now = options.now ?? new Date().toISOString();
   const ticket = findTicket(tracker, id);
@@ -96,8 +91,6 @@ export function mutateTracker(tracker, command, id, options = {}) {
     if (ticket.status !== 'in_progress' || tracker.active_ticket !== id) throw new Error(`${id} must be active to complete`);
     if (!options.evidence) throw new Error('complete requires --evidence');
     ticket.evidence.push(options.evidence);
-    const commit = options.commit ?? currentCommit(options.repoRoot);
-    if (!ticket.implementation_commits.includes(commit)) ticket.implementation_commits.push(commit);
     ticket.status = 'done';
     ticket.updated_at = now;
     tracker.active_ticket = null;

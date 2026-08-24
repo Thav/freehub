@@ -25,12 +25,12 @@ test('claim, block, and release maintain the active invariant', () => {
   assert.equal(tracker.tickets[0].status, 'pending');
 });
 
-test('completion requires evidence and records a commit', () => {
+test('completion requires evidence and can be committed with the implementation', () => {
   const tracker = { version: 1, active_ticket: 'FH-001', tickets: [ticket('FH-001', 'in_progress')] };
   assert.throws(() => mutateTracker(tracker, 'complete', 'FH-001'), /--evidence/);
-  mutateTracker(tracker, 'complete', 'FH-001', { evidence: 'tests pass', commit: 'abcdef0' });
+  mutateTracker(tracker, 'complete', 'FH-001', { evidence: 'tests pass' });
   assert.equal(tracker.tickets[0].status, 'done');
-  assert.deepEqual(tracker.tickets[0].implementation_commits, ['abcdef0']);
+  assert.deepEqual(tracker.tickets[0].implementation_commits, []);
 });
 
 test('validation rejects multiple active tickets', () => {

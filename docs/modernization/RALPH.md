@@ -56,7 +56,7 @@ Do not guess a generic profile, port, or fixture command; report the exact comma
 
 ## After owner acceptance
 
-The repository owner reviews and commits the implementation outside the agent workflow. Only after explicit acceptance may the owner, or an agent asked to finalize the reviewed ticket, run:
+The repository owner reviews the implementation outside the agent workflow. Only after explicit acceptance may the owner, or an agent asked to finalize the reviewed ticket, run:
 
 ```bash
 bin/ralph complete FH-### --evidence "<commands and artifacts>"
@@ -64,7 +64,7 @@ bin/ralph validate
 bin/ralph status
 ```
 
-The completion should record the owner-reviewed implementation commit. The tracker completion is then committed by the owner. Only after that may an agent claim the next ticket.
+Run completion before committing so the approval, verification evidence, implementation, and tracker transition are included in one owner-reviewed commit. Historical tickets may retain their `implementation_commits` references, but new completions do not require a separate implementation commit. Only after the combined commit may an agent claim the next ticket.
 
 ## Blocked work
 

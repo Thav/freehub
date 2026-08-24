@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "active_ticket": "FH-014",
+  "active_ticket": null,
   "tickets": [
     {
       "id": "FH-001",
@@ -255,16 +255,18 @@
     {
       "id": "FH-014",
       "title": "Implement visits and time tracking",
-      "status": "in_progress",
+      "status": "done",
       "path": "docs/modernization/tickets/FH-014-visits-and-time-tracking.md",
       "depends_on": [
         "FH-012"
       ],
       "claimed_at": "2026-08-22T19:17:30.055Z",
-      "updated_at": "2026-08-22T19:17:30.055Z",
+      "updated_at": "2026-08-24T00:09:34.017Z",
       "blocked_reason": null,
       "unblock_condition": null,
-      "evidence": [],
+      "evidence": [
+        "Owner-approved 2026-08-23. npm --prefix modern run check; docker compose --profile modern up -d --build --wait; docker compose --profile modern --profile test run --rm --build -e LOG_LEVEL=silent modern-test (9 tests covering DST, snapshots, queue transitions, duplicate same-activity active visits, transfers, cancellation retention, and archived-person discovery); docker compose --profile visual run --rm --no-deps modern-visual (7 workflows); bin/verify-modern-foundation; bin/verify-migration-preflight; git diff --check; bin/ralph validate all passed."
+      ],
       "implementation_commits": []
     },
     {
