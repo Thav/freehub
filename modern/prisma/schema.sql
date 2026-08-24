@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict fMIFeoAZNpkZFo6rcdDtNsmUo5O74l7VY9sUHNw7IZItVpubp1oPYmFRRegMCeH
+\restrict FVku9eaC3v2hhvnhimpZ9qMRBrSpLeLmJNGL770XxhuGWIZ7BP3KCNac4pSya0e
 
 -- Dumped from database version 18.4 (Debian 18.4-1.pgdg13+1)
 -- Dumped by pg_dump version 18.4 (Debian 18.4-1.pgdg13+1)
@@ -157,6 +157,16 @@ CREATE FUNCTION "public"."freehub_role_audit_append_only"() RETURNS "trigger"
     LANGUAGE "plpgsql"
     AS $$
 BEGIN RAISE EXCEPTION 'role audit events are append only' USING ERRCODE = 'integrity_constraint_violation'; END $$;
+
+
+--
+-- Name: freehub_service_audit_append_only(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION "public"."freehub_service_audit_append_only"() RETURNS "trigger"
+    LANGUAGE "plpgsql"
+    AS $$
+BEGIN RAISE EXCEPTION 'service audit events are append only' USING ERRCODE = 'integrity_constraint_violation'; END $$;
 
 
 --
@@ -657,6 +667,44 @@ CREATE TABLE "public"."Service" (
 
 
 --
+-- Name: ServiceAuditEvent; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE "public"."ServiceAuditEvent" (
+    "id" bigint NOT NULL,
+    "organizationId" bigint NOT NULL,
+    "serviceId" bigint NOT NULL,
+    "actorUserId" bigint NOT NULL,
+    "action" character varying(24) NOT NULL,
+    "previous" "jsonb",
+    "current" "jsonb",
+    "createdAt" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT "ServiceAuditEvent_action" CHECK ((("action")::"text" = ANY ((ARRAY['created'::character varying, 'corrected'::character varying, 'renewed'::character varying])::"text"[]))),
+    CONSTRAINT "ServiceAuditEvent_current_object" CHECK ((("current" IS NULL) OR ("jsonb_typeof"("current") = 'object'::"text"))),
+    CONSTRAINT "ServiceAuditEvent_previous_object" CHECK ((("previous" IS NULL) OR ("jsonb_typeof"("previous") = 'object'::"text")))
+);
+
+
+--
+-- Name: ServiceAuditEvent_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE "public"."ServiceAuditEvent_id_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ServiceAuditEvent_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE "public"."ServiceAuditEvent_id_seq" OWNED BY "public"."ServiceAuditEvent"."id";
+
+
+--
 -- Name: Service_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
@@ -779,6 +827,8 @@ CREATE TABLE "public"."Visit" (
     "updatedAt" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "createdByUserId" bigint,
     "updatedByUserId" bigint,
+    "cancelledAt" timestamp with time zone,
+    "cancelledByUserId" bigint,
     CONSTRAINT "visit_end_not_before_start" CHECK ((("endedAt" IS NULL) OR ("startedAt" IS NULL) OR ("endedAt" >= "startedAt"))),
     CONSTRAINT "visit_nonnegative_duration" CHECK ((("durationSeconds" IS NULL) OR ("durationSeconds" >= 0)))
 );
@@ -908,6 +958,13 @@ ALTER TABLE ONLY "public"."RoleAuditEvent" ALTER COLUMN "id" SET DEFAULT "nextva
 --
 
 ALTER TABLE ONLY "public"."Service" ALTER COLUMN "id" SET DEFAULT "nextval"('"public"."Service_id_seq"'::"regclass");
+
+
+--
+-- Name: ServiceAuditEvent id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY "public"."ServiceAuditEvent" ALTER COLUMN "id" SET DEFAULT "nextval"('"public"."ServiceAuditEvent_id_seq"'::"regclass");
 
 
 --
@@ -1084,6 +1141,14 @@ ALTER TABLE ONLY "public"."RoleAuditEvent"
 
 
 --
+-- Name: ServiceAuditEvent ServiceAuditEvent_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY "public"."ServiceAuditEvent"
+    ADD CONSTRAINT "ServiceAuditEvent_pkey" PRIMARY KEY ("id");
+
+
+--
 -- Name: Service Service_organizationId_id_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1227,6 +1292,13 @@ CREATE INDEX "RoleAuditEvent_organization_user_created_idx" ON "public"."RoleAud
 
 
 --
+-- Name: ServiceAuditEvent_organization_service_created_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "ServiceAuditEvent_organization_service_created_idx" ON "public"."ServiceAuditEvent" USING "btree" ("organizationId", "serviceId", "createdAt");
+
+
+--
 -- Name: Service_organizationId_personId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1273,6 +1345,13 @@ CREATE UNIQUE INDEX "User_email_key" ON "public"."User" USING "btree" ("email");
 --
 
 CREATE UNIQUE INDEX "User_login_key" ON "public"."User" USING "btree" ("login");
+
+
+--
+-- Name: Visit_open_queue_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "Visit_open_queue_idx" ON "public"."Visit" USING "btree" ("organizationId", "personId", "activity", "arrivedAt") WHERE (("endedAt" IS NULL) AND ("cancelledAt" IS NULL));
 
 
 --
@@ -1336,6 +1415,13 @@ CREATE TRIGGER "Person_displayName_derived" BEFORE INSERT OR UPDATE OF "firstNam
 --
 
 CREATE TRIGGER "RoleAuditEvent_append_only" BEFORE DELETE OR UPDATE ON "public"."RoleAuditEvent" FOR EACH ROW EXECUTE FUNCTION "public"."freehub_role_audit_append_only"();
+
+
+--
+-- Name: ServiceAuditEvent ServiceAuditEvent_append_only; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER "ServiceAuditEvent_append_only" BEFORE DELETE OR UPDATE ON "public"."ServiceAuditEvent" FOR EACH ROW EXECUTE FUNCTION "public"."freehub_service_audit_append_only"();
 
 
 --
@@ -1602,6 +1688,30 @@ ALTER TABLE ONLY "public"."RoleAuditEvent"
 
 
 --
+-- Name: ServiceAuditEvent ServiceAuditEvent_actorUserId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY "public"."ServiceAuditEvent"
+    ADD CONSTRAINT "ServiceAuditEvent_actorUserId_fkey" FOREIGN KEY ("actorUserId") REFERENCES "public"."User"("id") ON DELETE RESTRICT;
+
+
+--
+-- Name: ServiceAuditEvent ServiceAuditEvent_organizationId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY "public"."ServiceAuditEvent"
+    ADD CONSTRAINT "ServiceAuditEvent_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "public"."Organization"("id") ON DELETE RESTRICT;
+
+
+--
+-- Name: ServiceAuditEvent ServiceAuditEvent_serviceId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY "public"."ServiceAuditEvent"
+    ADD CONSTRAINT "ServiceAuditEvent_serviceId_fkey" FOREIGN KEY ("serviceId") REFERENCES "public"."Service"("id") ON DELETE RESTRICT;
+
+
+--
 -- Name: Service Service_createdByUserId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1674,6 +1784,14 @@ ALTER TABLE ONLY "public"."Tag"
 
 
 --
+-- Name: Visit Visit_cancelledByUserId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY "public"."Visit"
+    ADD CONSTRAINT "Visit_cancelledByUserId_fkey" FOREIGN KEY ("cancelledByUserId") REFERENCES "public"."User"("id");
+
+
+--
 -- Name: Visit Visit_createdByUserId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1717,4 +1835,4 @@ ALTER TABLE ONLY "public"."Visit"
 -- PostgreSQL database dump complete
 --
 
-\unrestrict fMIFeoAZNpkZFo6rcdDtNsmUo5O74l7VY9sUHNw7IZItVpubp1oPYmFRRegMCeH
+\unrestrict FVku9eaC3v2hhvnhimpZ9qMRBrSpLeLmJNGL770XxhuGWIZ7BP3KCNac4pSya0e

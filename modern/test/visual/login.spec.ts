@@ -116,3 +116,21 @@ test("daily visits support quick sign-in, queue transitions, and visit detail", 
   await page.getByRole("link", { name: "View visit" }).last().click();
   await expect(page.getByRole("heading", { name: "Visit detail" })).toBeVisible();
 });
+
+test("services can be created, reviewed, and renewed from a profile", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Log in" }).click();
+  await page.getByRole("link", { name: "New person" }).click();
+  await page.getByLabel("First name").fill("Service Visual");
+  await page.getByLabel("Last name").fill("Rider");
+  await page.getByRole("button", { name: "Create person" }).click();
+  await page.getByRole("link", { name: "Services" }).click();
+  await page.getByRole("link", { name: "Add a service" }).click();
+  await page.getByLabel("Service type").selectOption("membership");
+  await page.getByRole("button", { name: "Create service" }).click();
+  await expect(page.getByRole("heading", { name: "Service detail" })).toBeVisible();
+  await page.goBack(); await page.goBack(); await page.goBack();
+  await expect(page.getByText("Current member")).toBeVisible();
+  await page.getByRole("button", { name: "Renew membership" }).click();
+  await expect(page.getByText("Current member")).toBeVisible();
+});

@@ -1008,6 +1008,315 @@
         }
       }
     },
+    "/api/organizations/{organizationId}/people/{personId}/services": {
+      "get": {
+        "parameters": [
+          {
+            "schema": {
+              "pattern": "^[0-9]+$",
+              "type": "string"
+            },
+            "in": "path",
+            "name": "organizationId",
+            "required": true
+          },
+          {
+            "schema": {
+              "pattern": "^[0-9]+$",
+              "type": "string"
+            },
+            "in": "path",
+            "name": "personId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "type"
+                ],
+                "properties": {
+                  "type": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "membership"
+                        ]
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "earn_a_bike"
+                        ]
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "class"
+                        ]
+                      }
+                    ]
+                  },
+                  "startDate": {
+                    "anyOf": [
+                      {
+                        "format": "date",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "endDate": {
+                    "anyOf": [
+                      {
+                        "format": "date",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "paid": {
+                    "type": "boolean"
+                  },
+                  "volunteered": {
+                    "type": "boolean"
+                  },
+                  "note": {
+                    "maxLength": 20000,
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "pattern": "^[0-9]+$",
+              "type": "string"
+            },
+            "in": "path",
+            "name": "organizationId",
+            "required": true
+          },
+          {
+            "schema": {
+              "pattern": "^[0-9]+$",
+              "type": "string"
+            },
+            "in": "path",
+            "name": "personId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/organizations/{organizationId}/services/{serviceId}": {
+      "get": {
+        "parameters": [
+          {
+            "schema": {
+              "pattern": "^[0-9]+$",
+              "type": "string"
+            },
+            "in": "path",
+            "name": "organizationId",
+            "required": true
+          },
+          {
+            "schema": {
+              "pattern": "^[0-9]+$",
+              "type": "string"
+            },
+            "in": "path",
+            "name": "serviceId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "put": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "type"
+                ],
+                "properties": {
+                  "type": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "membership"
+                        ]
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "earn_a_bike"
+                        ]
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "class"
+                        ]
+                      }
+                    ]
+                  },
+                  "startDate": {
+                    "anyOf": [
+                      {
+                        "format": "date",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "endDate": {
+                    "anyOf": [
+                      {
+                        "format": "date",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "paid": {
+                    "type": "boolean"
+                  },
+                  "volunteered": {
+                    "type": "boolean"
+                  },
+                  "note": {
+                    "maxLength": 20000,
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "pattern": "^[0-9]+$",
+              "type": "string"
+            },
+            "in": "path",
+            "name": "organizationId",
+            "required": true
+          },
+          {
+            "schema": {
+              "pattern": "^[0-9]+$",
+              "type": "string"
+            },
+            "in": "path",
+            "name": "serviceId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/organizations/{organizationId}/services/{serviceId}/renew": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "startDate": {
+                    "format": "date",
+                    "type": "string"
+                  },
+                  "endDate": {
+                    "format": "date",
+                    "type": "string"
+                  },
+                  "paid": {
+                    "type": "boolean"
+                  },
+                  "volunteered": {
+                    "type": "boolean"
+                  },
+                  "note": {
+                    "maxLength": 20000,
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "pattern": "^[0-9]+$",
+              "type": "string"
+            },
+            "in": "path",
+            "name": "organizationId",
+            "required": true
+          },
+          {
+            "schema": {
+              "pattern": "^[0-9]+$",
+              "type": "string"
+            },
+            "in": "path",
+            "name": "serviceId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
     "/api/organizations/{organizationId}/tags": {
       "get": {
         "parameters": [

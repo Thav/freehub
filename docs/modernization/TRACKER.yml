@@ -272,16 +272,18 @@
     {
       "id": "FH-015",
       "title": "Implement services and membership",
-      "status": "pending",
+      "status": "done",
       "path": "docs/modernization/tickets/FH-015-services-and-membership.md",
       "depends_on": [
         "FH-012"
       ],
-      "claimed_at": null,
-      "updated_at": null,
+      "claimed_at": "2026-08-24T00:10:37.699Z",
+      "updated_at": "2026-08-24T00:37:31.315Z",
       "blocked_reason": null,
       "unblock_condition": null,
-      "evidence": [],
+      "evidence": [
+        "2026-08-24: docker compose --profile modern --profile test run --rm modern-test (10 passing tests); docker compose --profile visual run --rm --no-deps modern-visual npx playwright test --timeout=10000 (8 passing); bin/verify-migration-preflight (sanitized source 20597 = 9186 imported + 11411 quarantined; edge cases 60 = 32 imported + 28 quarantined); cd modern && npm run schema:check; git diff --check; bin/ralph validate."
+      ],
       "implementation_commits": []
     },
     {

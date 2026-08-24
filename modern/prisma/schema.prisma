@@ -53,6 +53,7 @@ model Organization {
   archiveEvents PersonArchiveEvent[]
   importJobs ImportJob[]
   roleAuditEvents RoleAuditEvent[]
+  serviceAuditEvents ServiceAuditEvent[]
 }
 model User {
   id BigInt @id @default(autoincrement())
@@ -186,6 +187,20 @@ model Service {
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   person Person @relation(fields: [personId], references: [id], onDelete: Restrict)
   notes Note[]
+  auditEvents ServiceAuditEvent[]
+}
+model ServiceAuditEvent {
+  id BigInt @id @default(autoincrement())
+  organizationId BigInt
+  serviceId BigInt
+  actorUserId BigInt
+  action String @db.VarChar(24)
+  previous Json?
+  current Json?
+  createdAt DateTime @default(now())
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  service Service @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  @@index([organizationId, serviceId, createdAt])
 }
 model Tag {
   id BigInt @id @default(autoincrement())
