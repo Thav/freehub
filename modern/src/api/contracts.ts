@@ -33,3 +33,7 @@ export const ServiceRenewalBody = Type.Object({ startDate: Type.Optional(Type.St
 export const TagAssignmentBody = Type.Object({ names: Type.Array(Type.String({ minLength: 1, maxLength: 120 }), { maxItems: 50 }) });
 export const NoteBody = Type.Object({ text: Type.String({ minLength: 1, maxLength: 20_000 }), personId: Type.Optional(Type.String({ pattern: "^[0-9]+$" })), visitId: Type.Optional(Type.String({ pattern: "^[0-9]+$" })), serviceId: Type.Optional(Type.String({ pattern: "^[0-9]+$" })) });
 export const NoteUpdateBody = Type.Object({ text: Type.String({ minLength: 1, maxLength: 20_000 }) });
+export const ImportServiceBody = Type.Object({ type: ServiceType, startDate: Type.Optional(Type.String({ format: "date" })), endDate: Type.Optional(Type.String({ format: "date" })), paid: Type.Optional(Type.Boolean()), volunteered: Type.Optional(Type.Boolean()) });
+export const ImportPreviewBody = Type.Object({ sourceBase64: Type.String({ minLength: 4, maxLength: 1_400_000 }), defaultService: Type.Optional(ImportServiceBody) });
+export const ImportApplyBody = ImportPreviewBody;
+export const ImportJobParams = Type.Intersect([OrganizationParams, Type.Object({ importJobId: Type.String({ pattern: "^[0-9]+$" }) })]);

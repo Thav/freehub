@@ -149,3 +149,18 @@ test("reports provide populated, empty, and export states", async ({ page }) => 
   await page.getByRole("button", { name: "Summary" }).click();
   await expect(page.getByRole("heading", { name: "Visits by Day" })).toBeVisible();
 });
+
+test("manager can preview and confirm a CSV import", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Log in" }).click();
+  await page.getByRole("link", { name: "Import" }).click();
+  await expect(page.getByRole("heading", { name: "Import people" })).toBeVisible();
+  const suffix = Date.now();
+  await page.getByLabel("CSV file").setInputFiles({ name: "members.csv", mimeType: "text/csv", buffer: Buffer.from(`first_name,last_name,email\nVisual,Import-${suffix},visual.import.${suffix}@example.test\n`) });
+  await page.getByRole("button", { name: "Preview import" }).click();
+  await expect(page.getByText(/1 to create/)).toBeVisible();
+  await expect(page.getByText(`Visual Import-${suffix}`, { exact: false })).toBeVisible();
+  await page.getByRole("button", { name: "Confirm import" }).click();
+  await expect(page.getByRole("status")).toHaveText(/Import applied/);
+  await expect(page.getByRole("link", { name: "View created person" })).toBeVisible();
+});

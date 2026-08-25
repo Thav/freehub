@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "active_ticket": null,
+  "active_ticket": "FH-017",
   "tickets": [
     {
       "id": "FH-001",
@@ -308,14 +308,14 @@
     {
       "id": "FH-017",
       "title": "Implement safe CSV member import",
-      "status": "pending",
+      "status": "in_progress",
       "path": "docs/modernization/tickets/FH-017-csv-import.md",
       "depends_on": [
         "FH-012",
         "FH-015"
       ],
-      "claimed_at": null,
-      "updated_at": null,
+      "claimed_at": "2026-08-24T01:17:50.804Z",
+      "updated_at": "2026-08-24T01:17:50.804Z",
       "blocked_reason": null,
       "unblock_condition": null,
       "evidence": [],

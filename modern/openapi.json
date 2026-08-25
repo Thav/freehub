@@ -1008,6 +1008,241 @@
         }
       }
     },
+    "/api/organizations/{organizationId}/imports/preview": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "sourceBase64"
+                ],
+                "properties": {
+                  "sourceBase64": {
+                    "minLength": 4,
+                    "maxLength": 1400000,
+                    "type": "string"
+                  },
+                  "defaultService": {
+                    "type": "object",
+                    "required": [
+                      "type"
+                    ],
+                    "properties": {
+                      "type": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "enum": [
+                              "membership"
+                            ]
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "earn_a_bike"
+                            ]
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "class"
+                            ]
+                          }
+                        ]
+                      },
+                      "startDate": {
+                        "format": "date",
+                        "type": "string"
+                      },
+                      "endDate": {
+                        "format": "date",
+                        "type": "string"
+                      },
+                      "paid": {
+                        "type": "boolean"
+                      },
+                      "volunteered": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "pattern": "^[0-9]+$",
+              "type": "string"
+            },
+            "in": "path",
+            "name": "organizationId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/organizations/{organizationId}/imports/{importJobId}": {
+      "get": {
+        "parameters": [
+          {
+            "schema": {
+              "pattern": "^[0-9]+$",
+              "type": "string"
+            },
+            "in": "path",
+            "name": "organizationId",
+            "required": true
+          },
+          {
+            "schema": {
+              "pattern": "^[0-9]+$",
+              "type": "string"
+            },
+            "in": "path",
+            "name": "importJobId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/organizations/{organizationId}/imports/{importJobId}/apply": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "sourceBase64"
+                ],
+                "properties": {
+                  "sourceBase64": {
+                    "minLength": 4,
+                    "maxLength": 1400000,
+                    "type": "string"
+                  },
+                  "defaultService": {
+                    "type": "object",
+                    "required": [
+                      "type"
+                    ],
+                    "properties": {
+                      "type": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "enum": [
+                              "membership"
+                            ]
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "earn_a_bike"
+                            ]
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "class"
+                            ]
+                          }
+                        ]
+                      },
+                      "startDate": {
+                        "format": "date",
+                        "type": "string"
+                      },
+                      "endDate": {
+                        "format": "date",
+                        "type": "string"
+                      },
+                      "paid": {
+                        "type": "boolean"
+                      },
+                      "volunteered": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "pattern": "^[0-9]+$",
+              "type": "string"
+            },
+            "in": "path",
+            "name": "organizationId",
+            "required": true
+          },
+          {
+            "schema": {
+              "pattern": "^[0-9]+$",
+              "type": "string"
+            },
+            "in": "path",
+            "name": "importJobId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/organizations/{organizationId}/imports/{importJobId}/rejections.csv": {
+      "get": {
+        "parameters": [
+          {
+            "schema": {
+              "pattern": "^[0-9]+$",
+              "type": "string"
+            },
+            "in": "path",
+            "name": "organizationId",
+            "required": true
+          },
+          {
+            "schema": {
+              "pattern": "^[0-9]+$",
+              "type": "string"
+            },
+            "in": "path",
+            "name": "importJobId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
     "/api/organizations/{organizationId}/people/{personId}/services": {
       "get": {
         "parameters": [

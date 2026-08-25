@@ -1,0 +1,2 @@
+first_name,last_name,email,phone,street1,street2,city,state,postal_code,country,year_of_birth,staff,email_opt_out,service_type,service_start_date,service_end_date,service_paid,service_volunteered
+Ada,Rider,ada@example.test,+1 555 0100,1 Bike Way,,Portland,OR,97201,US,1990,no,no,membership,2026-01-01,2026-12-31,yes,no

@@ -2,11 +2,12 @@ import cookie from "@fastify/cookie";
 import sensible from "@fastify/sensible";
 import swagger from "@fastify/swagger";
 import type { FastifyInstance, FastifyRequest } from "fastify";
-import { PrismaClient, ServiceType, VisitActivity } from "@prisma/client";
+import { ImportDisposition, PrismaClient, ServiceType, VisitActivity } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { Readable } from "node:stream";
-import { LoginBody, MembershipBody, MembershipParams, MembershipUpdateBody, NoteBody, NoteParams, NoteUpdateBody, OrganizationBody, OrganizationParams, OrganizationSettingsBody, PasswordBody, PersonBody, PersonParams, PersonTagParams, ProvisionUserBody, ReportQuery, SearchQuery, ServiceBody, ServiceParams, ServiceRenewalBody, SummaryQuery, TagAssignmentBody, TagParams, UserParams, UserSettingsBody, VisitActionBody, VisitBody, VisitDayParams, VisitListQuery, VisitParams, VisitTransferBody, VisitUpdateBody } from "./contracts.js";
+import { ImportApplyBody, ImportJobParams, ImportPreviewBody, LoginBody, MembershipBody, MembershipParams, MembershipUpdateBody, NoteBody, NoteParams, NoteUpdateBody, OrganizationBody, OrganizationParams, OrganizationSettingsBody, PasswordBody, PersonBody, PersonParams, PersonTagParams, ProvisionUserBody, ReportQuery, SearchQuery, ServiceBody, ServiceParams, ServiceRenewalBody, SummaryQuery, TagAssignmentBody, TagParams, UserParams, UserSettingsBody, VisitActionBody, VisitBody, VisitDayParams, VisitListQuery, VisitParams, VisitTransferBody, VisitUpdateBody } from "./contracts.js";
+import { normalizeName, normalizePhone, parseImport, type ImportPerson, type ImportService, type ParsedFile } from "../import/csv.js";
 
 type Auth = { userId: bigint; organizationId: bigint | null; role: "manager" | "operator" | null; csrfTokenDigest: string; sessionId: string; passwordChangeRequired: boolean; platformAdministrator: boolean };
 const sessionCookie = "freehub_session";
@@ -55,10 +56,10 @@ const serviceJson = (service: { id: bigint; organizationId: bigint; personId: bi
 const serviceSnapshot = (service: { type: ServiceType; startDate: Date | null; endDate: Date | null; paid: boolean; volunteered: boolean }) => ({ type: service.type === ServiceType.class_ ? "class" : service.type, startDate: dayString(service.startDate), endDate: dayString(service.endDate), paid: service.paid, volunteered: service.volunteered });
 const noteJson = (note: { id: bigint; organizationId: bigint; personId: bigint | null; visitId: bigint | null; serviceId: bigint | null; text: string; createdByUserId: bigint | null; updatedByUserId: bigint | null; createdAt: Date; updatedAt: Date }) => ({ id: note.id.toString(), organizationId: note.organizationId.toString(), personId: note.personId?.toString() || null, visitId: note.visitId?.toString() || null, serviceId: note.serviceId?.toString() || null, text: note.text, createdByUserId: note.createdByUserId?.toString() || null, updatedByUserId: note.updatedByUserId?.toString() || null, createdAt: note.createdAt, updatedAt: note.updatedAt });
 const trimmed = (value: string | null | undefined) => value?.trim() || null;
-const normalizePhone = (value: string | null) => value ? `${value.trim().startsWith("+") ? "+" : ""}${value.replace(/\D/g, "")}` || null : null;
+const normalizedPhone = (value: string | null) => normalizePhone(value || undefined) || null;
 const personValues = (input: { firstName: string; lastName?: string | null; email?: string | null; phone?: string | null; street1?: string | null; street2?: string | null; city?: string | null; state?: string | null; postalCode?: string | null; country?: string | null; yearOfBirth?: number | null; staff?: boolean; emailOptOut?: boolean }) => {
   const firstName = input.firstName.trim(); const lastName = trimmed(input.lastName); const email = trimmed(input.email); const phone = trimmed(input.phone);
-  return { firstName, lastName, displayName: [firstName, lastName].filter(Boolean).join(" "), email, normalizedEmail: email?.toLowerCase() || null, phone, normalizedPhone: normalizePhone(phone), street1: trimmed(input.street1), street2: trimmed(input.street2), city: trimmed(input.city), state: trimmed(input.state), postalCode: trimmed(input.postalCode), country: trimmed(input.country)?.toUpperCase() || null, yearOfBirth: input.yearOfBirth ?? null, staff: input.staff ?? false, emailOptOut: input.emailOptOut ?? false };
+  return { firstName, lastName, displayName: [firstName, lastName].filter(Boolean).join(" "), email, normalizedEmail: email?.toLowerCase() || null, phone, normalizedPhone: normalizedPhone(phone), street1: trimmed(input.street1), street2: trimmed(input.street2), city: trimmed(input.city), state: trimmed(input.state), postalCode: trimmed(input.postalCode), country: trimmed(input.country)?.toUpperCase() || null, yearOfBirth: input.yearOfBirth ?? null, staff: input.staff ?? false, emailOptOut: input.emailOptOut ?? false };
 };
 const csv = (values: Array<string | number | boolean | null | undefined>) => values.map((value) => { const text = value === null || value === undefined ? "" : String(value); return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text; }).join(",");
 const reportFilename = (key: string, report: string, after?: string, before?: string) => `${key}_${report}${after || before ? `_${after || "all"}_${before || "all"}` : ""}.csv`;
@@ -97,6 +98,28 @@ export async function buildApp(db = new PrismaClient()): Promise<FastifyInstance
     if (!membership) throw app.httpErrors.forbidden("organization membership required");
     return { ...auth, organizationId: orgId, role: membership.role };
   }
+  const importJobJson = (job: { id: bigint; format: string; status: string; sourceSha256: string; createdAt: Date; appliedAt: Date | null; rows: { rowNumber: number; disposition: ImportDisposition; matchedPersonId: bigint | null; createdPersonId: bigint | null; matchReason: string | null; warnings: unknown; errors: unknown }[] }, displayNames = new Map<number, string>()) => ({
+    id: job.id.toString(), format: job.format, status: job.status, sourceSha256: job.sourceSha256, createdAt: job.createdAt, appliedAt: job.appliedAt,
+    summary: { creates: job.rows.filter((row) => row.disposition === "create").length, matches: job.rows.filter((row) => row.disposition === "existing_match").length, rejected: job.rows.filter((row) => row.disposition === "rejected").length },
+    rows: job.rows.map((row) => ({ rowNumber: row.rowNumber, displayName: displayNames.get(row.rowNumber) || null, disposition: row.disposition, matchedPersonId: row.matchedPersonId?.toString() || null, createdPersonId: row.createdPersonId?.toString() || null, matchReason: row.matchReason, warnings: row.warnings, errors: row.errors }))
+  });
+  async function classifyImport(parsed: ParsedFile, organizationId: bigint, client: Pick<PrismaClient, "person"> = db) {
+    const people = await client.person.findMany({ where: { organizationId }, select: { id: true, normalizedEmail: true, normalizedPhone: true, firstName: true, lastName: true } });
+    const seen = new Set<string>();
+    return parsed.rows.map((row) => {
+      const errors = [...row.errors]; const email = row.person.email?.toLowerCase(); const phone = normalizePhone(row.person.phone); const name = normalizeName(row.person.firstName, row.person.lastName);
+      const keys = [["email", email], ["phone", phone], ["name", name]] as const;
+      if (keys.some(([, value]) => value && seen.has(`${value}`))) errors.push("duplicate row in this import");
+      for (const [, value] of keys) if (value) seen.add(value);
+      const matched = people.filter((person) => (email && person.normalizedEmail === email) || (phone && person.normalizedPhone === phone) || (name && normalizeName(person.firstName, person.lastName || undefined) === name));
+      const unique = [...new Map(matched.map((person) => [person.id.toString(), person])).values()];
+      const matchReason = unique.length === 1 ? (email && unique[0].normalizedEmail === email ? "normalized_email" : phone && unique[0].normalizedPhone === phone ? "normalized_phone" : "normalized_name") : null;
+      if (unique.length > 1) errors.push("multiple existing people match this row");
+      return { ...row, errors, disposition: errors.length ? ImportDisposition.rejected : unique.length ? ImportDisposition.existing_match : ImportDisposition.create, matchedPersonId: unique.length === 1 ? unique[0].id : null, matchReason };
+    });
+  }
+  const importDisplayNames = (parsed: ParsedFile) => new Map(parsed.rows.map((row) => [row.rowNumber, [row.person.firstName, row.person.lastName].filter(Boolean).join(" ")]));
+  const importPersonValues = (person: ImportPerson) => personValues({ ...person, lastName: person.lastName || null, email: person.email || null, phone: person.phone || null, street1: person.street1 || null, street2: person.street2 || null, city: person.city || null, state: person.state || null, postalCode: person.postalCode || null, country: person.country || null });
 
   app.get("/up", { schema: { response: { 200: { type: "object", properties: { status: { type: "string" } }, required: ["status"] } } } }, async () => ({ status: "ok" }));
   app.post("/api/login", { schema: { body: LoginBody } }, async (request, reply) => {
@@ -236,6 +259,29 @@ export async function buildApp(db = new PrismaClient()): Promise<FastifyInstance
     const { organizationId, personId } = request.params as { organizationId: string; personId: string }; const auth = await scoped(request, organizationId, { mutable: true }); const existing = await db.person.findFirst({ where: { id: bigint(personId), organizationId: bigint(organizationId) } }); if (!existing) throw app.httpErrors.notFound();
     if (action === "archive" && existing.archivedAt) throw app.httpErrors.conflict("person is already archived"); if (action === "restore" && !existing.archivedAt) throw app.httpErrors.conflict("person is not archived");
     const person = await db.$transaction(async (tx) => { const updated = await tx.person.update({ where: { id: existing.id }, data: action === "archive" ? { archivedAt: new Date(), archivedByUserId: auth.userId, updatedByUserId: auth.userId } : { archivedAt: null, archivedByUserId: null, updatedByUserId: auth.userId } }); await tx.personArchiveEvent.create({ data: { organizationId: updated.organizationId, personId: updated.id, actorUserId: auth.userId, action } }); return updated; }); return personJson(person);
+  });
+  app.post("/api/organizations/:organizationId/imports/preview", { schema: { params: OrganizationParams, body: ImportPreviewBody } }, async (request, reply) => {
+    const { organizationId } = request.params as { organizationId: string }; const auth = await scoped(request, organizationId, { mutable: true }); if (auth.role !== "manager") throw app.httpErrors.forbidden("organization manager required");
+    const body = request.body as { sourceBase64: string; defaultService?: ImportService }; let parsed: ParsedFile; try { parsed = parseImport(body.sourceBase64, body.defaultService); } catch (error) { throw app.httpErrors.badRequest((error as Error).message); }
+    const existing = await db.importJob.findUnique({ where: { organizationId_sourceSha256: { organizationId: bigint(organizationId), sourceSha256: parsed.sha256 } }, include: { rows: { orderBy: { rowNumber: "asc" } } } }); if (existing) return importJobJson(existing, importDisplayNames(parsed));
+    const rows = await classifyImport(parsed, bigint(organizationId));
+    const job = await db.importJob.create({ data: { organizationId: bigint(organizationId), format: parsed.format, sourceSha256: parsed.sha256, status: "previewed", createdByUserId: auth.userId, rows: { create: rows.map((row) => ({ rowNumber: row.rowNumber, disposition: row.disposition, matchedPersonId: row.matchedPersonId, matchReason: row.matchReason, warnings: row.warnings, errors: row.errors, inputFingerprint: row.fingerprint })) } }, include: { rows: { orderBy: { rowNumber: "asc" } } } }); return reply.code(201).send(importJobJson(job, importDisplayNames(parsed)));
+  });
+  app.get("/api/organizations/:organizationId/imports/:importJobId", { schema: { params: ImportJobParams } }, async (request) => {
+    const { organizationId, importJobId } = request.params as { organizationId: string; importJobId: string }; await scoped(request, organizationId); const job = await db.importJob.findFirst({ where: { id: bigint(importJobId), organizationId: bigint(organizationId) }, include: { rows: { orderBy: { rowNumber: "asc" } } } }); if (!job) throw app.httpErrors.notFound("import job not found"); return importJobJson(job);
+  });
+  app.post("/api/organizations/:organizationId/imports/:importJobId/apply", { schema: { params: ImportJobParams, body: ImportApplyBody } }, async (request) => {
+    const { organizationId, importJobId } = request.params as { organizationId: string; importJobId: string }; const auth = await scoped(request, organizationId, { mutable: true }); if (auth.role !== "manager") throw app.httpErrors.forbidden("organization manager required"); const body = request.body as { sourceBase64: string; defaultService?: ImportService }; let parsed: ParsedFile; try { parsed = parseImport(body.sourceBase64, body.defaultService); } catch (error) { throw app.httpErrors.badRequest((error as Error).message); }
+    const organization = bigint(organizationId); const job = await db.importJob.findFirst({ where: { id: bigint(importJobId), organizationId: organization }, include: { rows: { orderBy: { rowNumber: "asc" } } } }); if (!job) throw app.httpErrors.notFound("import job not found"); if (job.sourceSha256 !== parsed.sha256) throw app.httpErrors.conflict("CSV does not match this preview"); if (job.status === "applied") return importJobJson(job, importDisplayNames(parsed)); if (job.rows.length !== parsed.rows.length || job.rows.some((row, index) => row.inputFingerprint !== parsed.rows[index].fingerprint)) throw app.httpErrors.conflict("CSV options do not match this preview");
+    const result = await db.$transaction(async (tx) => {
+      const rows = await classifyImport(parsed, organization, tx);
+      for (const row of rows) { const persisted = job.rows.find((item) => item.rowNumber === row.rowNumber)!; if (row.disposition === ImportDisposition.create) { const created = await tx.person.create({ data: { ...importPersonValues(row.person), organizationId: organization, createdByUserId: auth.userId, updatedByUserId: auth.userId } }); if (row.person.service) await tx.service.create({ data: { organizationId: organization, personId: created.id, type: databaseServiceType(row.person.service.type), startDate: row.person.service.startDate ? date(row.person.service.startDate) : null, endDate: row.person.service.endDate ? date(row.person.service.endDate) : null, paid: row.person.service.paid || false, volunteered: row.person.service.volunteered || false, createdByUserId: auth.userId, updatedByUserId: auth.userId } }); await tx.importRow.update({ where: { id: persisted.id }, data: { disposition: ImportDisposition.create, createdPersonId: created.id, matchedPersonId: null, matchReason: null, warnings: row.warnings, errors: row.errors } }); }
+        else await tx.importRow.update({ where: { id: persisted.id }, data: { disposition: row.disposition, matchedPersonId: row.matchedPersonId, createdPersonId: null, matchReason: row.matchReason, warnings: row.warnings, errors: row.errors } }); }
+      return tx.importJob.update({ where: { id: job.id }, data: { status: "applied", appliedAt: new Date() }, include: { rows: { orderBy: { rowNumber: "asc" } } } });
+    }); return importJobJson(result, importDisplayNames(parsed));
+  });
+  app.get("/api/organizations/:organizationId/imports/:importJobId/rejections.csv", { schema: { params: ImportJobParams } }, async (request, reply) => {
+    const { organizationId, importJobId } = request.params as { organizationId: string; importJobId: string }; await scoped(request, organizationId); const job = await db.importJob.findFirst({ where: { id: bigint(importJobId), organizationId: bigint(organizationId) }, include: { organization: true, rows: { where: { disposition: ImportDisposition.rejected }, orderBy: { rowNumber: "asc" } } } }); if (!job) throw app.httpErrors.notFound("import job not found"); const body = ["row_number,errors,warnings", ...job.rows.map((row) => csv([row.rowNumber, (row.errors as string[]).join("; "), (row.warnings as string[]).join("; ")]))].join("\r\n") + "\r\n"; reply.header("content-type", "text/csv; charset=utf-8").header("content-disposition", `attachment; filename=\"${job.organization.key}_import_${job.id}_rejections.csv\"`); return body;
   });
   const serviceInput = (input: { type: ApiServiceType; startDate?: string | null; endDate?: string | null; paid?: boolean; volunteered?: boolean; note?: string }) => {
     const startDate = input.startDate ? date(input.startDate) : null; const endDate = input.endDate ? date(input.endDate) : null;
