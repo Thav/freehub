@@ -37,3 +37,5 @@ export const ImportServiceBody = Type.Object({ type: ServiceType, startDate: Typ
 export const ImportPreviewBody = Type.Object({ sourceBase64: Type.String({ minLength: 4, maxLength: 1_400_000 }), defaultService: Type.Optional(ImportServiceBody) });
 export const ImportApplyBody = ImportPreviewBody;
 export const ImportJobParams = Type.Intersect([OrganizationParams, Type.Object({ importJobId: Type.String({ pattern: "^[0-9]+$" }) })]);
+export const BulkPeopleQuery = Type.Object({ createdAfter: Type.Optional(Type.String({ format: "date" })), createdBefore: Type.Optional(Type.String({ format: "date" })), lastVisitAfter: Type.Optional(Type.String({ format: "date" })), lastVisitBefore: Type.Optional(Type.String({ format: "date" })), neverVisited: Type.Optional(Type.Boolean()), archived: Type.Optional(Type.Boolean()) });
+export const BulkPeopleBody = BulkPeopleQuery;

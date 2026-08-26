@@ -164,3 +164,8 @@ test("manager can preview and confirm a CSV import", async ({ page }) => {
   await expect(page.getByRole("status")).toHaveText(/Import applied/);
   await expect(page.getByRole("link", { name: "View created person" })).toBeVisible();
 });
+
+test("manager can preview a bulk people selection", async ({ page }) => {
+  await page.goto("/"); await page.getByRole("button", { name: "Log in" }).click(); await page.getByRole("link", { name: "Manage people" }).click();
+  await expect(page.getByRole("heading", { name: "Manage people" })).toBeVisible(); await page.getByRole("button", { name: "Preview selection" }).click(); await expect(page.getByRole("heading", { name: /people selected/ })).toBeVisible(); await expect(page.getByRole("link", { name: "Export selection" })).toBeVisible();
+});

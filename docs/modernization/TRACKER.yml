@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "active_ticket": "FH-017",
+  "active_ticket": "FH-018",
   "tickets": [
     {
       "id": "FH-001",
@@ -308,30 +308,32 @@
     {
       "id": "FH-017",
       "title": "Implement safe CSV member import",
-      "status": "in_progress",
+      "status": "done",
       "path": "docs/modernization/tickets/FH-017-csv-import.md",
       "depends_on": [
         "FH-012",
         "FH-015"
       ],
       "claimed_at": "2026-08-24T01:17:50.804Z",
-      "updated_at": "2026-08-24T01:17:50.804Z",
+      "updated_at": "2026-08-25T00:05:05.266Z",
       "blocked_reason": null,
       "unblock_condition": null,
-      "evidence": [],
+      "evidence": [
+        "2026-08-24: npm run check; docker compose --profile modern --profile test run --rm -e LOG_LEVEL=silent modern-test (parser/BOM, transaction/idempotency, default-service, authorization coverage); docker compose --profile modern up -d --build --wait; docker compose --profile visual run --rm --no-deps modern-visual (preview, named rows, created/existing-person result links); cd modern && npm run openapi && node scripts/verify-openapi.mjs && npm run schema:check; git diff --check; bin/ralph validate."
+      ],
       "implementation_commits": []
     },
     {
       "id": "FH-018",
       "title": "Implement bulk management workflows",
-      "status": "pending",
+      "status": "in_progress",
       "path": "docs/modernization/tickets/FH-018-bulk-management.md",
       "depends_on": [
         "FH-012",
         "FH-016"
       ],
-      "claimed_at": null,
-      "updated_at": null,
+      "claimed_at": "2026-08-25T00:05:09.879Z",
+      "updated_at": "2026-08-25T00:05:09.879Z",
       "blocked_reason": null,
       "unblock_condition": null,
       "evidence": [],

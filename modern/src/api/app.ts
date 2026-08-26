@@ -2,11 +2,11 @@ import cookie from "@fastify/cookie";
 import sensible from "@fastify/sensible";
 import swagger from "@fastify/swagger";
 import type { FastifyInstance, FastifyRequest } from "fastify";
-import { ImportDisposition, PrismaClient, ServiceType, VisitActivity } from "@prisma/client";
+import { ImportDisposition, Prisma, PrismaClient, ServiceType, VisitActivity } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { Readable } from "node:stream";
-import { ImportApplyBody, ImportJobParams, ImportPreviewBody, LoginBody, MembershipBody, MembershipParams, MembershipUpdateBody, NoteBody, NoteParams, NoteUpdateBody, OrganizationBody, OrganizationParams, OrganizationSettingsBody, PasswordBody, PersonBody, PersonParams, PersonTagParams, ProvisionUserBody, ReportQuery, SearchQuery, ServiceBody, ServiceParams, ServiceRenewalBody, SummaryQuery, TagAssignmentBody, TagParams, UserParams, UserSettingsBody, VisitActionBody, VisitBody, VisitDayParams, VisitListQuery, VisitParams, VisitTransferBody, VisitUpdateBody } from "./contracts.js";
+import { BulkPeopleBody, BulkPeopleQuery, ImportApplyBody, ImportJobParams, ImportPreviewBody, LoginBody, MembershipBody, MembershipParams, MembershipUpdateBody, NoteBody, NoteParams, NoteUpdateBody, OrganizationBody, OrganizationParams, OrganizationSettingsBody, PasswordBody, PersonBody, PersonParams, PersonTagParams, ProvisionUserBody, ReportQuery, SearchQuery, ServiceBody, ServiceParams, ServiceRenewalBody, SummaryQuery, TagAssignmentBody, TagParams, UserParams, UserSettingsBody, VisitActionBody, VisitBody, VisitDayParams, VisitListQuery, VisitParams, VisitTransferBody, VisitUpdateBody } from "./contracts.js";
 import { normalizeName, normalizePhone, parseImport, type ImportPerson, type ImportService, type ParsedFile } from "../import/csv.js";
 
 type Auth = { userId: bigint; organizationId: bigint | null; role: "manager" | "operator" | null; csrfTokenDigest: string; sessionId: string; passwordChangeRequired: boolean; platformAdministrator: boolean };
@@ -120,6 +120,15 @@ export async function buildApp(db = new PrismaClient()): Promise<FastifyInstance
   }
   const importDisplayNames = (parsed: ParsedFile) => new Map(parsed.rows.map((row) => [row.rowNumber, [row.person.firstName, row.person.lastName].filter(Boolean).join(" ")]));
   const importPersonValues = (person: ImportPerson) => personValues({ ...person, lastName: person.lastName || null, email: person.email || null, phone: person.phone || null, street1: person.street1 || null, street2: person.street2 || null, city: person.city || null, state: person.state || null, postalCode: person.postalCode || null, country: person.country || null });
+  type BulkFilter = { createdAfter?: string; createdBefore?: string; lastVisitAfter?: string; lastVisitBefore?: string; neverVisited?: boolean; archived?: boolean };
+  type BulkRow = { id: bigint; displayName: string; createdAt: Date; lastVisitAt: Date | null };
+  async function bulkRows(organizationId: bigint, filter: BulkFilter) {
+    if (filter.createdAfter && filter.createdBefore && filter.createdBefore < filter.createdAfter) throw app.httpErrors.badRequest("created before must not precede created after"); if (filter.lastVisitAfter && filter.lastVisitBefore && filter.lastVisitBefore < filter.lastVisitAfter) throw app.httpErrors.badRequest("last visit before must not precede last visit after");
+    const where: Prisma.Sql[] = [Prisma.sql`p."organizationId" = ${organizationId}`, filter.archived ? Prisma.sql`p."archivedAt" IS NOT NULL` : Prisma.sql`p."archivedAt" IS NULL`];
+    if (filter.createdAfter) where.push(Prisma.sql`p."createdAt" >= ${date(filter.createdAfter)}`); if (filter.createdBefore) where.push(Prisma.sql`p."createdAt" < ${date(nextDay(filter.createdBefore))}`);
+    const having: Prisma.Sql[] = []; if (filter.neverVisited) having.push(Prisma.sql`COUNT(v.id) = 0`); if (filter.lastVisitAfter) having.push(Prisma.sql`MAX(v."arrivedAt") >= ${date(filter.lastVisitAfter)}`); if (filter.lastVisitBefore) having.push(Prisma.sql`MAX(v."arrivedAt") < ${date(nextDay(filter.lastVisitBefore))}`);
+    return db.$queryRaw<BulkRow[]>(Prisma.sql`SELECT p.id, p."displayName", p."createdAt", MAX(v."arrivedAt") AS "lastVisitAt" FROM "Person" p LEFT JOIN "Visit" v ON v."personId" = p.id AND v."organizationId" = p."organizationId" AND v."cancelledAt" IS NULL WHERE ${Prisma.join(where, " AND ")} GROUP BY p.id ${having.length ? Prisma.sql`HAVING ${Prisma.join(having, " AND ")}` : Prisma.empty} ORDER BY p."displayName" ASC, p.id ASC`);
+  }
 
   app.get("/up", { schema: { response: { 200: { type: "object", properties: { status: { type: "string" } }, required: ["status"] } } } }, async () => ({ status: "ok" }));
   app.post("/api/login", { schema: { body: LoginBody } }, async (request, reply) => {
@@ -282,6 +291,16 @@ export async function buildApp(db = new PrismaClient()): Promise<FastifyInstance
   });
   app.get("/api/organizations/:organizationId/imports/:importJobId/rejections.csv", { schema: { params: ImportJobParams } }, async (request, reply) => {
     const { organizationId, importJobId } = request.params as { organizationId: string; importJobId: string }; await scoped(request, organizationId); const job = await db.importJob.findFirst({ where: { id: bigint(importJobId), organizationId: bigint(organizationId) }, include: { organization: true, rows: { where: { disposition: ImportDisposition.rejected }, orderBy: { rowNumber: "asc" } } } }); if (!job) throw app.httpErrors.notFound("import job not found"); const body = ["row_number,errors,warnings", ...job.rows.map((row) => csv([row.rowNumber, (row.errors as string[]).join("; "), (row.warnings as string[]).join("; ")]))].join("\r\n") + "\r\n"; reply.header("content-type", "text/csv; charset=utf-8").header("content-disposition", `attachment; filename=\"${job.organization.key}_import_${job.id}_rejections.csv\"`); return body;
+  });
+  app.get("/api/organizations/:organizationId/bulk-people", { schema: { params: OrganizationParams, querystring: BulkPeopleQuery } }, async (request) => {
+    const { organizationId } = request.params as { organizationId: string }; await scoped(request, organizationId); const rows = await bulkRows(bigint(organizationId), request.query as BulkFilter); return { count: rows.length, rows: rows.slice(0, 250).map((row) => ({ id: row.id.toString(), displayName: row.displayName, createdAt: row.createdAt, lastVisitAt: row.lastVisitAt })), truncated: rows.length > 250 };
+  });
+  app.get("/api/organizations/:organizationId/bulk-people.csv", { schema: { params: OrganizationParams, querystring: BulkPeopleQuery } }, async (request, reply) => {
+    const { organizationId } = request.params as { organizationId: string }; await scoped(request, organizationId); const rows = await bulkRows(bigint(organizationId), request.query as BulkFilter); const organization = await db.organization.findUniqueOrThrow({ where: { id: bigint(organizationId) } }); return csvReply(reply, `${organization.key}_bulk_people.csv`, [csv(["id", "display_name", "created_at", "last_visit_at"]), ...rows.map((row) => csv([row.id.toString(), row.displayName, row.createdAt.toISOString(), row.lastVisitAt?.toISOString() || null]))]);
+  });
+  for (const action of ["archive", "restore"] as const) app.post(`/api/organizations/:organizationId/bulk-people/${action}`, { schema: { params: OrganizationParams, body: BulkPeopleBody } }, async (request) => {
+    const { organizationId } = request.params as { organizationId: string }; const auth = await scoped(request, organizationId, { mutable: true }); if (auth.role !== "manager") throw app.httpErrors.forbidden("organization manager required"); const rows = await bulkRows(bigint(organizationId), { ...(request.body as BulkFilter), archived: action === "restore" }); if (rows.length > 10_000) throw app.httpErrors.payloadTooLarge("bulk selection exceeds 10,000 people; narrow the filters"); if (!rows.length) return { action, count: 0 };
+    await db.$transaction(async (tx) => { const ids = rows.map((row) => row.id); await tx.person.updateMany({ where: { id: { in: ids }, organizationId: bigint(organizationId) }, data: action === "archive" ? { archivedAt: new Date(), archivedByUserId: auth.userId, updatedByUserId: auth.userId } : { archivedAt: null, archivedByUserId: null, updatedByUserId: auth.userId } }); await tx.personArchiveEvent.createMany({ data: ids.map((personId) => ({ organizationId: bigint(organizationId), personId, actorUserId: auth.userId, action })) }); }); return { action, count: rows.length };
   });
   const serviceInput = (input: { type: ApiServiceType; startDate?: string | null; endDate?: string | null; paid?: boolean; volunteered?: boolean; note?: string }) => {
     const startDate = input.startDate ? date(input.startDate) : null; const endDate = input.endDate ? date(input.endDate) : null;
