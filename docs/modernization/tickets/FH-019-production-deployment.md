@@ -6,7 +6,7 @@ Prove the application can run on a generic container PaaS with managed PostgreSQ
 
 ## Dependencies
 
-FH-016, FH-017, and FH-018.
+FH-016, FH-017, FH-018, and FH-021.
 
 ## Scope
 

@@ -28,6 +28,11 @@ test("cutover provisioning, forced change, CSRF, expiry, disablement, and revoca
   const organization = await db.organization.findUniqueOrThrow({ where: { key: "spike-shop" } });
   const manager = await loginAs({ login: "manager", password: "spike-password" });
   assert.equal(manager.response.statusCode, 200);
+  const identity = await app.inject({ method: "GET", url: "/api/session", headers: { cookie: manager.cookie } });
+  assert.equal(identity.statusCode, 200);
+  const identityBody = identity.json() as { login: string; name: string; csrfToken: string };
+  assert.deepEqual({ login: identityBody.login, name: identityBody.name }, { login: "manager", name: "Spike Manager" });
+  manager.body.csrfToken = identityBody.csrfToken;
 
   const migrated = await db.user.create({ data: { login, email: `${login}@example.test`, name: "Cutover User", passwordDigest: "a".repeat(40), passwordChangeRequired: true } });
   userId = migrated.id;

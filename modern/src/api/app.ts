@@ -9,7 +9,7 @@ import { Readable } from "node:stream";
 import { BulkPeopleBody, BulkPeopleQuery, ImportApplyBody, ImportJobParams, ImportPreviewBody, LoginBody, MembershipBody, MembershipParams, MembershipUpdateBody, NoteBody, NoteParams, NoteUpdateBody, OrganizationBody, OrganizationParams, OrganizationSettingsBody, PasswordBody, PersonBody, PersonParams, PersonTagParams, ProvisionUserBody, ReportQuery, SearchQuery, ServiceBody, ServiceParams, ServiceRenewalBody, SummaryQuery, TagAssignmentBody, TagParams, UserParams, UserSettingsBody, VisitActionBody, VisitBody, VisitDayParams, VisitListQuery, VisitParams, VisitTransferBody, VisitUpdateBody } from "./contracts.js";
 import { normalizeName, normalizePhone, parseImport, type ImportPerson, type ImportService, type ParsedFile } from "../import/csv.js";
 
-type Auth = { userId: bigint; organizationId: bigint | null; role: "manager" | "operator" | null; csrfTokenDigest: string; sessionId: string; passwordChangeRequired: boolean; platformAdministrator: boolean };
+type Auth = { userId: bigint; login: string; name: string; organizationId: bigint | null; role: "manager" | "operator" | null; csrfTokenDigest: string; sessionId: string; passwordChangeRequired: boolean; platformAdministrator: boolean };
 const sessionCookie = "freehub_session";
 const bigint = (value: string) => BigInt(value);
 const digest = (value: string) => createHash("sha256").update(value).digest("hex");
@@ -54,7 +54,7 @@ type ApiServiceType = "membership" | "earn_a_bike" | "class";
 const databaseServiceType = (type: ApiServiceType) => type === "class" ? ServiceType.class_ : type;
 const serviceJson = (service: { id: bigint; organizationId: bigint; personId: bigint; type: ServiceType; startDate: Date | null; endDate: Date | null; paid: boolean; volunteered: boolean; createdByUserId: bigint | null; updatedByUserId: bigint | null; createdAt: Date; updatedAt: Date }) => ({ id: service.id.toString(), organizationId: service.organizationId.toString(), personId: service.personId.toString(), type: service.type === ServiceType.class_ ? "class" : service.type, startDate: dayString(service.startDate), endDate: dayString(service.endDate), paid: service.paid, volunteered: service.volunteered, createdByUserId: service.createdByUserId?.toString() || null, updatedByUserId: service.updatedByUserId?.toString() || null, createdAt: service.createdAt, updatedAt: service.updatedAt });
 const serviceSnapshot = (service: { type: ServiceType; startDate: Date | null; endDate: Date | null; paid: boolean; volunteered: boolean }) => ({ type: service.type === ServiceType.class_ ? "class" : service.type, startDate: dayString(service.startDate), endDate: dayString(service.endDate), paid: service.paid, volunteered: service.volunteered });
-const noteJson = (note: { id: bigint; organizationId: bigint; personId: bigint | null; visitId: bigint | null; serviceId: bigint | null; text: string; createdByUserId: bigint | null; updatedByUserId: bigint | null; createdAt: Date; updatedAt: Date }) => ({ id: note.id.toString(), organizationId: note.organizationId.toString(), personId: note.personId?.toString() || null, visitId: note.visitId?.toString() || null, serviceId: note.serviceId?.toString() || null, text: note.text, createdByUserId: note.createdByUserId?.toString() || null, updatedByUserId: note.updatedByUserId?.toString() || null, createdAt: note.createdAt, updatedAt: note.updatedAt });
+const noteJson = (note: { id: bigint; organizationId: bigint; personId: bigint | null; visitId: bigint | null; serviceId: bigint | null; text: string; createdByUserId: bigint | null; updatedByUserId: bigint | null; createdAt: Date; updatedAt: Date }, userNames: ReadonlyMap<string, string> = new Map()) => ({ id: note.id.toString(), organizationId: note.organizationId.toString(), personId: note.personId?.toString() || null, visitId: note.visitId?.toString() || null, serviceId: note.serviceId?.toString() || null, text: note.text, createdByUserId: note.createdByUserId?.toString() || null, updatedByUserId: note.updatedByUserId?.toString() || null, createdByName: note.createdByUserId ? userNames.get(note.createdByUserId.toString()) || null : null, updatedByName: note.updatedByUserId ? userNames.get(note.updatedByUserId.toString()) || null : null, createdAt: note.createdAt, updatedAt: note.updatedAt });
 const trimmed = (value: string | null | undefined) => value?.trim() || null;
 const normalizedPhone = (value: string | null) => normalizePhone(value || undefined) || null;
 const personValues = (input: { firstName: string; lastName?: string | null; email?: string | null; phone?: string | null; street1?: string | null; street2?: string | null; city?: string | null; state?: string | null; postalCode?: string | null; country?: string | null; yearOfBirth?: number | null; staff?: boolean; emailOptOut?: boolean }) => {
@@ -83,7 +83,7 @@ export async function buildApp(db = new PrismaClient()): Promise<FastifyInstance
     if (!rawToken) throw app.httpErrors.unauthorized();
     const session = await db.session.findUnique({ where: { tokenDigest: digest(rawToken) }, include: { user: true } });
     if (!session || session.expiresAt <= new Date() || session.revokedAt || session.user.disabledAt) throw app.httpErrors.unauthorized();
-    return { userId: session.userId, organizationId: session.organizationId, role: null, csrfTokenDigest: session.csrfTokenDigest || "", sessionId: session.id, passwordChangeRequired: session.user.passwordChangeRequired, platformAdministrator: session.user.platformAdministrator };
+    return { userId: session.userId, login: session.user.login, name: session.user.name, organizationId: session.organizationId, role: null, csrfTokenDigest: session.csrfTokenDigest || "", sessionId: session.id, passwordChangeRequired: session.user.passwordChangeRequired, platformAdministrator: session.user.platformAdministrator };
   }
   async function csrf(request: FastifyRequest, auth: Auth) {
     const value = request.headers["x-csrf-token"];
@@ -146,7 +146,7 @@ export async function buildApp(db = new PrismaClient()): Promise<FastifyInstance
   app.get("/api/session", async (request) => {
     const auth = await authenticated(request); const csrfToken = token();
     await db.session.update({ where: { id: auth.sessionId }, data: { csrfTokenDigest: digest(csrfToken) } });
-    return { organizationId: auth.organizationId?.toString() || null, csrfToken, passwordChangeRequired: auth.passwordChangeRequired };
+    return { organizationId: auth.organizationId?.toString() || null, userId: auth.userId.toString(), login: auth.login, name: auth.name, csrfToken, passwordChangeRequired: auth.passwordChangeRequired };
   });
   app.get("/api/organizations", async (request) => {
     const auth = await authenticated(request); if (auth.passwordChangeRequired) throw app.httpErrors.forbidden("password change required");
@@ -195,7 +195,7 @@ export async function buildApp(db = new PrismaClient()): Promise<FastifyInstance
   app.put("/api/organizations/:organizationId/settings", { schema: { params: OrganizationParams, body: OrganizationSettingsBody } }, async (request) => {
     const { organizationId } = request.params as { organizationId: string }; await requireOrganizationAdministrator(request, organizationId); const input = request.body as { name: string; timezone: string; location?: string };
     const organization = await db.organization.update({ where: { id: bigint(organizationId) }, data: { name: input.name.trim(), timezone: input.timezone, location: input.location?.trim() || null } });
-    return { id: organization.id.toString(), name: organization.name, key: organization.key, timezone: organization.timezone, location: organization.location };
+    return { id: organization.id.toString(), name: organization.name, key: organization.key, timezone: organization.timezone, location: organization.location, canManage: true };
   });
   app.get("/api/organizations/:organizationId/memberships", { schema: { params: OrganizationParams } }, async (request) => {
     const { organizationId } = request.params as { organizationId: string }; const auth = await scoped(request, organizationId);
@@ -314,10 +314,10 @@ export async function buildApp(db = new PrismaClient()): Promise<FastifyInstance
   app.get("/api/organizations/:organizationId/people/:personId/services", { schema: { params: PersonParams } }, async (request) => {
     const { organizationId, personId } = request.params as { organizationId: string; personId: string }; await scoped(request, organizationId);
     const person = await db.person.findFirst({ where: { id: bigint(personId), organizationId: bigint(organizationId) } }); if (!person) throw app.httpErrors.notFound();
-    const services = await db.service.findMany({ where: { organizationId: bigint(organizationId), personId: person.id }, orderBy: [{ endDate: "desc" }, { createdAt: "desc" }] }); return services.map(serviceJson);
+    const services = await db.service.findMany({ where: { organizationId: bigint(organizationId), personId: person.id }, include: { notes: { orderBy: { createdAt: "desc" } } }, orderBy: [{ endDate: "desc" }, { createdAt: "desc" }] }); return services.map((service) => ({ ...serviceJson(service), notes: service.notes.map((note) => noteJson(note)) }));
   });
   app.get("/api/organizations/:organizationId/services/:serviceId", { schema: { params: ServiceParams } }, async (request) => {
-    const { organizationId, serviceId } = request.params as { organizationId: string; serviceId: string }; await scoped(request, organizationId); const service = await serviceForOrganization(organizationId, serviceId); return { ...serviceJson(service), notes: service.notes.map(noteJson) };
+    const { organizationId, serviceId } = request.params as { organizationId: string; serviceId: string }; await scoped(request, organizationId); const service = await serviceForOrganization(organizationId, serviceId); return { ...serviceJson(service), notes: service.notes.map((note) => noteJson(note)) };
   });
   app.post("/api/organizations/:organizationId/people/:personId/services", { schema: { params: PersonParams, body: ServiceBody } }, async (request, reply) => {
     const { organizationId, personId } = request.params as { organizationId: string; personId: string }; const auth = await scoped(request, organizationId, { mutable: true }); const person = await db.person.findFirst({ where: { id: bigint(personId), organizationId: bigint(organizationId) } }); if (!person) throw app.httpErrors.notFound(); const body = request.body as { type: ApiServiceType; startDate?: string | null; endDate?: string | null; paid?: boolean; volunteered?: boolean; note?: string }; const organization = await db.organization.findUniqueOrThrow({ where: { id: bigint(organizationId) } }); const defaultStart = localDay(new Date(), organization.timezone); const defaultEnd = new Date(Date.UTC(Number(defaultStart.slice(0, 4)) + 1, Number(defaultStart.slice(5, 7)) - 1, Number(defaultStart.slice(8, 10)) - 1)).toISOString().slice(0, 10); const input = serviceInput({ ...body, startDate: body.startDate === undefined ? defaultStart : body.startDate, endDate: body.endDate === undefined ? defaultEnd : body.endDate });
@@ -338,9 +338,9 @@ export async function buildApp(db = new PrismaClient()): Promise<FastifyInstance
   });
   app.get("/api/organizations/:organizationId/tags/:tagId", { schema: { params: TagParams } }, async (request) => {
     const { organizationId, tagId } = request.params as { organizationId: string; tagId: string }; await scoped(request, organizationId);
-    const tag = await db.tag.findFirst({ where: { id: bigint(tagId), organizationId: bigint(organizationId) }, include: { people: { include: { person: true }, orderBy: { person: { displayName: "asc" } } } } });
+    const tag = await db.tag.findFirst({ where: { id: bigint(tagId), organizationId: bigint(organizationId) }, include: { people: { include: { person: { include: { services: { where: { type: "membership" }, orderBy: [{ endDate: "desc" }, { createdAt: "desc" }], take: 1 }, visits: { where: { cancelledAt: null }, orderBy: { arrivedAt: "desc" }, take: 1 } } } }, orderBy: { person: { displayName: "asc" } } } } });
     if (!tag) throw app.httpErrors.notFound();
-    return { id: tag.id.toString(), name: tag.name, people: tag.people.map(({ person }) => personJson(person)) };
+    return { id: tag.id.toString(), name: tag.name, people: tag.people.map(({ person }) => ({ ...personJson(person), membershipEndsOn: dayString(person.services[0]?.endDate || null), lastVisitAt: person.visits[0]?.arrivedAt || null })) };
   });
   app.put("/api/organizations/:organizationId/people/:personId/tags", { schema: { params: PersonParams, body: TagAssignmentBody } }, async (request) => {
     const { organizationId, personId } = request.params as { organizationId: string; personId: string }; const auth = await scoped(request, organizationId, { mutable: true }); const organizationIdBigint = bigint(organizationId);
@@ -371,21 +371,27 @@ export async function buildApp(db = new PrismaClient()): Promise<FastifyInstance
     if (!target) throw app.httpErrors.notFound("note target not found");
     return { personId: field === "personId" ? id : null, visitId: field === "visitId" ? id : null, serviceId: field === "serviceId" ? id : null };
   }
+  async function noteAuthorNames(notes: Parameters<typeof noteJson>[0][]) {
+    const ids = [...new Set(notes.flatMap((note) => [note.createdByUserId, note.updatedByUserId].filter((id): id is bigint => id !== null).map(String)))];
+    const users = ids.length ? await db.user.findMany({ where: { id: { in: ids.map(bigint) } }, select: { id: true, name: true } }) : [];
+    return new Map(users.map((user) => [user.id.toString(), user.name]));
+  }
+  async function noteResponse(note: Parameters<typeof noteJson>[0]) { return noteJson(note, await noteAuthorNames([note])); }
   app.get("/api/organizations/:organizationId/people/:personId/notes", { schema: { params: PersonParams } }, async (request) => {
     const { organizationId, personId } = request.params as { organizationId: string; personId: string }; await scoped(request, organizationId); const organizationIdBigint = bigint(organizationId); const personIdBigint = bigint(personId);
     const person = await db.person.findFirst({ where: { id: personIdBigint, organizationId: organizationIdBigint } }); if (!person) throw app.httpErrors.notFound();
     const notes = await db.note.findMany({ where: { organizationId: organizationIdBigint, OR: [{ personId: personIdBigint }, { visit: { personId: personIdBigint } }, { service: { personId: personIdBigint } }] }, orderBy: { createdAt: "desc" } });
-    return notes.map(noteJson);
+    const userNames = await noteAuthorNames(notes); return notes.map((note) => noteJson(note, userNames));
   });
   app.get("/api/organizations/:organizationId/notes/:noteId", { schema: { params: NoteParams } }, async (request) => {
-    const { organizationId, noteId } = request.params as { organizationId: string; noteId: string }; await scoped(request, organizationId); const note = await db.note.findFirst({ where: { id: bigint(noteId), organizationId: bigint(organizationId) } }); if (!note) throw app.httpErrors.notFound(); return noteJson(note);
+    const { organizationId, noteId } = request.params as { organizationId: string; noteId: string }; await scoped(request, organizationId); const note = await db.note.findFirst({ where: { id: bigint(noteId), organizationId: bigint(organizationId) } }); if (!note) throw app.httpErrors.notFound(); return noteResponse(note);
   });
   app.post("/api/organizations/:organizationId/notes", { schema: { params: OrganizationParams, body: NoteBody } }, async (request, reply) => {
     const { organizationId } = request.params as { organizationId: string }; const auth = await scoped(request, organizationId, { mutable: true }); const input = request.body as { text: string; personId?: string; visitId?: string; serviceId?: string }; const text = input.text.trim(); if (!text) throw app.httpErrors.badRequest("note text is required");
-    const note = await db.note.create({ data: { organizationId: bigint(organizationId), ...await noteTarget(bigint(organizationId), input), text, createdByUserId: auth.userId, updatedByUserId: auth.userId } }); return reply.code(201).send(noteJson(note));
+    const note = await db.note.create({ data: { organizationId: bigint(organizationId), ...await noteTarget(bigint(organizationId), input), text, createdByUserId: auth.userId, updatedByUserId: auth.userId } }); return reply.code(201).send(await noteResponse(note));
   });
   app.put("/api/organizations/:organizationId/notes/:noteId", { schema: { params: NoteParams, body: NoteUpdateBody } }, async (request) => {
-    const { organizationId, noteId } = request.params as { organizationId: string; noteId: string }; const auth = await scoped(request, organizationId, { mutable: true }); const existing = await db.note.findFirst({ where: { id: bigint(noteId), organizationId: bigint(organizationId) } }); if (!existing) throw app.httpErrors.notFound(); const text = (request.body as { text: string }).text.trim(); if (!text) throw app.httpErrors.badRequest("note text is required"); return noteJson(await db.note.update({ where: { id: existing.id }, data: { text, updatedByUserId: auth.userId } }));
+    const { organizationId, noteId } = request.params as { organizationId: string; noteId: string }; const auth = await scoped(request, organizationId, { mutable: true }); const existing = await db.note.findFirst({ where: { id: bigint(noteId), organizationId: bigint(organizationId) } }); if (!existing) throw app.httpErrors.notFound(); const text = (request.body as { text: string }).text.trim(); if (!text) throw app.httpErrors.badRequest("note text is required"); return noteResponse(await db.note.update({ where: { id: existing.id }, data: { text, updatedByUserId: auth.userId } }));
   });
   app.delete("/api/organizations/:organizationId/notes/:noteId", { schema: { params: NoteParams } }, async (request, reply) => {
     const { organizationId, noteId } = request.params as { organizationId: string; noteId: string }; await scoped(request, organizationId, { mutable: true }); const existing = await db.note.findFirst({ where: { id: bigint(noteId), organizationId: bigint(organizationId) } }); if (!existing) throw app.httpErrors.notFound(); await db.note.delete({ where: { id: existing.id } }); return reply.code(204).send();
@@ -413,7 +419,7 @@ export async function buildApp(db = new PrismaClient()): Promise<FastifyInstance
   });
   app.get("/api/organizations/:organizationId/visits/:visitId", { schema: { params: VisitParams } }, async (request) => {
     const { organizationId, visitId } = request.params as { organizationId: string; visitId: string }; await scoped(request, organizationId); const visit = await visitForOrganization(organizationId, visitId);
-    return { ...visitJson(visit), note: visit.notes[0] ? noteJson(visit.notes[0]) : null, notes: visit.notes.map(noteJson) };
+    return { ...visitJson(visit), note: visit.notes[0] ? noteJson(visit.notes[0]) : null, notes: visit.notes.map((note) => noteJson(note)) };
   });
   app.post("/api/organizations/:organizationId/visits", { schema: { params: OrganizationParams, body: VisitBody } }, async (request, reply) => {
     const { organizationId } = request.params as { organizationId: string }; const input = request.body as { personId: string; activity: "project" | "volunteering"; arrivedAt: string; startedAt?: string | null; endedAt?: string | null; note?: string }; const auth = await scoped(request, organizationId, { mutable: true });

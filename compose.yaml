@@ -118,9 +118,13 @@ services:
     environment:
       BASE_URL: http://modern:3001
       HOME: /tmp
+      PARITY_BASELINE_MANIFEST: /repo/test/legacy-visual/manifest.json
+      PARITY_OUTPUT: /output/modern-candidates
     working_dir: /work
     volumes:
       - ./modern:/work:ro
+      - .:/repo:ro
+      - ./tmp/visual-review:/output
     command: ["npx", "playwright", "test"]
     networks: [ingress]
 
