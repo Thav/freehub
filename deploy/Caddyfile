@@ -1,0 +1,8 @@
+{$FREEHUB_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy app:{$FREEHUB_CONTAINER_PORT}
+	log {
+		output stdout
+		format json
+	}
+}

@@ -1,0 +1,30 @@
+#!/bin/sh
+set -eu
+umask 077
+
+root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
+compose_file=${FREEHUB_DEPLOY_COMPOSE:-$root/deploy/compose.yaml}
+env_file=${FREEHUB_DEPLOY_ENV:-$root/deploy/.env}
+output=${1:-$root/backups/freehub-$(date -u +%Y%m%dT%H%M%SZ).dump}
+if [ -e "$output" ]; then
+  echo "refusing to overwrite existing backup: $output" >&2
+  exit 73
+fi
+mkdir -p "$(dirname "$output")"
+temporary="$output.partial"
+trap 'rm -f "$temporary"' EXIT HUP INT TERM
+
+compose() {
+  if [ -n "${FREEHUB_DEPLOY_PROJECT:-}" ]; then
+    docker compose --project-name "$FREEHUB_DEPLOY_PROJECT" --env-file "$env_file" -f "$compose_file" "$@"
+  else
+    docker compose --env-file "$env_file" -f "$compose_file" "$@"
+  fi
+}
+
+compose exec -T database \
+  sh -eu -c 'exec pg_dump --format=custom --no-owner --no-privileges --username="$POSTGRES_USER" --dbname="$POSTGRES_DB"' > "$temporary"
+test -s "$temporary"
+mv "$temporary" "$output"
+trap - EXIT HUP INT TERM
+echo "$output"

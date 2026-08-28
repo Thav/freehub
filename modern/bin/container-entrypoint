@@ -1,0 +1,22 @@
+#!/bin/sh
+set -eu
+
+if [ -n "${DATABASE_URL_FILE:-}" ]; then
+  if [ -n "${DATABASE_URL:-}" ]; then
+    echo "DATABASE_URL and DATABASE_URL_FILE are mutually exclusive" >&2
+    exit 64
+  fi
+  if [ ! -r "$DATABASE_URL_FILE" ]; then
+    echo "DATABASE_URL_FILE is not readable" >&2
+    exit 66
+  fi
+  DATABASE_URL=$(sed -n '1p' "$DATABASE_URL_FILE")
+  export DATABASE_URL
+fi
+
+if [ -z "${DATABASE_URL:-}" ]; then
+  echo "DATABASE_URL or DATABASE_URL_FILE is required" >&2
+  exit 64
+fi
+
+exec "$@"

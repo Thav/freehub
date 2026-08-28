@@ -12,6 +12,7 @@ FH-016, FH-017, FH-018, and FH-021.
 
 - One OCI image, configurable `PORT`, `/up`, stdout/stderr logs, environment secrets, no durable local filesystem, and a release command from the same image.
 - Managed PostgreSQL TLS, backups/PITR, health checks, staging, rollback, and optional SMTP.
+- A provider-neutral single-VPS pilot may run app and PostgreSQL in separate containers, with bounded operator access for logs, backup/restore, and emergency user management. It must not become an application or provider dependency.
 
 ## Exclusions
 
@@ -23,7 +24,10 @@ FH-016, FH-017, FH-018, and FH-021.
 
 ## Verification
 
-Run the production image contract suite and documented disaster-recovery exercise.
+Run `bin/verify-production-deployment` for the production image contract and
+disposable disaster-recovery exercise. Review
+`docs/modernization/production-deployment.md` for the staging, managed database,
+Oracle VPS pilot, operator access, and rollback procedures.
 
 ## Rollback and handoff
 

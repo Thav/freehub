@@ -9,6 +9,8 @@
     "dev": "concurrently \"vite --host 0.0.0.0\" \"tsx watch src/server.ts\"",
     "build": "vite build && tsc -p tsconfig.server.json",
     "start": "node dist-server/server.js",
+    "release": "prisma migrate deploy",
+    "admin": "node dist-server/ops/admin.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate deploy",
     "prisma:seed": "tsx prisma/seed.ts",

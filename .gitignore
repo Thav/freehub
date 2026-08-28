@@ -1,4 +1,7 @@
 tmp/
+backups/
+deploy/.env
+deploy/secrets/
 .legacy-build/
 .idea
 *.iml

@@ -1,0 +1,98 @@
+#!/bin/sh
+set -eu
+
+root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
+scratch=$(mktemp -d)
+project="freehub-contract-$$"
+image="freehub-contract:current-$$"
+previous="freehub-contract:previous-$$"
+host_port=$((18000 + ($$ % 1000)))
+public_port=$((19000 + ($$ % 1000)))
+container_port=3187
+compose_file="$root/deploy/compose.yaml"
+env_file="$scratch/deployment.env"
+secrets="$scratch/secrets"
+backup="$scratch/freehub.dump"
+
+cleanup() {
+  docker compose --project-name "$project" --env-file "$env_file" -f "$compose_file" --profile release --profile ops down --volumes --remove-orphans >/dev/null 2>&1 || true
+  docker image rm "$image" "$previous" >/dev/null 2>&1 || true
+  rm -rf "$scratch"
+}
+trap cleanup EXIT HUP INT TERM
+
+mkdir -p "$secrets"
+printf '%s\n' 'contract-password' > "$secrets/database_password"
+printf '%s\n' 'postgresql://freehub:contract-password@database:5432/freehub?schema=public' > "$secrets/database_url"
+printf '%s\n' \
+  "FREEHUB_IMAGE=$image" \
+  "FREEHUB_HTTP_PORT=$host_port" \
+  'FREEHUB_DOMAIN=http://localhost' \
+  "FREEHUB_PUBLIC_HTTP_PORT=$public_port" \
+  "FREEHUB_PUBLIC_HTTPS_PORT=$((public_port + 1000))" \
+  "FREEHUB_CONTAINER_PORT=$container_port" \
+  'POSTGRES_DB=freehub' \
+  'POSTGRES_USER=freehub' \
+  'LOG_LEVEL=info' \
+  'COOKIE_SECURE=false' \
+  "FREEHUB_SECRETS_DIR=$secrets" > "$env_file"
+
+compose() {
+  docker compose --project-name "$project" --env-file "$env_file" -f "$compose_file" "$@"
+}
+
+docker build --tag "$image" --target runtime "$root/modern"
+docker tag "$image" "$previous"
+docker run --rm --env DATABASE_URL=postgresql://contract.invalid/freehub "$image" \
+  sh -eu -c 'openssl version >/dev/null; test -r /etc/ssl/certs/ca-certificates.crt'
+compose config --quiet
+compose up -d --wait database
+compose --profile release run --rm release
+compose up -d --wait app caddy
+
+health=$(curl --fail --silent "http://127.0.0.1:$host_port/up")
+test "$health" = '{"status":"ok"}'
+public_health=$(curl --fail --silent "http://localhost:$public_port/up")
+test "$public_health" = '{"status":"ok"}'
+container=$(compose ps -q app)
+test "$(docker inspect --format '{{.Config.User}}' "$container")" = node
+test "$(docker inspect --format '{{.HostConfig.ReadonlyRootfs}}' "$container")" = true
+if docker inspect --format '{{range .Config.Env}}{{println .}}{{end}}' "$container" | grep -q '^SMTP_'; then
+  echo "SMTP-disabled deployment unexpectedly contains SMTP configuration" >&2
+  exit 1
+fi
+test -z "$(docker port "$(compose ps -q database)")"
+compose logs app | grep -q 'request completed'
+compose logs caddy | grep -q '"status":200'
+
+compose exec -T database sh -eu -c 'psql --username="$POSTGRES_USER" --dbname="$POSTGRES_DB" --set=ON_ERROR_STOP=1' <<'SQL'
+INSERT INTO "Organization" (name, key, timezone, "createdAt", "updatedAt")
+VALUES ('Recovery marker', 'recovery-marker', 'Etc/UTC', now(), now());
+INSERT INTO "User" (login, email, name, "passwordDigest", "createdAt", "updatedAt")
+VALUES ('contract-admin', 'contract-admin@example.test', 'Contract Admin', 'not-a-valid-password', now(), now());
+SQL
+
+FREEHUB_DEPLOY_COMPOSE="$compose_file" FREEHUB_DEPLOY_ENV="$env_file" FREEHUB_DEPLOY_PROJECT="$project" \
+  "$root/bin/production-backup" "$backup" >/dev/null
+compose exec -T database sh -eu -c 'psql --username="$POSTGRES_USER" --dbname="$POSTGRES_DB" --set=ON_ERROR_STOP=1 --command="DELETE FROM \"Organization\" WHERE key = '\''recovery-marker'\''"' >/dev/null
+FREEHUB_ALLOW_RESTORE=yes FREEHUB_DEPLOY_COMPOSE="$compose_file" FREEHUB_DEPLOY_ENV="$env_file" FREEHUB_DEPLOY_PROJECT="$project" \
+  "$root/bin/production-restore" "$backup" >/dev/null
+restored=$(compose exec -T database sh -eu -c 'psql --tuples-only --no-align --username="$POSTGRES_USER" --dbname="$POSTGRES_DB" --command="SELECT count(*) FROM \"Organization\" WHERE key = '\''recovery-marker'\''"')
+test "$restored" = 1
+
+compose --profile ops run --rm admin users list >/dev/null
+compose --profile ops run --rm admin users reset-password contract-admin >/dev/null
+compose --profile ops run --rm admin users disable contract-admin >/dev/null
+disabled=$(compose exec -T database sh -eu -c 'psql --tuples-only --no-align --username="$POSTGRES_USER" --dbname="$POSTGRES_DB" --command="SELECT (\"disabledAt\" IS NOT NULL AND \"passwordChangeRequired\")::int FROM \"User\" WHERE login = '\''contract-admin'\''"')
+test "$disabled" = 1
+compose --profile ops run --rm admin users enable contract-admin >/dev/null
+compose --profile ops run --rm admin users promote contract-admin >/dev/null
+promoted=$(compose exec -T database sh -eu -c 'psql --tuples-only --no-align --username="$POSTGRES_USER" --dbname="$POSTGRES_DB" --command="SELECT (\"disabledAt\" IS NULL AND \"platformAdministrator\")::int FROM \"User\" WHERE login = '\''contract-admin'\''"')
+test "$promoted" = 1
+FREEHUB_IMAGE="$previous" compose up -d --no-deps --force-recreate --wait app
+test "$(docker inspect --format '{{.Config.Image}}' "$(compose ps -q app)")" = "$previous"
+curl --fail --silent "http://127.0.0.1:$host_port/up" >/dev/null
+
+grep -q 'sslmode=require' "$root/docs/modernization/production-deployment.md"
+grep -q 'SMTP-disabled' "$root/docs/modernization/production-deployment.md"
+echo "production deployment contract passed: TLS prerequisites, release, Caddy ingress, configurable port, health, read-only SMTP-disabled app, logs, backup restore, admin jobs, and image rollback"

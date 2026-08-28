@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "active_ticket": "FH-018",
+  "active_ticket": null,
   "tickets": [
     {
       "id": "FH-001",
@@ -326,34 +326,39 @@
     {
       "id": "FH-018",
       "title": "Implement bulk management workflows",
-      "status": "in_progress",
+      "status": "done",
       "path": "docs/modernization/tickets/FH-018-bulk-management.md",
       "depends_on": [
         "FH-012",
         "FH-016"
       ],
       "claimed_at": "2026-08-25T00:05:09.879Z",
-      "updated_at": "2026-08-25T00:05:09.879Z",
+      "updated_at": "2026-08-26T11:40:57.227Z",
       "blocked_reason": null,
       "unblock_condition": null,
-      "evidence": [],
+      "evidence": [
+        "2026-08-24/26: docker compose --profile modern --profile test run --rm --build -e LOG_LEVEL=silent modern-test (created/last-visit boundaries, never-visited, exports, batch archive/restore, audit, authorization, and 250-row large-selection display coverage); docker compose --profile modern up -d --build --wait; docker compose --profile visual run --rm --no-deps modern-visual (bulk-management preview/export flow); cd modern && npm run openapi && node scripts/verify-openapi.mjs && npm run schema:check; git diff --check; bin/ralph validate."
+      ],
       "implementation_commits": []
     },
     {
       "id": "FH-019",
       "title": "Implement the production deployment contract",
-      "status": "pending",
+      "status": "done",
       "path": "docs/modernization/tickets/FH-019-production-deployment.md",
       "depends_on": [
         "FH-016",
         "FH-017",
-        "FH-018"
+        "FH-018",
+        "FH-021"
       ],
-      "claimed_at": null,
-      "updated_at": null,
+      "claimed_at": "2026-08-27T11:24:33.881Z",
+      "updated_at": "2026-08-28T00:32:14.067Z",
       "blocked_reason": null,
       "unblock_condition": null,
-      "evidence": [],
+      "evidence": [
+        "2026-08-27: bin/verify-production-deployment (same-image release applied all 8 migrations; Caddy ingress; configurable private/public ports; /up health; non-root read-only SMTP-disabled app; stdout logs; isolated PostgreSQL; pg_dump/pg_restore recovery; emergency user jobs; previous-image rollback); bin/verify-modern-foundation; docker compose --profile modern up -d --build --wait; docker compose --profile modern --profile test run --rm --build -e LOG_LEVEL=silent modern-test (18 passing database-backed tests); sh -n bin/production-backup bin/production-restore bin/verify-production-deployment modern/bin/container-entrypoint; git diff --check; bin/ralph validate."
+      ],
       "implementation_commits": []
     },
     {
@@ -369,6 +374,23 @@
       "blocked_reason": null,
       "unblock_condition": null,
       "evidence": [],
+      "implementation_commits": []
+    },
+    {
+      "id": "FH-021",
+      "title": "Restore screenshot-by-screenshot visual parity",
+      "status": "done",
+      "path": "docs/modernization/tickets/FH-021-visual-parity.md",
+      "depends_on": [
+        "FH-018"
+      ],
+      "claimed_at": "2026-08-26T12:35:53.960Z",
+      "updated_at": "2026-08-27T11:21:42.978Z",
+      "blocked_reason": null,
+      "unblock_condition": null,
+      "evidence": [
+        "2026-08-27: npm run check; focused Playwright coverage for alternating person-search rows, aligned daily visit columns, organization-timezone display changes, manager settings persistence, and resolved note author names; docker compose --profile modern up -d --build --wait modern; git diff --check; owner full-resolution review and acceptance."
+      ],
       "implementation_commits": []
     }
   ]

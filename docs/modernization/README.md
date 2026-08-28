@@ -11,6 +11,7 @@ This directory is the durable source of truth for the Freehub modernization. It 
 - [Screen inventory](screen-inventory.md)
 - [Parity matrix](parity-matrix.md)
 - [Risks and decisions](risks-and-decisions.md)
+- [Production deployment](production-deployment.md)
 - [Tickets](tickets/)
 
 Run `bin/ralph status` for current state and `bin/ralph next` to identify the next dependency-ready ticket.

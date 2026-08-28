@@ -1,0 +1,29 @@
+#!/bin/sh
+set -eu
+
+if [ "$#" -ne 1 ] || [ ! -r "$1" ]; then
+  echo "usage: FREEHUB_ALLOW_RESTORE=yes bin/production-restore BACKUP.dump" >&2
+  exit 64
+fi
+if [ "${FREEHUB_ALLOW_RESTORE:-}" != yes ]; then
+  echo "restore replaces the selected deployment database; set FREEHUB_ALLOW_RESTORE=yes" >&2
+  exit 64
+fi
+
+root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
+compose_file=${FREEHUB_DEPLOY_COMPOSE:-$root/deploy/compose.yaml}
+env_file=${FREEHUB_DEPLOY_ENV:-$root/deploy/.env}
+
+compose() {
+  if [ -n "${FREEHUB_DEPLOY_PROJECT:-}" ]; then
+    docker compose --project-name "$FREEHUB_DEPLOY_PROJECT" --env-file "$env_file" -f "$compose_file" "$@"
+  else
+    docker compose --env-file "$env_file" -f "$compose_file" "$@"
+  fi
+}
+
+compose stop app
+compose exec -T database \
+  sh -eu -c 'exec pg_restore --clean --if-exists --exit-on-error --no-owner --no-privileges --username="$POSTGRES_USER" --dbname="$POSTGRES_DB"' < "$1"
+compose up -d --wait app
+echo "restore complete; run a smoke check before returning traffic"
